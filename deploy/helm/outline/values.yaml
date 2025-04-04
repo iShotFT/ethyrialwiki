@@ -28,6 +28,8 @@ serviceAccount:
 
 # Configuration for services
 services:
+  web: true
+  worker: true
   collaboration: true
 
 # Authentication configuration
