@@ -101,4 +101,5 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "outline.fullname" . }}-data
         {{- else }}
-          emptyDir: {} 
+          emptyDir: {}
+        {{- end }} 
