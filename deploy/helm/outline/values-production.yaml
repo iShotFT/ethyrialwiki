@@ -1,0 +1,95 @@
+# Production environment values for outline.
+replicaCount:
+  web: 2
+  worker: 2
+  collaboration: 2
+
+# Authentication configuration
+auth:
+  discord:
+    enabled: true
+    # Credentials stored in Kubernetes secret
+
+# Disable other authentication methods
+auth.google.enabled: false
+auth.slack.enabled: false
+auth.oidc.enabled: false
+
+# Enable autoscaling for production
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Resources for production
+resources:
+  web:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  worker:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  collaboration:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+
+# Larger persistence sizes for production
+persistence:
+  enabled: true
+  size: 50Gi
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 20Gi
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      size: 10Gi
+
+# Enable ingress for production
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+  host: outline.ethyrial.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+    secretName: outline-production-tls
+
+# Environment variables for production
+env:
+  URL: "https://ethyrial.com"
+  DEBUG: "false"
+  ENABLE_UPDATES: false
+  NODE_ENV: "production"
+  FORCE_HTTPS: true
+  RATE_LIMITER_ENABLED: true
+  # S3 Storage configuration
+  FILE_STORAGE: "s3"
+  AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki"
+  AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki.s3.eu-central-1.amazonaws.com"
+  AWS_REGION: "eu-central-1"

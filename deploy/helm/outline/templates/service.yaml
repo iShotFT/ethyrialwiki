@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "outline.fullname" . }}-web
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "outline.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: web
+---
+{{- if .Values.services.collaboration }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "outline.fullname" . }}-collaboration
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: collaboration
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 3002
+      targetPort: collab
+      protocol: TCP
+      name: collab
+  selector:
+    {{- include "outline.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: collaboration
+{{- end }} 

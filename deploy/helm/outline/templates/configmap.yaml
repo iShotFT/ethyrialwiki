@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "outline.fullname" . }}
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+data:
+  URL: {{ .Values.env.URL | quote }}
+  PORT: {{ .Values.env.PORT | default "3000" | quote }}
+  NODE_ENV: {{ .Values.env.NODE_ENV | default "production" | quote }}
+  {{- if .Values.env.DEBUG }}
+  DEBUG: {{ .Values.env.DEBUG | quote }}
+  {{- end }}
+  {{- if .Values.env.FORCE_HTTPS }}
+  FORCE_HTTPS: {{ .Values.env.FORCE_HTTPS | quote }}
+  {{- end }}
+  {{- if .Values.env.ENABLE_UPDATES }}
+  ENABLE_UPDATES: {{ .Values.env.ENABLE_UPDATES | quote }}
+  {{- end }}
+  {{- if .Values.env.GOOGLE_ANALYTICS_ID }}
+  GOOGLE_ANALYTICS_ID: {{ .Values.env.GOOGLE_ANALYTICS_ID | quote }}
+  {{- end }}
+  {{- if .Values.auth.oidc.enabled }}
+  OIDC_AUTH_URI: {{ .Values.auth.oidc.authUri | quote }}
+  OIDC_TOKEN_URI: {{ .Values.auth.oidc.tokenUri | quote }}
+  OIDC_USERINFO_URI: {{ .Values.auth.oidc.userInfoUri | quote }}
+  OIDC_USERNAME_CLAIM: {{ .Values.auth.oidc.usernameClaim | quote }}
+  {{- end }}
+  {{- if .Values.env.FILE_STORAGE }}
+  FILE_STORAGE: {{ .Values.env.FILE_STORAGE | quote }}
+  {{- end }}
+  {{- if .Values.env.AWS_S3_UPLOAD_BUCKET_NAME }}
+  AWS_S3_UPLOAD_BUCKET_NAME: {{ .Values.env.AWS_S3_UPLOAD_BUCKET_NAME | quote }}
+  {{- end }}
+  {{- if .Values.env.AWS_S3_UPLOAD_BUCKET_URL }}
+  AWS_S3_UPLOAD_BUCKET_URL: {{ .Values.env.AWS_S3_UPLOAD_BUCKET_URL | quote }}
+  {{- end }}
+  {{- if .Values.env.AWS_S3_UPLOAD_MAX_SIZE }}
+  AWS_S3_UPLOAD_MAX_SIZE: {{ .Values.env.AWS_S3_UPLOAD_MAX_SIZE | quote }}
+  {{- end }}
+  {{- if .Values.env.AWS_REGION }}
+  AWS_REGION: {{ .Values.env.AWS_REGION | quote }}
+  {{- end }}
+  {{- if .Values.env.RATE_LIMITER_ENABLED }}
+  RATE_LIMITER_ENABLED: {{ .Values.env.RATE_LIMITER_ENABLED | quote }}
+  {{- end }}
+  {{- with .Values.extraConfig }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }} 

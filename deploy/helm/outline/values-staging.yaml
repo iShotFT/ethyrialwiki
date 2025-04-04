@@ -1,0 +1,84 @@
+# Staging environment values for outline.
+replicaCount:
+  web: 1
+  worker: 1
+  collaboration: 1
+
+# Authentication configuration
+auth:
+  discord:
+    enabled: true
+    # Credentials stored in Kubernetes secret
+
+# Disable other authentication methods
+auth.google.enabled: false
+auth.slack.enabled: false
+auth.oidc.enabled: false
+
+# Resources for staging (smaller than production)
+resources:
+  web:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  worker:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  collaboration:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Use smaller persistence sizes for staging
+persistence:
+  enabled: true
+  size: 5Gi
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 4Gi
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      size: 4Gi
+
+# Enable ingress for staging
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  host: outline.staging.ethyrial.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+    secretName: outline-staging-tls
+
+# Environment variables for staging
+env:
+  URL: "https://staging.ethyrial.com"
+  DEBUG: "http,sql"
+  ENABLE_UPDATES: false
+  NODE_ENV: "production"
+  FORCE_HTTPS: true
+  RATE_LIMITER_ENABLED: true
+  # S3 Storage configuration
+  FILE_STORAGE: "s3"
+  AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki-staging"
+  AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki-staging.s3.eu-central-1.amazonaws.com"
+  AWS_REGION: "eu-central-1"

@@ -1,0 +1,184 @@
+# Default values for outline.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount:
+  web: 1
+  worker: 1
+  collaboration: 1
+
+image:
+  repository: outlinewiki/outline
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Configuration for services
+services:
+  collaboration: true
+
+# Authentication configuration
+auth:
+  google:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+  slack:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+  oidc:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+    authUri: ""
+    tokenUri: ""
+    userInfoUri: ""
+    usernameClaim: "email"
+  discord:
+    enabled: true
+    clientId: ""
+    clientSecret: ""
+    serverId: ""
+
+# SMTP configuration
+smtp:
+  enabled: false
+  host: ""
+  port: 587
+  username: ""
+  password: ""
+  fromEmail: ""
+
+# Outline environment variables
+env:
+  URL: "http://localhost:3000"
+  PORT: 3000
+  DEBUG: ""
+  FORCE_HTTPS: true
+  ENABLE_UPDATES: true
+  NODE_ENV: "production"
+  # These will be auto-generated if not provided
+  SECRET_KEY: ""
+  UTILS_SECRET: ""
+  # Optional environment variables
+  DATABASE_URL: ""
+  REDIS_URL: ""
+  FILE_STORAGE: "local"
+  AWS_S3_UPLOAD_BUCKET_NAME: ""
+  AWS_S3_UPLOAD_BUCKET_URL: ""
+  AWS_S3_UPLOAD_MAX_SIZE: ""
+  AWS_REGION: ""
+  RATE_LIMITER_ENABLED: false
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  host: chart-example.local
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    secretName: outline-tls
+
+# Resource limits for deployments
+resources:
+  web:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  worker:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  collaboration:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Persistence configuration
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+postgresql:
+  enabled: true
+  auth:
+    username: outline
+    password: outline
+    database: outline
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+    service:
+      ports:
+        postgresql: 5432
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+extraConfig: {}
+extraSecrets: {}

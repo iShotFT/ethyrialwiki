@@ -1,0 +1,104 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: "Version to deploy (default: latest)"
+        required: false
+        default: "latest"
+        type: string
+      services:
+        description: "Services to deploy (comma-separated, default: all)"
+        required: false
+        default: "all"
+        type: string
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "latest"
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [ "$VERSION" = "latest" ]; then
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Parse services
+        id: services
+        run: |
+          SERVICES="${{ github.event.inputs.services }}"
+          if [ "$SERVICES" = "all" ]; then
+            SERVICES="web,worker,collaboration"
+          fi
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+
+      - name: Set namespace
+        id: namespace
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          NAMESPACE="ethyrial-$ENVIRONMENT"
+          echo "namespace=$NAMESPACE" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Kubernetes
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          SERVICES=${{ steps.services.outputs.services }}
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+
+          helm upgrade --install outline ./deploy/helm/outline \
+            --namespace $NAMESPACE \
+            --create-namespace \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=$VERSION \
+            --set environment=${{ github.event.inputs.environment }} \
+            --set services=$SERVICES \
+            --set ingress.host=outline.${{ github.event.inputs.environment == 'production' && 'ethyrial.com' || 'staging.ethyrial.com' }} \
+            --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+
+      - name: Verify deployment
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+
+          kubectl rollout status deployment/outline-web -n $NAMESPACE
+
+          # Only check other components if they were deployed
+          if [[ "${{ steps.services.outputs.services }}" == *"worker"* ]]; then
+            kubectl rollout status deployment/outline-worker -n $NAMESPACE
+          fi
+
+          if [[ "${{ steps.services.outputs.services }}" == *"collaboration"* ]]; then
+            kubectl rollout status deployment/outline-collaboration -n $NAMESPACE
+          fi
