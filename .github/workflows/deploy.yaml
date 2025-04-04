@@ -92,6 +92,12 @@ jobs:
             SERVICE_PARAMS="$SERVICE_PARAMS --set services.$service=true"
           done
 
+          # Check if release exists and delete deployments if it does (prevents env var ordering issues)
+          if helm status outline -n $NAMESPACE >/dev/null 2>&1; then
+            echo "Outline release exists, deleting deployments to avoid patch conflicts..."
+            kubectl delete deployment -l app.kubernetes.io/instance=outline -n $NAMESPACE || true
+          fi
+
           helm upgrade --install outline ./deploy/helm/outline \
             --namespace $NAMESPACE \
             --create-namespace \
