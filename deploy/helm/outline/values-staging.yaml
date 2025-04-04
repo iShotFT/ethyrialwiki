@@ -4,6 +4,10 @@ replicaCount:
   worker: 1
   collaboration: 1
 
+# Image pull secrets for private registry
+imagePullSecrets:
+  - name: github-container-registry
+
 # Authentication configuration
 auth:
   discord:
