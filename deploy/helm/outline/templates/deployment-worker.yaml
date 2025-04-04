@@ -7,7 +7,9 @@ metadata:
     {{- include "outline.labels" . | nindent 4 }}
     app.kubernetes.io/component: worker
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount.worker }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "outline.selectorLabels" . | nindent 6 }}
@@ -40,6 +42,24 @@ spec:
       serviceAccountName: {{ include "outline.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-dependencies
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL and Redis to be accessible..."
+              # Try direct IPs first
+              until nc -z -w 2 10.152.183.80 5432; do
+                echo "Waiting for PostgreSQL on IP..."
+                sleep 2
+              done
+              until nc -z -w 2 10.152.183.118 6379; do
+                echo "Waiting for Redis on IP..."
+                sleep 2
+              done
+              echo "Dependencies verified, proceeding with startup"
       containers:
         - name: {{ .Chart.Name }}-worker
           securityContext:
