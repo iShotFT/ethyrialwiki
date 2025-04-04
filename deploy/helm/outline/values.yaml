@@ -32,6 +32,9 @@ services:
   worker: true
   collaboration: true
 
+# Enable host networking (for environments with network connectivity issues between pods)
+hostNetwork: false
+
 # Authentication configuration
 auth:
   google:

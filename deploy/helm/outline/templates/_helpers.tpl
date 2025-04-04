@@ -66,7 +66,7 @@ Environment variables for database connection
 */}}
 {{- define "outline.databaseEnv" -}}
 - name: DATABASE_URL
-  value: {{ .Values.env.DATABASE_URL | default (printf "postgres://%s:%s@%s:%d/%s" .Values.postgresql.auth.username .Values.postgresql.auth.password .Values.postgresql.primary.service.name .Values.postgresql.primary.service.ports.postgresql .Values.postgresql.auth.database) | quote }}
+  value: {{ .Values.env.DATABASE_URL | default (printf "postgres://%s:%s@%s:%d/%s?sslmode=disable" .Values.postgresql.auth.username .Values.postgresql.auth.password .Values.postgresql.primary.service.name .Values.postgresql.primary.service.ports.postgresql .Values.postgresql.auth.database) | quote }}
 {{- end }}
 
 {{/*

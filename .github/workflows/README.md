@@ -259,6 +259,8 @@ For the first deployment:
 3. **Secret not found**: Verify that you created all required secrets in the Kubernetes namespace
 4. **Database connection error**: Check database credentials and network connectivity
 5. **Redis connection error**: Check Redis credentials and network connectivity
+6. **PostgreSQL SSL connection error**: By default, the chart is configured to use `sslmode=disable` for PostgreSQL connections. If you need SSL, update the connection strings accordingly.
+7. **Pod communication issues**: If running on MicroK8s or other clusters where pod-to-pod communication is restricted, the chart will use `hostNetwork: true` by default in staging and production. If this is not desired, set `hostNetwork: false` in your values file.
 
 ### Viewing Deployment Status
 

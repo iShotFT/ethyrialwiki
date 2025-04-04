@@ -2,9 +2,9 @@
 {{- if .Values.ingress.enabled }}
 Access your Outline instance at:
   {{- if .Values.ingress.tls.enabled }}
-  https://{{ .Values.ingress.host }}
+  {{ .Values.env.URL }}
   {{- else }}
-  http://{{ .Values.ingress.host }}
+  {{ .Values.env.URL | replace "https://" "http://" }}
   {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "outline.fullname" . }}-web)
