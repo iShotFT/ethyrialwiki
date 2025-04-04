@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME_BASE: ishotft/ethyrialwiki
 
 jobs:
   build-and-push-image:
@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}
           tags: |
             type=sha
             type=ref,event=branch
@@ -47,7 +47,7 @@ jobs:
           context: .
           file: ./Dockerfile.base
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-base:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}-base:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |

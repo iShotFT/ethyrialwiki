@@ -24,7 +24,7 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME_BASE: ishotft/ethyrialwiki
 
 jobs:
   deploy:
@@ -81,7 +81,7 @@ jobs:
           helm upgrade --install outline ./deploy/helm/outline \
             --namespace $NAMESPACE \
             --create-namespace \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
             --set image.tag=$VERSION \
             --set environment=${{ github.event.inputs.environment }} \
             --set services=$SERVICES \
