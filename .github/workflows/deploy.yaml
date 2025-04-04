@@ -15,6 +15,11 @@ on:
         required: false
         default: "latest"
         type: string
+      use_latest_image:
+        description: "Use latest image regardless of version"
+        required: false
+        default: false
+        type: boolean
       services:
         description: "Services to deploy (comma-separated, default: all)"
         required: false
@@ -52,9 +57,13 @@ jobs:
         id: version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          if [ "$VERSION" = "latest" ]; then
-            VERSION=$(git rev-parse --short HEAD)
+          USE_LATEST="${{ github.event.inputs.use_latest_image }}"
+
+          if [ "$VERSION" = "latest" ] || [ "$USE_LATEST" = "true" ]; then
+            echo "Using latest image tag"
+            VERSION="latest"
           fi
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Parse services
