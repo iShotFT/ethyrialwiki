@@ -26,7 +26,15 @@ spec:
     spec:
       {{- if .Values.hostNetwork }}
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       {{- end }}
+      dnsConfig:
+        nameservers:
+        - 10.152.183.10
+        searches:
+        - {{ .Release.Namespace }}.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -66,11 +74,11 @@ spec:
           {{- end }}
           {{- if .Values.postgresql.enabled }}
             - name: DATABASE_URL
-              value: postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@outline-postgresql:5432/{{ .Values.postgresql.auth.database }}?sslmode=disable
+              value: "postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@$(POSTGRES_SERVICE_HOST):$(POSTGRES_SERVICE_PORT)/{{ .Values.postgresql.auth.database }}?sslmode=disable"
           {{- end }}
           {{- if .Values.redis.enabled }}
             - name: REDIS_URL
-              value: redis://outline-redis-master:6379
+              value: "redis://$(REDIS_MASTER_SERVICE_HOST):$(REDIS_MASTER_SERVICE_PORT)"
           {{- end }}
           {{- if and .Values.services.collaboration (not .Values.env.COLLABORATION_URL) }}
             - name: COLLABORATION_URL

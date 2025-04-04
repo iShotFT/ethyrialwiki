@@ -67,7 +67,7 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-  host: outline.staging.ethyrial.com
+  host: staging.ethyrial.wiki
   path: /
   pathType: Prefix
   tls:
@@ -76,7 +76,7 @@ ingress:
 
 # Environment variables for staging
 env:
-  URL: "https://staging.ethyrial.com"
+  URL: "https://staging.ethyrial.wiki"
   DEBUG: "http,sql"
   ENABLE_UPDATES: false
   NODE_ENV: "production"

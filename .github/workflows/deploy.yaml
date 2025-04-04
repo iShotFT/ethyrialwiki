@@ -114,7 +114,7 @@ jobs:
             --set image.tag=$VERSION \
             --set environment=${{ github.event.inputs.environment }} \
             $SERVICE_PARAMS \
-            --set ingress.host=outline.${{ github.event.inputs.environment == 'production' && 'ethyrial.com' || 'staging.ethyrial.com' }} \
+            --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
             --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
 
       - name: Verify deployment

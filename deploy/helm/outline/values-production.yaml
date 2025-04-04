@@ -73,7 +73,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-  host: outline.ethyrial.com
+  host: ethyrial.wiki
   path: /
   pathType: Prefix
   tls:
@@ -82,7 +82,7 @@ ingress:
 
 # Environment variables for production
 env:
-  URL: "https://outline.ethyrial.com"
+  URL: "https://ethyrial.wiki"
   DEBUG: "false"
   ENABLE_UPDATES: false
   NODE_ENV: "production"

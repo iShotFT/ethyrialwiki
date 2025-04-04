@@ -143,7 +143,7 @@ Example configuration:
 ```yaml
 # values-staging.yaml example
 env:
-  URL: "https://outline.staging.ethyrial.com"
+  URL: "https://staging.ethyrial.wiki"
   # Set DATABASE_URL if using external database
   # DATABASE_URL: "postgres://user:password@postgres-host:5432/outline"
   # Set REDIS_URL if using external Redis
@@ -175,8 +175,8 @@ existingSecrets:
 
 Configure your DNS provider to point:
 
-- `outline.staging.ethyrial.com` → Your staging ingress IP
-- `outline.ethyrial.com` → Your production ingress IP
+- `staging.ethyrial.wiki` → Your staging ingress IP
+- `ethyrial.wiki` → Your production ingress IP
 
 ### 6. CI/CD Workflow Process
 
@@ -261,6 +261,15 @@ For the first deployment:
 5. **Redis connection error**: Check Redis credentials and network connectivity
 6. **PostgreSQL SSL connection error**: By default, the chart is configured to use `sslmode=disable` for PostgreSQL connections. If you need SSL, update the connection strings accordingly.
 7. **Pod communication issues**: If running on MicroK8s or other clusters where pod-to-pod communication is restricted, the chart will use `hostNetwork: true` by default in staging and production. If this is not desired, set `hostNetwork: false` in your values file.
+8. **DNS resolution issues**: MicroK8s sometimes has DNS resolution problems. The chart includes a custom `dnsConfig` that points to the CoreDNS service IP and adds the appropriate search domains. If you encounter DNS-related issues, check if the CoreDNS service IP matches the one configured in the deployment templates.
+
+### MicroK8s Specific Setup
+
+If deploying to MicroK8s, make sure:
+
+1. The CoreDNS addon is enabled: `microk8s enable dns`
+2. The DNS service IP (usually 10.152.183.10) matches the one in the deployment templates
+3. Network policies allow traffic between pods (if CNI is enabled)
 
 ### Viewing Deployment Status
 
