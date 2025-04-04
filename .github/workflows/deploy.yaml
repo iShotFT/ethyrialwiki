@@ -75,6 +75,10 @@ jobs:
           NAMESPACE="ethyrial-$ENVIRONMENT"
           echo "namespace=$NAMESPACE" >> $GITHUB_OUTPUT
 
+      - name: Build Helm dependencies
+        run: |
+          helm dependency build ./deploy/helm/outline
+
       - name: Deploy to Kubernetes
         run: |
           VERSION=${{ steps.version.outputs.version }}
