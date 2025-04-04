@@ -55,6 +55,7 @@ spec:
             - name: {{ .name }}
               value: {{ .value | quote }}
           {{- end }}
+          {{- include "outline.secretEnv" . | nindent 12 }}
           {{- with .Values.extraEnvFrom }}
           envFrom:
             {{- toYaml . | nindent 12 }}

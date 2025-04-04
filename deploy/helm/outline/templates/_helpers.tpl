@@ -75,4 +75,53 @@ Environment variables for Redis connection
 {{- define "outline.redisEnv" -}}
 - name: REDIS_URL
   value: {{ .Values.env.REDIS_URL | default (printf "redis://%s/0" .Values.redis.master.service.name) | quote }}
-{{- end }} 
+{{- end }}
+
+{{/* Generate environment variables from existing secrets */}}
+{{- define "outline.secretEnv" -}}
+{{- if .Values.existingSecrets -}}
+{{- if .Values.existingSecrets.keys }}
+- name: SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.keys }}
+      key: SECRET_KEY
+- name: UTILS_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.keys }}
+      key: UTILS_SECRET
+{{- end }}
+{{- if .Values.existingSecrets.auth }}
+{{- if .Values.auth.discord.enabled }}
+- name: DISCORD_CLIENT_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.auth }}
+      key: DISCORD_CLIENT_ID
+- name: DISCORD_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.auth }}
+      key: DISCORD_CLIENT_SECRET
+- name: DISCORD_SERVER_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.auth }}
+      key: DISCORD_SERVER_ID
+{{- end }}
+{{- end }}
+{{- if and .Values.existingSecrets.s3 (eq .Values.env.FILE_STORAGE "s3") }}
+- name: AWS_ACCESS_KEY_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.s3 }}
+      key: AWS_ACCESS_KEY_ID
+- name: AWS_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.s3 }}
+      key: AWS_SECRET_ACCESS_KEY
+{{- end }}
+{{- end }}
+{{- end -}} 

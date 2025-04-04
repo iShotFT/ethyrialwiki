@@ -1,5 +1,6 @@
-1. Get the application URL by running these commands:
+1. Ethyrial Wiki has been deployed! 
 {{- if .Values.ingress.enabled }}
+Access your Outline instance at:
   {{- if .Values.ingress.tls.enabled }}
   https://{{ .Values.ingress.host }}
   {{- else }}
@@ -17,14 +18,38 @@
 {{- else if contains "ClusterIP" .Values.service.type }}
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "outline.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=web" -o jsonpath="{.items[0].metadata.name}")
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
+  echo "Visit http://127.0.0.1:8080 to access your wiki"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
 
-2. Outline requires authentication setup. Please ensure the following environment variables are properly configured:
-   - At least one authentication provider (Google, Slack, OIDC)
-   - SECRET_KEY and UTILS_SECRET for security
-   - Database and Redis connection information
+2. Authentication is configured to use Discord.
+{{- if eq .Values.environment "staging" }}
+   Environment: STAGING
+{{- else if eq .Values.environment "production" }}
+   Environment: PRODUCTION
+{{- else }}
+   Environment: {{ .Values.environment }}
+{{- end }}
 
-For more information, visit the Outline documentation:
-https://docs.getoutline.com/s/hosting/doc/hosting-outline-DBABcOLPVR 
+3. Deployed services:
+{{- range $key, $value := .Values.services }}
+{{- if $value }}
+   - {{ $key }}
+{{- end }}
+{{- end }}
+
+4. Storage:
+{{- if .Values.persistence.enabled }}
+   - Persistence enabled with {{ .Values.persistence.size }} storage
+{{- else }}
+   - Using emptyDir (non-persistent storage)
+{{- end }}
+{{- if .Values.env.FILE_STORAGE }}
+   - File storage: {{ .Values.env.FILE_STORAGE }}
+{{- if eq .Values.env.FILE_STORAGE "s3" }}
+   - S3 bucket: {{ .Values.env.AWS_S3_UPLOAD_BUCKET_NAME }}
+{{- end }}
+{{- end }}
+
+For troubleshooting, check pod status:
+kubectl get pods -n {{ .Release.Namespace }} 

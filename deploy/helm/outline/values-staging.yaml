@@ -87,3 +87,9 @@ env:
   AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki-staging"
   AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki-staging.s3.eu-central-1.amazonaws.com"
   AWS_REGION: "eu-central-1"
+
+# Reference existing secrets (created according to README instructions)
+existingSecrets:
+  auth: "outline-auth"
+  keys: "outline-keys"
+  s3: "outline-s3"
