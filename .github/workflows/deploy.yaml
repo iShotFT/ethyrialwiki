@@ -64,6 +64,8 @@ jobs:
           if [ "$SERVICES" = "all" ]; then
             SERVICES="web,worker,collaboration"
           fi
+          # Remove any trailing commas that might cause Helm issues
+          SERVICES=$(echo $SERVICES | sed 's/,$//')
           echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
       - name: Set namespace
