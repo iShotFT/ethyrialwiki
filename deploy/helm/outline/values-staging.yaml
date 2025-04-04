@@ -47,6 +47,7 @@ resources:
 persistence:
   enabled: true
   size: 5Gi
+  storageClass: "microk8s-hostpath"
 
 postgresql:
   enabled: true
