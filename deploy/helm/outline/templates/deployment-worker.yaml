@@ -50,16 +50,67 @@ spec:
             - -c
             - |
               echo "Waiting for PostgreSQL and Redis to be accessible..."
-              # Try direct IPs first
-              until nc -z -w 2 10.152.183.80 5432; do
-                echo "Waiting for PostgreSQL on IP..."
+              # Try service DNS names with retry logic
+              POSTGRES_HOST="outline-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+              REDIS_HOST="outline-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+              
+              echo "Checking DNS resolution for $POSTGRES_HOST..."
+              for i in $(seq 1 30); do
+                if nslookup $POSTGRES_HOST > /dev/null 2>&1; then
+                  echo "DNS resolution successful for PostgreSQL"
+                  break
+                fi
+                echo "Attempt $i: DNS resolution failed for PostgreSQL, retrying in 2s..."
                 sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: DNS resolution still failing for PostgreSQL after 30 attempts"
+                  # Continue anyway, we'll check connectivity directly
+                fi
               done
-              until nc -z -w 2 10.152.183.118 6379; do
-                echo "Waiting for Redis on IP..."
+              
+              echo "Checking DNS resolution for $REDIS_HOST..."
+              for i in $(seq 1 30); do
+                if nslookup $REDIS_HOST > /dev/null 2>&1; then
+                  echo "DNS resolution successful for Redis"
+                  break
+                fi
+                echo "Attempt $i: DNS resolution failed for Redis, retrying in 2s..."
                 sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: DNS resolution still failing for Redis after 30 attempts"
+                  # Continue anyway, we'll check connectivity directly
+                fi
               done
-              echo "Dependencies verified, proceeding with startup"
+              
+              # Try connection to PostgreSQL
+              echo "Checking connection to PostgreSQL..."
+              for i in $(seq 1 30); do
+                if nc -z -w 2 $POSTGRES_HOST 5432; then
+                  echo "PostgreSQL is accessible!"
+                  break
+                fi
+                echo "Attempt $i: PostgreSQL not accessible, retrying in 2s..."
+                sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: PostgreSQL still not accessible after 30 attempts"
+                fi
+              done
+              
+              # Try connection to Redis
+              echo "Checking connection to Redis..."
+              for i in $(seq 1 30); do
+                if nc -z -w 2 $REDIS_HOST 6379; then
+                  echo "Redis is accessible!"
+                  break
+                fi
+                echo "Attempt $i: Redis not accessible, retrying in 2s..."
+                sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: Redis still not accessible after 30 attempts"
+                fi
+              done
+              
+              echo "Dependency check completed, proceeding with startup"
       containers:
         - name: {{ .Chart.Name }}-worker
           securityContext:

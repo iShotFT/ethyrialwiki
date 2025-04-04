@@ -89,9 +89,6 @@ env:
   AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki-staging.s3.eu-central-1.amazonaws.com"
   AWS_REGION: "eu-central-1"
   PGSSLMODE: "disable"
-  # Override connection strings with direct IPs as fallback
-  DATABASE_URL: "postgres://outline:outline@10.152.183.80:5432/outline?sslmode=disable"
-  REDIS_URL: "redis://10.152.183.118:6379"
 
 # Add host networking for microk8s compatibility
 hostNetwork: true
