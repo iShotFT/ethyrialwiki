@@ -81,13 +81,20 @@ jobs:
           SERVICES=${{ steps.services.outputs.services }}
           NAMESPACE=${{ steps.namespace.outputs.namespace }}
 
+          # Split services into individual --set parameters
+          SERVICE_PARAMS=""
+          IFS=',' read -ra SERVICE_ARRAY <<< "$SERVICES"
+          for service in "${SERVICE_ARRAY[@]}"; do
+            SERVICE_PARAMS="$SERVICE_PARAMS --set services.$service=true"
+          done
+
           helm upgrade --install outline ./deploy/helm/outline \
             --namespace $NAMESPACE \
             --create-namespace \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
             --set image.tag=$VERSION \
             --set environment=${{ github.event.inputs.environment }} \
-            --set services=$SERVICES \
+            $SERVICE_PARAMS \
             --set ingress.host=outline.${{ github.event.inputs.environment == 'production' && 'ethyrial.com' || 'staging.ethyrial.com' }} \
             --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
 
