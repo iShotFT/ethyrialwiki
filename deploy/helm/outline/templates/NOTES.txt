@@ -31,14 +31,17 @@ Access your Outline instance at:
    Environment: {{ .Values.environment }}
 {{- end }}
 
-3. Deployed services:
+3. Debug mode: {{ if .Values.env.DEBUG }}ENABLED{{ else }}DISABLED{{ end }}
+   Log level: {{ .Values.env.LOG_LEVEL | default "info" }}
+
+4. Deployed services:
 {{- range $key, $value := .Values.services }}
 {{- if $value }}
    - {{ $key }}
 {{- end }}
 {{- end }}
 
-4. Storage:
+5. Storage:
 {{- if .Values.persistence.enabled }}
    - Persistence enabled with {{ .Values.persistence.size }} storage
 {{- else }}
@@ -51,5 +54,16 @@ Access your Outline instance at:
 {{- end }}
 {{- end }}
 
+6. Environment Settings:
+   - ENVIRONMENT is set to: {{ .Values.env.ENVIRONMENT | default "production" }}
+   - NODE_ENV is set to: {{ .Values.env.NODE_ENV | default "production" }}
+
+7. Health Probes:
+   - Readiness probe set to check after {{ .Values.probes.readiness.initialDelaySeconds | default "90" }}s
+   - Liveness probe set to check after {{ .Values.probes.liveness.initialDelaySeconds | default "120" }}s
+
 For troubleshooting, check pod status:
-kubectl get pods -n {{ .Release.Namespace }} 
+kubectl get pods -n {{ .Release.Namespace }}
+
+For logs, use:
+kubectl logs -n {{ .Release.Namespace }} <pod-name> 

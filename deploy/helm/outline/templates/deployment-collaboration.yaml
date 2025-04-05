@@ -52,18 +52,18 @@ spec:
             {{- toYaml .Values.resources.collaboration | nindent 12 }}
           env:
           {{- range $key, $value := .Values.env }}
-          {{- if and (ne $key "DATABASE_URL") (ne $key "REDIS_URL") }}
+          {{- if and (ne $key "DATABASE_URL") (ne $key "REDIS_URL") (ne $key "SECRET_KEY") (ne $key "UTILS_SECRET") }}
             - name: {{ $key }}
               value: {{ $value | quote }}
           {{- end }}
           {{- end }}
           {{- if .Values.postgresql.enabled }}
             - name: DATABASE_URL
-              value: postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@outline-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432/{{ .Values.postgresql.auth.database }}?sslmode=disable
+              value: postgres://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ include "outline.fullname" . }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432/{{ .Values.postgresql.auth.database }}?sslmode=disable
           {{- end }}
           {{- if .Values.redis.enabled }}
             - name: REDIS_URL
-              value: redis://outline-redis-master.{{ .Release.Namespace }}.svc.cluster.local:6379
+              value: redis://{{ include "outline.fullname" . }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local:6379
           {{- end }}
           {{- range .Values.extraEnv }}
             - name: {{ .name }}

@@ -44,16 +44,20 @@ The following table lists the configurable parameters of the Outline chart and t
 | `autoscaling.maxReplicas`    | Maximum number of replicas             | `5`                   |
 | `postgresql.enabled`         | Deploy PostgreSQL container(s)         | `true`                |
 | `redis.enabled`              | Deploy Redis container(s)              | `true`                |
+| `probes.readiness`           | Readiness probe settings               | (see values.yaml)     |
+| `probes.liveness`            | Liveness probe settings                | (see values.yaml)     |
 
 ## Environment Variables
 
 Outline requires several environment variables to be set for proper operation. The most important ones are:
 
-| Variable       | Description                                           |
-| -------------- | ----------------------------------------------------- |
-| `URL`          | The fully qualified URL for your Outline installation |
-| `SECRET_KEY`   | Secret key for sessions                               |
-| `UTILS_SECRET` | Secret key for utils                                  |
+| Variable       | Description                                            |
+| -------------- | ------------------------------------------------------ |
+| `URL`          | The fully qualified URL for your Outline installation  |
+| `SECRET_KEY`   | Secret key for sessions                                |
+| `UTILS_SECRET` | Secret key for utils                                   |
+| `ENVIRONMENT`  | Must be one of: development, production, staging, test |
+| `NODE_ENV`     | Typically "production" for production deployments      |
 
 ## Authentication
 
@@ -93,6 +97,29 @@ auth:
     usernameClaim: "email"
 ```
 
+### Discord
+
+```yaml
+auth:
+  discord:
+    enabled: true
+    clientId: "your-client-id"
+    clientSecret: "your-client-secret"
+    serverId: "your-server-id" # Optional
+```
+
+## WebSocket Support
+
+To enable real-time collaboration features, ensure your ingress controller is configured for WebSockets support. This is automatically configured if you use the provided ingress settings:
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+```
+
 ## Storage
 
 By default, Outline uses the local file system for storage. You can configure it to use AWS S3 or other S3-compatible storage:
@@ -117,4 +144,28 @@ Example:
 ```bash
 helm install outline-staging . -f values-staging.yaml
 helm install outline-production . -f values-production.yaml
+```
+
+## Troubleshooting
+
+If you experience issues with pods not starting or being unable to reach database/redis services:
+
+1. Verify that the PostgreSQL and Redis pods are running correctly
+2. Check for connectivity issues between pods
+3. Review the health probe settings in values.yaml
+
+The chart includes custom health check settings that are tuned for Outline's startup behavior. These can be adjusted if needed:
+
+```yaml
+probes:
+  readiness:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  liveness:
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
 ```

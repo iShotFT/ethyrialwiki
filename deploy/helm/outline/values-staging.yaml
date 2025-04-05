@@ -4,6 +4,14 @@ replicaCount:
   worker: 1
   collaboration: 1
 
+# Services configuration - make sure all required services are enabled
+services:
+  web: true
+  worker: true
+  collaboration: true
+  # Admin service is only for development
+  admin: false
+
 # Storage class configuration
 storageClasses:
   create: false # Don't create new storage classes, they should exist already
@@ -29,14 +37,14 @@ resources:
   web:
     limits:
       cpu: 1000m
-      memory: 6Gi
+      memory: 8Gi
     requests:
       cpu: 100m
       memory: 1Gi
   worker:
     limits:
       cpu: 1000m
-      memory: 6Gi
+      memory: 8Gi
     requests:
       cpu: 100m
       memory: 1Gi
@@ -65,12 +73,15 @@ postgresql:
     persistence:
       size: 4Gi
       storageClassName: "local-path" # K3s local-path provisioner
+      storageClass: "local-path" # Also include this for compatibility
   auth:
     username: outline
     password: outline
     database: outline
     enablePostgresUser: true
     postgresPassword: outline
+  volumePermissions:
+    enabled: true
 
 redis:
   enabled: true
@@ -78,8 +89,11 @@ redis:
     persistence:
       size: 4Gi
       storageClassName: "local-path" # K3s local-path provisioner
+      storageClass: "local-path" # Also include this for compatibility
   auth:
     enabled: false
+  volumePermissions:
+    enabled: true
 
 # Enable ingress for staging
 ingress:
@@ -88,6 +102,10 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     kubernetes.io/tls-acme: "true" # For cert-manager integration
+    # Add WebSocket support for collaboration
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
   host: staging.ethyrial.wiki
   path: /
   pathType: Prefix
@@ -97,13 +115,24 @@ ingress:
 
 # Environment variables for staging
 env:
-  URL: "https://staging.ethyrial.wiki"
-  DEBUG: "http,sql"
-  LOG_LEVEL: "debug"
-  ENABLE_UPDATES: false
+  # Identity/Environment
+  ENVIRONMENT: "production" # Must be one of: development, production, staging, test
   NODE_ENV: "production"
+
+  # URLs and Networking
+  URL: "https://staging.ethyrial.wiki"
+  COLLABORATION_URL: "wss://staging.ethyrial.wiki/collaboration"
+  PORT: 3000
   FORCE_HTTPS: true
+
+  # Debugging (disabled for production use)
+  DEBUG: ""
+  LOG_LEVEL: "info"
+
+  # Feature flags
+  ENABLE_UPDATES: false
   RATE_LIMITER_ENABLED: true
+
   # S3 Storage configuration
   FILE_STORAGE: "s3"
   AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki-staging"
@@ -128,3 +157,16 @@ existingSecrets:
   auth: "outline-auth"
   keys: "outline-keys"
   s3: "outline-s3"
+
+# Custom probe settings for better startup
+probes:
+  readiness:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  liveness:
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6

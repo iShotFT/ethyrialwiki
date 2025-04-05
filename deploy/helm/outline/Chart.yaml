@@ -1,14 +1,16 @@
 apiVersion: v2
 name: outline
-description: Outline is a fast, collaborative, knowledge base for your team
+description: Outline is a fast, collaborative, knowledge base for your team with improved connectivity and health checks
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "0.73.1"
 icon: https://avatars.githubusercontent.com/u/31515853?s=200&v=4
 keywords:
   - wiki
   - documentation
   - knowledge base
+  - discord
+  - collaboration
 home: https://www.getoutline.com/
 sources:
   - https://github.com/outline/outline

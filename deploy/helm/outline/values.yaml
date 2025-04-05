@@ -83,6 +83,7 @@ env:
   FORCE_HTTPS: true
   ENABLE_UPDATES: true
   NODE_ENV: "production"
+  ENVIRONMENT: "production"
   # These will be auto-generated if not provided
   SECRET_KEY: ""
   UTILS_SECRET: ""
@@ -95,6 +96,19 @@ env:
   AWS_S3_UPLOAD_MAX_SIZE: ""
   AWS_REGION: ""
   RATE_LIMITER_ENABLED: false
+
+# Custom probe settings for health checks
+probes:
+  readiness:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  liveness:
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
 
 podAnnotations: {}
 
@@ -181,6 +195,8 @@ postgresql:
     service:
       ports:
         postgresql: 5432
+  volumePermissions:
+    enabled: true
 
 redis:
   enabled: true
@@ -191,6 +207,8 @@ redis:
     persistence:
       enabled: true
       size: 8Gi
+  volumePermissions:
+    enabled: true
 
 extraConfig: {}
 extraSecrets: {}

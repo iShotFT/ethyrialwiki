@@ -8,8 +8,15 @@ data:
   URL: {{ .Values.env.URL | quote }}
   PORT: {{ .Values.env.PORT | default "3000" | quote }}
   NODE_ENV: {{ .Values.env.NODE_ENV | default "production" | quote }}
+  ENVIRONMENT: {{ .Values.env.ENVIRONMENT | default "production" | quote }}
+  {{- if .Values.env.COLLABORATION_URL }}
+  COLLABORATION_URL: {{ .Values.env.COLLABORATION_URL | quote }}
+  {{- end }}
   {{- if .Values.env.DEBUG }}
   DEBUG: {{ .Values.env.DEBUG | quote }}
+  {{- end }}
+  {{- if .Values.env.LOG_LEVEL }}
+  LOG_LEVEL: {{ .Values.env.LOG_LEVEL | quote }}
   {{- end }}
   {{- if .Values.env.FORCE_HTTPS }}
   FORCE_HTTPS: {{ .Values.env.FORCE_HTTPS | quote }}
@@ -43,6 +50,9 @@ data:
   {{- end }}
   {{- if .Values.env.RATE_LIMITER_ENABLED }}
   RATE_LIMITER_ENABLED: {{ .Values.env.RATE_LIMITER_ENABLED | quote }}
+  {{- end }}
+  {{- if .Values.env.PGSSLMODE }}
+  PGSSLMODE: {{ .Values.env.PGSSLMODE | quote }}
   {{- end }}
   {{- with .Values.extraConfig }}
   {{- toYaml . | nindent 2 }}

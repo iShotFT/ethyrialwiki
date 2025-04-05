@@ -4,6 +4,14 @@ replicaCount:
   worker: 2
   collaboration: 2
 
+# Services configuration - make sure all required services are enabled
+services:
+  web: true
+  worker: true
+  collaboration: true
+  # Admin service is only for development
+  admin: false
+
 # Storage class configuration
 storageClasses:
   create: false # Don't create new storage classes, they should exist already
@@ -69,12 +77,15 @@ postgresql:
     persistence:
       size: 20Gi
       storageClassName: "local-path" # K3s local-path provisioner
+      storageClass: "local-path" # Also include this for compatibility
   auth:
     username: outline
     password: outline
     database: outline
     enablePostgresUser: true
     postgresPassword: outline
+  volumePermissions:
+    enabled: true
 
 redis:
   enabled: true
@@ -82,8 +93,11 @@ redis:
     persistence:
       size: 10Gi
       storageClassName: "local-path" # K3s local-path provisioner
+      storageClass: "local-path" # Also include this for compatibility
   auth:
     enabled: false
+  volumePermissions:
+    enabled: true
 
 # Enable ingress for production
 ingress:
@@ -104,13 +118,24 @@ ingress:
 
 # Environment variables for production
 env:
+  # Identity/Environment
+  ENVIRONMENT: "production" # Must be one of: development, production, staging, test
+  NODE_ENV: "production"
+
+  # URLs and Networking
   URL: "https://ethyrial.wiki"
+  COLLABORATION_URL: "wss://ethyrial.wiki/collaboration"
+  PORT: 3000
+  FORCE_HTTPS: true
+
+  # Debugging (disabled for production use)
   DEBUG: "false"
   LOG_LEVEL: "info"
+
+  # Feature flags
   ENABLE_UPDATES: false
-  NODE_ENV: "production"
-  FORCE_HTTPS: true
   RATE_LIMITER_ENABLED: true
+
   # S3 Storage configuration
   FILE_STORAGE: "s3"
   AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki"
@@ -135,3 +160,16 @@ existingSecrets:
   auth: "outline-auth"
   keys: "outline-keys"
   s3: "outline-s3"
+
+# Custom probe settings for better startup
+probes:
+  readiness:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  liveness:
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
