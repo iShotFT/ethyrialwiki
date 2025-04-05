@@ -14,8 +14,8 @@ services:
 
 # Storage class configuration
 storageClasses:
-  create: false # Don't create new storage classes, they should exist already
-  adoptExisting: false # Don't try to adopt existing storage classes
+  create: true # Create storage classes automatically for portability
+  adoptExisting: true # Adopt existing storage classes if they exist
 
 # Image pull secrets for private registry
 imagePullSecrets:
@@ -152,6 +152,12 @@ dnsConfig:
     - svc.cluster.local
     - cluster.local
 
+# Add explicit service configuration for better discoverability
+service:
+  type: NodePort
+  port: 3000
+  nodePort: 30080
+
 # Reference existing secrets (created according to README instructions)
 existingSecrets:
   auth: "outline-auth"
@@ -170,3 +176,9 @@ probes:
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 6
+
+# Nginx Proxy Manager Integration (disabled by default)
+nginxProxyManager:
+  enabled: false
+  domains: "staging.ethyrial.wiki"
+  certificateId: 2

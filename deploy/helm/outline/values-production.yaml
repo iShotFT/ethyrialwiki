@@ -1,8 +1,8 @@
 # Production environment values for outline.
 replicaCount:
-  web: 2
-  worker: 2
-  collaboration: 2
+  web: 1
+  worker: 1
+  collaboration: 1
 
 # Services configuration - make sure all required services are enabled
 services:
@@ -14,8 +14,8 @@ services:
 
 # Storage class configuration
 storageClasses:
-  create: false # Don't create new storage classes, they should exist already
-  adoptExisting: false # Don't try to adopt existing storage classes
+  create: true # Create storage classes automatically for portability
+  adoptExisting: true # Adopt existing storage classes if they exist
 
 # Authentication configuration
 auth:
@@ -31,7 +31,7 @@ auth.oidc.enabled: false
 # Enable autoscaling for production
 autoscaling:
   enabled: true
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
@@ -41,29 +41,29 @@ podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "3000"
 
-# Resources for production
+# Resources for production (increased to match staging configuration)
 resources:
   web:
     limits:
       cpu: 2000m
-      memory: 6Gi
+      memory: 8Gi
     requests:
-      cpu: 500m
+      cpu: 250m
       memory: 1Gi
   worker:
     limits:
       cpu: 2000m
-      memory: 6Gi
+      memory: 8Gi
     requests:
-      cpu: 500m
+      cpu: 250m
       memory: 1Gi
   collaboration:
     limits:
       cpu: 1000m
       memory: 2Gi
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 100m
+      memory: 256Mi
 
 # Larger persistence sizes for production
 persistence:
@@ -151,15 +151,21 @@ dnsConfig:
   nameservers:
     - 10.43.0.10 # K3s CoreDNS service IP
   searches:
-    - ethyrial-production.svc.cluster.local
+    - ethyrial-prod.svc.cluster.local
     - svc.cluster.local
     - cluster.local
 
+# Add explicit service configuration for better discoverability
+service:
+  type: NodePort
+  port: 3000
+  nodePort: 30081
+
 # Reference existing secrets (created according to README instructions)
 existingSecrets:
-  auth: "outline-auth"
-  keys: "outline-keys"
-  s3: "outline-s3"
+  auth: "outline-auth-prod"
+  keys: "outline-keys-prod"
+  s3: "outline-s3-prod"
 
 # Custom probe settings for better startup
 probes:
@@ -173,3 +179,9 @@ probes:
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 6
+
+# Nginx Proxy Manager Integration (disabled by default)
+nginxProxyManager:
+  enabled: false
+  domains: "ethyrial.wiki"
+  certificateId: 1
