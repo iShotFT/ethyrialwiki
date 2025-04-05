@@ -4,6 +4,10 @@ replicaCount:
   worker: 2
   collaboration: 2
 
+# Enable storage class creation for K3s
+storageClasses:
+  create: true
+
 # Authentication configuration
 auth:
   discord:
@@ -64,6 +68,12 @@ postgresql:
     persistence:
       size: 20Gi
       storageClassName: "local-path" # K3s local-path provisioner
+  auth:
+    username: outline
+    password: outline
+    database: outline
+    enablePostgresUser: true
+    postgresPassword: outline
 
 redis:
   enabled: true
@@ -71,6 +81,8 @@ redis:
     persistence:
       size: 10Gi
       storageClassName: "local-path" # K3s local-path provisioner
+  auth:
+    enabled: false
 
 # Enable ingress for production
 ingress:
@@ -100,8 +112,8 @@ env:
   RATE_LIMITER_ENABLED: true
   # S3 Storage configuration
   FILE_STORAGE: "s3"
-  AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki-production"
-  AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki-production.s3.eu-central-1.amazonaws.com"
+  AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki"
+  AWS_S3_UPLOAD_BUCKET_URL: "https://s3.eu-central-1.amazonaws.com"
   AWS_REGION: "eu-central-1"
   PGSSLMODE: "disable"
 

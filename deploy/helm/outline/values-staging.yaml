@@ -4,6 +4,10 @@ replicaCount:
   worker: 1
   collaboration: 1
 
+# Enable storage class creation for K3s
+storageClasses:
+  create: true
+
 # Image pull secrets for private registry
 imagePullSecrets:
   - name: github-container-registry
@@ -60,6 +64,12 @@ postgresql:
     persistence:
       size: 4Gi
       storageClassName: "local-path" # K3s local-path provisioner
+  auth:
+    username: outline
+    password: outline
+    database: outline
+    enablePostgresUser: true
+    postgresPassword: outline
 
 redis:
   enabled: true
@@ -67,6 +77,8 @@ redis:
     persistence:
       size: 4Gi
       storageClassName: "local-path" # K3s local-path provisioner
+  auth:
+    enabled: false
 
 # Enable ingress for staging
 ingress:
@@ -94,7 +106,7 @@ env:
   # S3 Storage configuration
   FILE_STORAGE: "s3"
   AWS_S3_UPLOAD_BUCKET_NAME: "ethyrial-wiki-staging"
-  AWS_S3_UPLOAD_BUCKET_URL: "https://ethyrial-wiki-staging.s3.eu-central-1.amazonaws.com"
+  AWS_S3_UPLOAD_BUCKET_URL: "https://s3.eu-central-1.amazonaws.com"
   AWS_REGION: "eu-central-1"
   PGSSLMODE: "disable"
 
