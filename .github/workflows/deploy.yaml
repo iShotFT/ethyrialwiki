@@ -84,6 +84,11 @@ jobs:
           NAMESPACE="ethyrial-$ENVIRONMENT"
           echo "namespace=$NAMESPACE" >> $GITHUB_OUTPUT
 
+      - name: Run pre-deployment script
+        run: |
+          chmod +x ./k3s-migration/pre-deploy.sh
+          ./k3s-migration/pre-deploy.sh
+
       - name: Build Helm dependencies
         run: |
           helm dependency build ./deploy/helm/outline
