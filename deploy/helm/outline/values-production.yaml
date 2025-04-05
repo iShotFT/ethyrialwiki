@@ -126,7 +126,7 @@ env:
   URL: "https://ethyrial.wiki"
   COLLABORATION_URL: "wss://ethyrial.wiki/collaboration"
   PORT: 3000
-  FORCE_HTTPS: true
+  FORCE_HTTPS: false
 
   # Debugging (disabled for production use)
   DEBUG: "false"
