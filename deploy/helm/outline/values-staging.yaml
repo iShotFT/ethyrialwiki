@@ -36,8 +36,8 @@ storageInit:
 
 # Storage class configuration
 storageClasses:
-  create: true # Create storage classes automatically for portability
-  adoptExisting: true # Adopt existing storage classes if they exist
+  create: false # Don't create storage classes automatically since they already exist
+  adoptExisting: false # Don't adopt existing storage classes as it causes issues
 
 # Image pull secrets for private registry
 imagePullSecrets:
