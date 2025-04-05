@@ -115,14 +115,45 @@ jobs:
             kubectl delete deployment -l app.kubernetes.io/instance=outline -n $NAMESPACE || true
           fi
 
-          helm upgrade --install outline ./deploy/helm/outline \
-            --namespace $NAMESPACE \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
-            --set image.tag=$VERSION \
-            --set environment=${{ github.event.inputs.environment }} \
-            $SERVICE_PARAMS \
-            --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
-            --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+          # Special handling for production environment to avoid PVC issues
+          if [[ "$NAMESPACE" == "ethyrial-production" ]]; then
+            echo "Checking for existing PVC in production..."
+            if kubectl get pvc outline-data -n $NAMESPACE &>/dev/null; then
+              PVC_SIZE=$(kubectl get pvc outline-data -n $NAMESPACE -o jsonpath='{.status.capacity.storage}')
+              echo "Found existing PVC with size $PVC_SIZE"
+              
+              echo "Using --skip-crds and skipping PVC creation for production..."
+              helm upgrade --install outline ./deploy/helm/outline \
+                --namespace $NAMESPACE \
+                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
+                --set image.tag=$VERSION \
+                --set environment=${{ github.event.inputs.environment }} \
+                $SERVICE_PARAMS \
+                --set persistence.existingClaim=outline-data \
+                --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
+                --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+            else
+              echo "No existing PVC found, using standard deployment..."
+              helm upgrade --install outline ./deploy/helm/outline \
+                --namespace $NAMESPACE \
+                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
+                --set image.tag=$VERSION \
+                --set environment=${{ github.event.inputs.environment }} \
+                $SERVICE_PARAMS \
+                --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
+                --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+            fi
+          else
+            # Standard deployment for non-production environments
+            helm upgrade --install outline ./deploy/helm/outline \
+              --namespace $NAMESPACE \
+              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
+              --set image.tag=$VERSION \
+              --set environment=${{ github.event.inputs.environment }} \
+              $SERVICE_PARAMS \
+              --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
+              --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+          fi
 
       - name: Verify deployment
         run: |
@@ -144,3 +175,31 @@ jobs:
           fi
 
           echo "Deployment verification completed"
+
+      - name: Output Nginx Proxy Manager Settings
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          HOST=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }}
+
+          echo "::group::Nginx Proxy Manager Settings for $HOST"
+          echo "=================================="
+          echo "NGINX PROXY MANAGER CONFIGURATION"
+          echo "=================================="
+          echo
+          echo "Domain: $HOST"
+          echo "Scheme: https"
+
+          # Get ingress controller pod IP (preferred method)
+          INGRESS_POD_IP=$(kubectl get pods -n ingress-nginx -o jsonpath='{.items[0].status.podIP}')
+          if [ -n "$INGRESS_POD_IP" ]; then
+            echo "Forward Hostname/IP: $INGRESS_POD_IP"
+            echo "Forward Port: 443"
+          else
+            # Fallback to NodePort if pod IP isn't available
+            echo "Forward Hostname/IP: 127.0.0.1"
+            echo "Forward Port: 32443"
+          fi
+
+          echo "Enable WebSockets: Yes"
+          echo "SSL: Enabled with Let's Encrypt"
+          echo "::endgroup::"

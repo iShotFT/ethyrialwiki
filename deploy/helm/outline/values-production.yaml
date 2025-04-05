@@ -72,10 +72,10 @@ resources:
 # Larger persistence sizes for production
 persistence:
   enabled: true
-  existingClaim: "" # Use a new claim
+  existingClaim: "" # Will be overridden by GitHub workflow for production
   storageClass: local-path # Use existing storage class
   accessMode: ReadWriteOnce
-  size: 10Gi
+  size: 50Gi # Match the existing PVC size
 
 postgresql:
   enabled: true
