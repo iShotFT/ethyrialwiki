@@ -12,6 +12,24 @@ services:
   # Admin service is only for development
   admin: false
 
+# Update strategy to ensure zero downtime during updates
+deploymentStrategy:
+  web:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  worker:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  collaboration:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
 # Storage initialization job to set required labels and annotations
 storageInit:
   enabled: true
@@ -32,13 +50,9 @@ auth.google.enabled: false
 auth.slack.enabled: false
 auth.oidc.enabled: false
 
-# Enable autoscaling for production
+# Disable autoscaling to keep consistent pod count
 autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 5
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  enabled: false
 
 # Pod annotations for K3s integration
 podAnnotations:

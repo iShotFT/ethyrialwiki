@@ -12,6 +12,24 @@ services:
   # Admin service is only for development
   admin: false
 
+# Update strategy to ensure zero downtime during updates
+deploymentStrategy:
+  web:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  worker:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  collaboration:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
 # Storage initialization job to set required labels and annotations
 storageInit:
   enabled: false

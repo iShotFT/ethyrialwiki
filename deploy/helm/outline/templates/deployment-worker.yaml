@@ -10,6 +10,10 @@ spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount.worker }}
   {{- end }}
+  {{- with .Values.deploymentStrategy.worker }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "outline.selectorLabels" . | nindent 6 }}

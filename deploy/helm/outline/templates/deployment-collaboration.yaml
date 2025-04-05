@@ -8,6 +8,10 @@ metadata:
     app.kubernetes.io/component: collaboration
 spec:
   replicas: {{ .Values.replicaCount.collaboration }}
+  {{- with .Values.deploymentStrategy.collaboration }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "outline.selectorLabels" . | nindent 6 }}

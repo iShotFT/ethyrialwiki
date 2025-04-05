@@ -15,3 +15,9 @@ data/*
 *.key
 *.cert
 .env.development
+
+# Helm chart dependencies and temporary files
+*.tar.gz
+*.tgz
+deploy/helm/outline/Chart.lock
+deploy/helm/outline/charts/

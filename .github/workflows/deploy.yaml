@@ -109,11 +109,8 @@ jobs:
           # Create the namespace if it doesn't exist
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
-          # Check if release exists and delete deployments if it does (prevents env var ordering issues)
-          if helm status outline -n $NAMESPACE >/dev/null 2>&1; then
-            echo "Outline release exists, deleting deployments to avoid patch conflicts..."
-            kubectl delete deployment -l app.kubernetes.io/instance=outline -n $NAMESPACE || true
-          fi
+          # Use a better approach for updates - don't delete existing deployments first
+          # This allows Kubernetes to perform proper rolling updates
 
           # Special handling for production environment to avoid PVC issues
           if [[ "$NAMESPACE" == "ethyrial-production" ]]; then
@@ -122,38 +119,29 @@ jobs:
               PVC_SIZE=$(kubectl get pvc outline-data -n $NAMESPACE -o jsonpath='{.status.capacity.storage}')
               echo "Found existing PVC with size $PVC_SIZE"
               
-              echo "Using --skip-crds and skipping PVC creation for production..."
-              helm upgrade --install outline ./deploy/helm/outline \
-                --namespace $NAMESPACE \
-                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
-                --set image.tag=$VERSION \
-                --set environment=${{ github.event.inputs.environment }} \
-                $SERVICE_PARAMS \
-                --set persistence.existingClaim=outline-data \
-                --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
-                --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+              echo "Using existingClaim for PVC in production..."
+              HELM_ARGS="--set persistence.existingClaim=outline-data"
             else
               echo "No existing PVC found, using standard deployment..."
-              helm upgrade --install outline ./deploy/helm/outline \
-                --namespace $NAMESPACE \
-                --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
-                --set image.tag=$VERSION \
-                --set environment=${{ github.event.inputs.environment }} \
-                $SERVICE_PARAMS \
-                --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
-                --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+              HELM_ARGS=""
             fi
           else
             # Standard deployment for non-production environments
-            helm upgrade --install outline ./deploy/helm/outline \
-              --namespace $NAMESPACE \
-              --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
-              --set image.tag=$VERSION \
-              --set environment=${{ github.event.inputs.environment }} \
-              $SERVICE_PARAMS \
-              --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
-              --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml
+            HELM_ARGS=""
           fi
+
+          # Perform Helm upgrade with proper update strategy
+          echo "Deploying with rolling update strategy for zero downtime..."
+          helm upgrade --install outline ./deploy/helm/outline \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }} \
+            --set image.tag=$VERSION \
+            --set environment=${{ github.event.inputs.environment }} \
+            $SERVICE_PARAMS \
+            $HELM_ARGS \
+            --set ingress.host=${{ github.event.inputs.environment == 'production' && 'ethyrial.wiki' || 'staging.ethyrial.wiki' }} \
+            --values ./deploy/helm/outline/values-${{ github.event.inputs.environment }}.yaml \
+            --timeout 10m
 
       - name: Verify deployment
         run: |
