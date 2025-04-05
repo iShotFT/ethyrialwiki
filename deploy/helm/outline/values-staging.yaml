@@ -6,7 +6,8 @@ replicaCount:
 
 # Enable storage class creation for K3s
 storageClasses:
-  create: true
+  create: false # Don't create new ones since they already exist
+  adoptExisting: true # Adopt existing storage classes
 
 # Image pull secrets for private registry
 imagePullSecrets:

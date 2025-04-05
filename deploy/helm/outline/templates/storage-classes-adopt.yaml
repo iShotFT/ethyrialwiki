@@ -1,4 +1,4 @@
-{{- if .Values.storageClasses.create }}
+{{- if .Values.storageClasses.adoptExisting }}
 {{- /* Check if local-path storage class already exists */ -}}
 {{- $localPathExists := false }}
 {{- $microk8sHostpathExists := false }}
@@ -11,30 +11,38 @@
   {{- end }}
 {{- end }}
 
-{{- if not $localPathExists }}
+# This template patches existing storage classes with Helm labels and annotations
+# so they can be managed by the release
+
+{{- if $localPathExists }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: local-path
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-    "helm.sh/resource-policy": keep
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+    helm.sh/resource-policy: keep
   labels:
+    app.kubernetes.io/managed-by: Helm
     {{- include "outline.labels" . | nindent 4 }}
 provisioner: rancher.io/local-path
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 {{- end }}
 
-{{- if not $microk8sHostpathExists }}
+{{- if $microk8sHostpathExists }}
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: microk8s-hostpath
   annotations:
-    "helm.sh/resource-policy": keep
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+    helm.sh/resource-policy: keep
   labels:
+    app.kubernetes.io/managed-by: Helm
     {{- include "outline.labels" . | nindent 4 }}
 provisioner: rancher.io/local-path
 volumeBindingMode: WaitForFirstConsumer

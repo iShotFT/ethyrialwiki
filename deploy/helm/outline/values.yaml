@@ -21,6 +21,8 @@ fullnameOverride: ""
 storageClasses:
   # Set to true to create storage classes needed for K3s
   create: false
+  # Set to true to label existing storage classes for Helm adoption
+  adoptExisting: false
 
 serviceAccount:
   # Specifies whether a service account should be created
