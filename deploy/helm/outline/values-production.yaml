@@ -186,6 +186,7 @@ existingSecrets:
   auth: "outline-auth-prod"
   keys: "outline-keys-prod"
   s3: "outline-s3-prod"
+  notion: "outline-notion-prod"
 
 # Custom probe settings for better startup
 probes:

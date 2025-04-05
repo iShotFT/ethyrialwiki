@@ -123,5 +123,17 @@ Environment variables for Redis connection
       name: {{ .Values.existingSecrets.s3 }}
       key: AWS_SECRET_ACCESS_KEY
 {{- end }}
+{{- if .Values.existingSecrets.notion }}
+- name: NOTION_CLIENT_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.notion }}
+      key: NOTION_CLIENT_ID
+- name: NOTION_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.notion }}
+      key: NOTION_CLIENT_SECRET
+{{- end }}
 {{- end }}
 {{- end -}} 
