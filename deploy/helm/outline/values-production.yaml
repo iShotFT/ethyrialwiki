@@ -12,10 +12,14 @@ services:
   # Admin service is only for development
   admin: false
 
+# Storage initialization job to set required labels and annotations
+storageInit:
+  enabled: true
+
 # Storage class configuration
 storageClasses:
-  create: true # Create storage classes automatically for portability
-  adoptExisting: true # Adopt existing storage classes if they exist
+  create: false # Don't create new storage classes
+  adoptExisting: false # Don't try to adopt existing storage classes
 
 # Authentication configuration
 auth:
@@ -68,8 +72,10 @@ resources:
 # Larger persistence sizes for production
 persistence:
   enabled: true
-  size: 50Gi
-  storageClass: "local-path" # K3s local-path provisioner
+  existingClaim: "" # Use a new claim
+  storageClass: local-path # Use existing storage class
+  accessMode: ReadWriteOnce
+  size: 10Gi
 
 postgresql:
   enabled: true

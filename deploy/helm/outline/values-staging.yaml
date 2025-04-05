@@ -12,6 +12,10 @@ services:
   # Admin service is only for development
   admin: false
 
+# Storage initialization job to set required labels and annotations
+storageInit:
+  enabled: false
+
 # Storage class configuration
 storageClasses:
   create: true # Create storage classes automatically for portability
