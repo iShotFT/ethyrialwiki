@@ -10,3 +10,5 @@
 !minimap_data/extracted/stitched/*
 !minimap_data/stitched
 !minimap_data/stitched/*
+!*.py
+!*.md
