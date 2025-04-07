@@ -1,0 +1,8 @@
+*
+!.gitignore
+!source
+!output
+!minimap_data
+!minimap_data/*
+!minimap_data/extracted
+!minimap_data/stitched
