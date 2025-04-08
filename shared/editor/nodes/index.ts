@@ -43,7 +43,6 @@ import TableHeader from "./TableHeader";
 import TableRow from "./TableRow";
 import Text from "./Text";
 import Video from "./Video";
-import MapNode from "./Map";
 
 type Nodes = (typeof Node | typeof Mark | typeof Extension)[];
 
@@ -109,7 +108,6 @@ export const richExtensions: Nodes = [
   Math,
   MathBlock,
   Mention,
-  MapNode,
   // Container type nodes should be last so that key handlers are registered for content inside
   // the container nodes first.
   ...listExtensions,
