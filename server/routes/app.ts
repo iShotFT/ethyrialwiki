@@ -17,7 +17,7 @@ import readManifestFile from "@server/utils/readManifestFile";
 
 const readFile = util.promisify(fs.readFile);
 const entry = "app/index.tsx";
-const viteHost = env.URL.replace(`:${env.PORT}`, ":3001");
+const viteHost = env.URL.replace(new RegExp(`:\\d+`), ":4001");
 
 let indexHtmlCache: Buffer | undefined;
 
