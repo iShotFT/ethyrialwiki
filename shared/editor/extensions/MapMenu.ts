@@ -1,6 +1,6 @@
-import { MenuItem } from "../types";
-import Extension from "../lib/Extension";
 import { EditorState } from "prosemirror-state";
+import Extension from "../lib/Extension";
+import { MenuItem } from "../types";
 
 export default class MapMenu extends Extension {
   get name() {
@@ -22,8 +22,8 @@ export default class MapMenu extends Extension {
         active: (state: EditorState) => {
           const { schema } = state;
           return !!schema.nodes.map;
-        }
-      }
+        },
+      },
     ];
   }
-} 
+}

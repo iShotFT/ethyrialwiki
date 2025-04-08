@@ -1,9 +1,9 @@
 import DateTime from "./DateTime";
 import History from "./History";
+import MapMenu from "./MapMenu";
 import MaxLength from "./MaxLength";
 import Placeholder from "./Placeholder";
 import TrailingNode from "./TrailingNode";
-import MapMenu from "./MapMenu";
 
 export default [
   DateTime,
@@ -11,5 +11,5 @@ export default [
   MaxLength,
   Placeholder,
   TrailingNode,
-  MapMenu
-]; 
+  MapMenu,
+];
