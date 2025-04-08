@@ -31,7 +31,7 @@ export default () =>
     publicDir: "./server/static",
     base: (environment.CDN_URL ?? "") + "/static/",
     server: {
-      port: 3001,
+      port: 4001,
       host: true,
       https: httpsConfig,
       allowedHosts: host ? [host] : undefined,
