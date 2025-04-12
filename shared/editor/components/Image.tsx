@@ -67,6 +67,11 @@ const Image = (props: Props) => {
     ? { width: "var(--container-width)" }
     : { width: width || "auto" };
 
+  const handleImageError = (_err: unknown) => {
+    setError(true);
+    setLoaded(true);
+  };
+
   return (
     <div contentEditable={false} className={className} ref={ref}>
       <ImageWrapper
@@ -104,25 +109,24 @@ const Image = (props: Props) => {
                     : "all",
               }}
               src={sanitizedSrc}
-              onError={() => {
-                setError(true);
-                setLoaded(true);
-              }}
+              onError={handleImageError}
               onLoad={(ev: React.SyntheticEvent<HTMLImageElement>) => {
-                // For some SVG's Firefox does not provide the naturalWidth, in this
-                // rare case we need to provide a default so that the image can be
-                // seen and is not sized to 0px
-                const nw = (ev.target as HTMLImageElement).naturalWidth || 300;
-                const nh = (ev.target as HTMLImageElement).naturalHeight;
-                setNaturalWidth(nw);
-                setNaturalHeight(nh);
-                setLoaded(true);
+                try {
+                  const nw =
+                    (ev.target as HTMLImageElement).naturalWidth || 300;
+                  const nh = (ev.target as HTMLImageElement).naturalHeight;
+                  setNaturalWidth(nw);
+                  setNaturalHeight(nh);
+                  setLoaded(true);
 
-                if (!node.attrs.width) {
-                  setSize((state) => ({
-                    ...state,
-                    width: nw,
-                  }));
+                  if (!node.attrs.width) {
+                    setSize((state) => ({
+                      ...state,
+                      width: nw,
+                    }));
+                  }
+                } catch (err) {
+                  handleImageError(err);
                 }
               }}
             />
@@ -160,7 +164,7 @@ const Image = (props: Props) => {
 };
 
 function getPlaceholder(width: number, height: number) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" />`;
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg"><rect width="${width}" height="${height}" fill="#E6E6E6"/></svg>`;
 }
 
 const Error = styled(Flex)`
