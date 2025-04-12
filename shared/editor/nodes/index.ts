@@ -29,6 +29,8 @@ import Heading from "./Heading";
 import HorizontalRule from "./HorizontalRule";
 import Image from "./Image";
 import ListItem from "./ListItem";
+import Map from "./Map";
+import MapBlock from "./MapBlock";
 import Math from "./Math";
 import MathBlock from "./MathBlock";
 import Mention from "./Mention";
@@ -107,6 +109,8 @@ export const richExtensions: Nodes = [
   TemplatePlaceholder,
   Math,
   MathBlock,
+  Map,
+  MapBlock,
   Mention,
   // Container type nodes should be last so that key handlers are registered for content inside
   // the container nodes first.

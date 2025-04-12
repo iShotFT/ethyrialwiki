@@ -21,6 +21,7 @@ import {
   MathIcon,
   DoneIcon,
   EmbedIcon,
+  GlobeIcon,
 } from "outline-icons";
 import * as React from "react";
 import styled from "styled-components";
@@ -149,6 +150,15 @@ export default function blockMenuItems(
       title: dictionary.mathBlock,
       icon: <MathIcon />,
       keywords: "math katex latex",
+    },
+    {
+      name: "map_block",
+      title: "Game Map",
+      icon: <GlobeIcon />,
+      keywords: "map game coordinates location ethyrial",
+      onSelect: () => {
+        console.log("Map block selected from menu");
+      },
     },
     {
       name: "hr",

@@ -21,6 +21,7 @@ import useEmbeds from "~/hooks/useEmbeds";
 import useStores from "~/hooks/useStores";
 import { uploadFile, uploadFileFromUrl } from "~/utils/files";
 import lazyWithRetry from "~/utils/lazyWithRetry";
+import MapNodeViewLoader from "~/editor/components/MapNodeViewLoader";
 
 const LazyLoadedEditor = lazyWithRetry(() => import("~/editor"));
 
@@ -211,19 +212,22 @@ function Editor(props: Props, ref: React.RefObject<SharedEditor> | null) {
             </div>
           </EditorContainer>
         ) : (
-          <LazyLoadedEditor
-            key={props.extensions?.length || 0}
-            ref={mergeRefs([ref, localRef, handleRefChanged])}
-            uploadFile={handleUploadFile}
-            embeds={embeds}
-            userPreferences={preferences}
-            dictionary={dictionary}
-            {...props}
-            onClickLink={handleClickLink}
-            onChange={handleChange}
-            placeholder={props.placeholder || ""}
-            defaultValue={props.defaultValue || ""}
-          />
+          <>
+            <LazyLoadedEditor
+              key={props.extensions?.length || 0}
+              ref={mergeRefs([ref, localRef, handleRefChanged])}
+              uploadFile={handleUploadFile}
+              embeds={embeds}
+              userPreferences={preferences}
+              dictionary={dictionary}
+              {...props}
+              onClickLink={handleClickLink}
+              onChange={handleChange}
+              placeholder={props.placeholder || ""}
+              defaultValue={props.defaultValue || ""}
+            />
+            <MapNodeViewLoader />
+          </>
         )}
         {props.editorStyle?.paddingBottom && !props.readOnly && (
           <ClickablePadding
