@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Adjust TargetFramework if needed, e.g., net6.0, net7.0, net8.0 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+     <!-- Allow unsafe code for potential future use if needed for interop/pointers, though not currently planned -->
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+     <!-- Suppress warning about BinaryFormatter being obsolete (necessary for this specific task) -->
+    <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <!-- This is needed for BinaryFormatter -->
+      <PackageReference Include="System.Runtime.Serialization.Formatters" Version="8.0.0" />
+      <!-- Removed explicit Compile item for MarkerProcessor.cs as it's included by default -->
+      <!-- <Compile Include="MarkerProcessor.cs" /> -->
+  </ItemGroup>
+
+</Project>

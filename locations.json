@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Silverlake Leyline",
+        "map": "IRUMESA",
+        "type": "LEYLINE",
+        "x": 4718,
+        "y": 3962,
+        "z": 1
+    },
+    {
+        "name": "Cobalt Tower Leyline",
+        "map": "IRUMESA",
+        "type": "LEYLINE",
+        "x": 2305,
+        "y": 2142,
+        "z": 22
+    },
+    {
+        "name": "Edrivine Leyline",
+        "map": "IRUMESA",
+        "type": "LEYLINE",
+        "x": 4154,
+        "y": 2022,
+        "z": 1
+    },
+    {
+        "name": "Ardholm Leyline",
+        "map": "IRUMESA",
+        "type": "LEYLINE",
+        "x": 1261,
+        "y": 4024,
+        "z": 0
+    },
+    {
+        "name": "Farwood Leyline",
+        "map": "THESOLITARYISLES",
+        "type": "LEYLINE",
+        "x": 15,
+        "y": 121,
+        "z": 0
+    }
+]
