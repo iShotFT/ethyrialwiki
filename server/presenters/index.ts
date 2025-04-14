@@ -57,3 +57,9 @@ export {
   presentUser,
   presentView,
 };
+
+// Map presenters
+export { presentMap, presentMarkerCategory } from "./maps";
+
+// Marker presenter
+export { presentMarker } from "./markers";

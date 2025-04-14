@@ -76,8 +76,15 @@ export function parseDomain(url: string): Domain {
 }
 
 export function getCookieDomain(domain: string, isCloudHosted: boolean) {
-  // always use the base URL for cookies when in hosted mode
-  // and the domain is not custom
+  // *** SIMPLIFIED DEVELOPMENT LOGIC ***
+  // If the domain ends with .local.test, assume it's development
+  // and use the parent domain for cookies.
+  if (domain.endsWith(".local.test")) {
+    return ".local.test";
+  }
+  // *** END SIMPLIFIED LOGIC ***
+
+  // Original logic for cloud hosted environments
   if (isCloudHosted) {
     const parsed = parseDomain(domain);
 

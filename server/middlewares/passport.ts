@@ -9,20 +9,32 @@ import { AuthenticationResult } from "@server/types";
 import { signIn } from "@server/utils/authentication";
 import { parseState } from "@server/utils/passport";
 
+interface StateInfo {
+  host: string;
+  client?: Client;
+}
+
 export default function createMiddleware(providerName: string) {
   return function passportMiddleware(ctx: Context) {
-    return passport.authorize(
+    // Use passport.authenticate instead of authorize for initial redirect
+    // to ensure the strategy runs and sets the cookie before redirecting.
+    return passport.authenticate(
       providerName,
       {
         session: false,
+        // Pass options needed by the specific strategy (like scope for Discord)
+        scope: providerName === 'discord' ? ["identify", "email", "guilds", "guilds.members.read"] : undefined,
+        prompt: providerName === 'discord' ? "consent" : undefined, 
       },
-      async (err, user, result: AuthenticationResult) => {
+      // This callback is typically only for the *final* verification stage,
+      // not the initial redirect. We rely on the authenticate call above
+      // triggering the strategy's first step which includes StateStore.store.
+      // We add logging *after* the authenticate call returns to see headers.
+      async (err, user, result: AuthenticationResult, stateInfo?: StateInfo) => {
+        // This part handles the CALLBACK from the provider
         if (err) {
-          Logger.error(
-            "Error during authentication",
-            err instanceof InternalOAuthError ? err.oauthError : err
-          );
-
+          Logger.error("Authentication Error", err, { providerName, stateInfo });
+          // Redirect with error notice
           if (err.id) {
             const notice = err.id.replace(/_/g, "-");
             const redirectPath = err.redirectPath ?? "/";
@@ -32,19 +44,20 @@ export default function createMiddleware(providerName: string) {
             // But when there is an error, we want to redirect the user on the
             // same domain or subdomain that they originated from (found in state).
 
-            // get original host
-            const stateString = ctx.cookies.get("state");
-            const state = stateString ? parseState(stateString) : undefined;
+            // Use stateInfo if available, otherwise fallback to parsing cookie again
+            const state = stateInfo?.host
+               ? stateInfo
+               : ctx.cookies.get("state") ? parseState(ctx.cookies.get("state")!) : undefined;
 
             // form a URL object with the err.redirectPath and replace the host
             const reqProtocol =
               state?.client === Client.Desktop ? "outline" : ctx.protocol;
 
-            // `state.host` cannot be trusted if the error is a state mismatch, use `ctx.hostname`
             const requestHost =
               err instanceof OAuthStateMismatchError
-                ? ctx.hostname
+                  ? ctx.hostname // Cannot trust state.host if state is mismatched
                 : state?.host ?? ctx.hostname;
+
             const url = new URL(
               env.isCloudHosted
                 ? `${reqProtocol}://${requestHost}${redirectPath}`
@@ -93,8 +106,27 @@ export default function createMiddleware(providerName: string) {
           return ctx.redirect("/?notice=user-suspended");
         }
 
-        await signIn(ctx, providerName, result);
+        const originalHost = stateInfo?.host ?? ctx.hostname;
+        await signIn(ctx, providerName, result, originalHost);
+
+        // Log headers just before the sign-in completes the response/redirect
+        if (env.DEBUG_AUTH) {
+          Logger.debug("authentication", `[passportMiddleware Callback] Response headers BEFORE signIn redirect: ${JSON.stringify(ctx.response.headers)}`);
+        }
       }
-    )(ctx);
+    // Immediately invoke the middleware function returned by passport.authenticate
+    )(ctx).then(() => {
+        // This block executes AFTER passport.authenticate has potentially initiated
+        // the redirect TO the provider (Discord). Log headers here.
+        if (ctx.status === 302) { // Check if it's a redirect response
+             if (env.DEBUG_AUTH) {
+               Logger.debug("authentication", `[passportMiddleware Initial Redirect] Response headers SENT for redirect TO provider: ${JSON.stringify(ctx.response.headers)}`);
+             }
+        }
+    }).catch((err: Error) => {
+        // Handle potential errors during the initial authenticate call itself
+        Logger.error("Error during initial passport.authenticate call", err);
+        ctx.redirect(`/?notice=auth-error`);
+    });
   };
 }

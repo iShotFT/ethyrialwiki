@@ -41,6 +41,8 @@ import urls from "./urls";
 import userMemberships from "./userMemberships";
 import users from "./users";
 import views from "./views";
+import maps from "./maps";
+import Logger from "@server/logging/Logger";
 
 const api = new Koa<AppState, AppContext>();
 const router = new Router();
@@ -69,6 +71,10 @@ api.use(editor());
 PluginManager.getHooks(Hook.API).forEach((hook) =>
   router.use("/", hook.value.routes())
 );
+
+// Mount the new map API router with a specific prefix
+router.use("/maps", maps.routes());
+Logger.info("utils", `Registered Map API Routes under /api/maps: ${JSON.stringify(maps.stack.map(l => l.path))}`);
 
 // routes
 router.use("/", auth.routes());

@@ -148,6 +148,18 @@ export class Environment {
   public URL = (environment.URL ?? "").replace(/\/$/, "");
 
   /**
+   * The publicly accessible URL for the application, including port if non-standard.
+   * Used for OAuth callbacks and other external links.
+   */
+  @Public
+  @IsUrl({
+    protocols: ["http", "https"],
+    require_protocol: true,
+    require_tld: false,
+  })
+  public PUBLIC_URL = (environment.PUBLIC_URL || this.URL).replace(/\/$/, "");
+
+  /**
    * If using a Cloudfront/Cloudflare distribution or similar it can be set below.
    * This will cause paths to javascript, stylesheets, and images to be updated to
    * the hostname defined in CDN_URL. In your CDN configuration the origin server
@@ -201,6 +213,13 @@ export class Environment {
    * Optional extra debugging. Comma separated
    */
   public DEBUG = environment.DEBUG || "";
+
+  /**
+   * Optional extra debugging for Authentication/Domain logic. Comma separated if more needed later.
+   */
+  @IsOptional()
+  @IsBoolean()
+  public DEBUG_AUTH = this.toOptionalBoolean(environment.DEBUG_AUTH);
 
   /**
    * Configure lowest severity level for server logs

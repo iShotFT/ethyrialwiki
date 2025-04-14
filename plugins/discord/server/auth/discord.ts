@@ -25,30 +25,31 @@ import {
   request,
 } from "@server/utils/passport";
 import config from "../../plugin.json";
-import env from "../env";
+import pluginEnv from "../env";
+import serverEnv from "@server/env";
 import { DiscordGuildError, DiscordGuildRoleError } from "../errors";
 
 const router = new Router();
 
 const scope = ["identify", "email"];
 
-if (env.DISCORD_SERVER_ID) {
+if (pluginEnv.DISCORD_SERVER_ID) {
   scope.push("guilds", "guilds.members.read");
 }
 
-if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
+if (pluginEnv.DISCORD_CLIENT_ID && pluginEnv.DISCORD_CLIENT_SECRET) {
   passport.use(
     config.id,
     new Strategy(
       {
-        clientID: env.DISCORD_CLIENT_ID,
-        clientSecret: env.DISCORD_CLIENT_SECRET,
+        clientID: pluginEnv.DISCORD_CLIENT_ID,
+        clientSecret: pluginEnv.DISCORD_CLIENT_SECRET,
         passReqToCallback: true,
         scope,
-        // @ts-expect-error custom state store
+        // @ts-expect-error Type mismatch between Koa context and Express request expected by passport-oauth2 types
         store: new StateStore(),
         state: true,
-        callbackURL: `${env.URL}/auth/${config.id}.callback`,
+        callbackURL: `${serverEnv.PUBLIC_URL}/auth/${config.id}.callback`,
         authorizationURL: "https://discord.com/api/oauth2/authorize",
         tokenURL: "https://discord.com/api/oauth2/token",
         pkce: false,
@@ -103,7 +104,7 @@ if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
            * If a Discord server is configured, we will check if the user is a member of the server
            * Additionally, we can get the user's nickname in the server if it exists
            */
-          if (env.DISCORD_SERVER_ID) {
+          if (pluginEnv.DISCORD_SERVER_ID) {
             /** Fetch the guilds a user is in */
             const guilds: RESTGetAPICurrentUserGuildsResult = await request(
               "GET",
@@ -112,7 +113,7 @@ if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
             );
 
             /** Find the guild that matches the configured server ID */
-            const guild = guilds?.find((g) => g.id === env.DISCORD_SERVER_ID);
+            const guild = guilds?.find((g) => g.id === pluginEnv.DISCORD_SERVER_ID);
 
             /** If the user is not in the server, throw an error */
             if (!guild) {
@@ -149,7 +150,7 @@ if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
             const guildMember: RESTGetCurrentUserGuildMemberResult =
               await request(
                 "GET",
-                `https://discord.com/api/users/@me/guilds/${env.DISCORD_SERVER_ID}/member`,
+                `https://discord.com/api/users/@me/guilds/${pluginEnv.DISCORD_SERVER_ID}/member`,
                 accessToken
               );
 
@@ -164,10 +165,10 @@ if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
             }
 
             /** If server roles are configured, check if the user has any of the roles */
-            if (env.DISCORD_SERVER_ROLES) {
+            if (pluginEnv.DISCORD_SERVER_ROLES) {
               const { roles } = guildMember;
               const hasRole = roles?.some((role) =>
-                env.DISCORD_SERVER_ROLES?.includes(role)
+                pluginEnv.DISCORD_SERVER_ROLES?.includes(role)
               );
 
               /** If the user does not have any of the roles, throw an error */
@@ -197,7 +198,7 @@ if (env.DISCORD_CLIENT_ID && env.DISCORD_CLIENT_SECRET) {
             },
             authenticationProvider: {
               name: config.id,
-              providerId: env.DISCORD_SERVER_ID ?? "",
+              providerId: pluginEnv.DISCORD_SERVER_ID ?? "",
             },
             authentication: {
               providerId: profile.id,

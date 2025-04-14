@@ -9,11 +9,12 @@ import { IntegrationType, TeamPreference } from "@shared/types";
 import { unicodeCLDRtoISO639 } from "@shared/utils/date";
 import documentLoader from "@server/commands/documentLoader";
 import env from "@server/env";
-import { Integration } from "@server/models";
+import { Integration, User } from "@server/models";
 import presentEnv from "@server/presenters/env";
 import { getTeamFromContext } from "@server/utils/passport";
 import prefetchTags from "@server/utils/prefetchTags";
 import readManifestFile from "@server/utils/readManifestFile";
+import Logger from "@server/logging/Logger";
 
 const readFile = util.promisify(fs.readFile);
 const entry = "app/index.tsx";
@@ -206,4 +207,84 @@ export const renderShare = async (ctx: Context, next: Next) => {
       : undefined,
     allowIndexing: share?.allowIndexing,
   });
+};
+
+export const renderMap = async (
+  ctx: Context,
+  next: Next,
+  options: {
+    // Define any specific options needed for the map later
+  } = {}
+) => {
+  const title = "Ethyrial Map";
+  const description = "Interactive map for Ethyrial: Echoes of Yore";
+  const canonical = ctx.href; // Or customize if needed
+  const shortcutIcon = `${env.CDN_URL || ""}/images/favicon-32.png`; // Use default
+  const mapEntry = "app/mapIndex.tsx"; // Our new entry point
+
+  const page = await readFile(path.resolve(__dirname, "../../../public/map.html"));
+
+  // Prepare environment variables for the map page
+  // Include user info directly in the env object
+
+  // *** Add specific logging for ctx.state.auth and ctx.state.user ***
+  if (env.DEBUG_AUTH) {
+    Logger.debug("authentication", `[renderMap] ctx.state.auth value: ${JSON.stringify(ctx.state.auth)}`);
+  }
+  const user = ctx.state.auth?.user as User | null; // Use optional chaining
+  if (env.DEBUG_AUTH) {
+    Logger.debug("authentication", `[renderMap] Extracted user value: ${user ? user.id : 'null'}`);
+  }
+  // ***************************************************************
+
+  const baseEnv = presentEnv(env, {});
+  const mapEnv = {
+    ...baseEnv,
+    currentUser: user
+      ? { id: user.id, name: user.name, email: user.email, teamId: user.teamId }
+      : null,
+    // Inject the handlerConfig determined by the middleware
+    handlerConfig: ctx.state.domainConfig?.config ?? null,
+  };
+
+  const environmentScript = `
+    <script nonce="${ctx.state.cspNonce}">
+      window.env = ${JSON.stringify(mapEnv).replace(/</g, "\\u003c")};
+    </script>
+  `;
+
+  const scriptTags = env.isProduction
+    ? `<script type="module" nonce="${ctx.state.cspNonce}" src="${
+        env.CDN_URL || ""
+      }/static/${readManifestFile()[mapEntry]["file"]}"></script>` // Adjust if manifest structure differs
+    : `<script type="module" nonce="${ctx.state.cspNonce}">
+        import RefreshRuntime from "${viteHost}/static/@react-refresh"
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => { }
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+      </script>
+      <script type="module" nonce="${ctx.state.cspNonce}" src="${viteHost}/static/@vite/client"></script>
+      <script type="module" nonce="${ctx.state.cspNonce}" src="${viteHost}/static/${mapEntry}"></script>
+    `;
+
+  // Ensure no caching is performed
+  ctx.response.set("Cache-Control", "no-cache, must-revalidate");
+  ctx.response.set("Expires", "-1");
+
+  // Replace placeholders in the map template
+  ctx.body = page
+    .toString()
+    .replace(/\{env\}/g, environmentScript)
+    .replace(/\{lang\}/g, unicodeCLDRtoISO639(env.DEFAULT_LANGUAGE))
+    .replace(/\{title\}/g, escape(title))
+    .replace(/\{description\}/g, escape(description))
+    .replace(/\{manifest-url\}/g, "") // No manifest for map page
+    .replace(/\{canonical-url\}/g, canonical)
+    .replace(/\{shortcut-icon-url\}/g, shortcutIcon)
+    .replace(/\{cdn-url\}/g, env.CDN_URL || "")
+    .replace(/\{prefetch\}/g, "") // No prefetch for map page
+    .replace(/\{slack-app-id\}/g, "") // No slack app id for map page
+    .replace(/\{script-tags\}/g, scriptTags)
+    .replace(/\{csp-nonce\}/g, ctx.state.cspNonce);
 };

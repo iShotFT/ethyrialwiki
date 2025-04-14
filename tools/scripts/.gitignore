@@ -3,12 +3,6 @@
 !source
 !output
 !minimap_data
-!minimap_data/*
-!minimap_data/extracted
-!minimap_data/extracted/*
-!minimap_data/extracted/stitched
-!minimap_data/extracted/stitched/*
-!minimap_data/stitched
-!minimap_data/stitched/*
+
 !*.py
 !*.md

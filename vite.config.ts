@@ -177,6 +177,7 @@ export default () =>
       rollupOptions: {
         input: {
           index: "./app/index.tsx",
+          map: "./app/mapIndex.tsx",
         },
         output: {
           assetFileNames: "assets/[name].[hash][extname]",

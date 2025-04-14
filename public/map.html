@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="{lang}">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="description" content="{description}" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>{title}</title>
+    <link rel="shortcut icon" type="image/png" href="{shortcut-icon-url}" />
+    <link rel="canonical" href="{canonical-url}" />
+    <!-- No manifest for map page -->
+    <!-- <link rel="manifest" href="{manifest-url}" /> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
+    {env}
+    <style>
+      /* Basic styling to prevent flash of unstyled content */
+      body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
+      #root { height: 100%; }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run the Ethyrial Map.</noscript>
+    <div id="root"></div>
+    {script-tags}
+    <!-- Auth info will be injected here by the server -->
+  </body>
+</html> 

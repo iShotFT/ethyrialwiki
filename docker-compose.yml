@@ -4,6 +4,7 @@ services:
     ports:
       - "127.0.0.1:6380:6379"
     user: "redis:redis"
+    restart: unless-stopped
   postgres:
     image: postgres
     ports:
@@ -13,3 +14,14 @@ services:
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: outline
     user: "postgres:postgres"
+    restart: unless-stopped
+
+  proxy:
+    image: caddy:latest
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

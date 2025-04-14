@@ -1,0 +1,17 @@
+# Caddyfile for local Outline development proxy
+
+{
+  # Optional: Enable debug logging for Caddy
+  debug
+}
+
+# Handle all requests coming to port 80 (mapped from host's 8080)
+:80 {
+  # Reverse proxy all requests to the Outline app running on the host
+  reverse_proxy host.docker.internal:4000 {
+    # Pass the original Host header to the backend app
+    header_up Host {host}
+    header_up X-Forwarded-Host {host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+} 

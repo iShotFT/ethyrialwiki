@@ -143,6 +143,8 @@ env:
 
   # URLs and Networking
   URL: "https://staging.ethyrial.wiki"
+  BASE_DOMAIN: "staging.ethyrial.wiki"
+  PUBLIC_URL: "https://staging.ethyrial.wiki"
   COLLABORATION_URL: "wss://staging.ethyrial.wiki/collaboration"
   PORT: 3000
   FORCE_HTTPS: false

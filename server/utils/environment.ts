@@ -36,4 +36,10 @@ process.env = {
   ...process.env,
 };
 
+// Debugging Discord env vars
+// console.log("### Environment Variables Loaded ###");
+// console.log(`DISCORD_CLIENT_ID: [${process.env.DISCORD_CLIENT_ID}]`);
+// console.log(`DISCORD_CLIENT_SECRET: [${process.env.DISCORD_CLIENT_SECRET}]`);
+// console.log("##################################");
+
 export default process.env;

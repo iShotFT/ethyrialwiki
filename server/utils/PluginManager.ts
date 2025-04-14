@@ -117,12 +117,18 @@ export class PluginManager {
       return;
     }
     const rootDir = env.ENVIRONMENT === "test" ? "" : "build";
+    const pluginsDir = path.join(process.cwd(), rootDir, "plugins");
 
-    glob
-      .sync(path.join(rootDir, "plugins/*/server/!(*.test|schema).[jt]s"))
-      .forEach((filePath: string) => {
-        require(path.join(process.cwd(), filePath));
-      });
+    // Construct a platform-independent glob pattern
+    const pattern = path
+      .join(pluginsDir, "*", "server", "!(*.test|schema).[jt]s")
+      // Convert backslashes to forward slashes for glob compatibility
+      .replace(/\\/g, "/");
+
+    glob.sync(pattern).forEach((filePath: string) => {
+      // Use require with the absolute path returned by glob
+      require(filePath);
+    });
     this.loaded = true;
   }
 

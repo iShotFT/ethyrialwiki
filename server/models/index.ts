@@ -61,3 +61,11 @@ export { default as WebhookSubscription } from "./WebhookSubscription";
 export { default as WebhookDelivery } from "./WebhookDelivery";
 
 export { default as Subscription } from "./Subscription";
+
+export { default as CustomDomain } from "./CustomDomain";
+
+// Map related models
+export { default as Map } from "./Map";
+export { default as MapIcon } from "./MapIcon";
+export { default as MarkerCategory } from "./MarkerCategory";
+export { default as Marker } from "./Marker";

@@ -12,7 +12,10 @@
         "legacy": true
       }
     ],
-    "@babel/plugin-transform-class-properties",
+    [
+      "@babel/plugin-transform-class-properties",
+      { "loose": true }
+    ],
     [
       "transform-inline-environment-variables",
       {

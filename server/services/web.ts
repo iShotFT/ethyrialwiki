@@ -22,11 +22,13 @@ import { initI18n } from "@server/utils/i18n";
 import routes from "../routes";
 import api from "../routes/api";
 import auth from "../routes/auth";
+import customDomainResolver from "../middlewares/customDomainResolver";
+import coreAuthMiddleware from "../middlewares/authentication";
 
 // Construct scripts CSP based on services in use by this installation
 const defaultSrc = ["'self'"];
 const scriptSrc = ["'self'", "www.googletagmanager.com"];
-const styleSrc = ["'self'", "'unsafe-inline'"];
+const styleSrc = ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"];
 
 if (env.isCloudHosted) {
   scriptSrc.push("cdn.zapier.com");
@@ -35,8 +37,17 @@ if (env.isCloudHosted) {
 
 // Allow to load assets from Vite
 if (!env.isProduction) {
-  scriptSrc.push(env.URL.replace(`:${env.PORT}`, ":4001"));
-  scriptSrc.push("localhost:4001");
+  // Construct Vite dev server URL based on PUBLIC_URL if available, else default
+  let viteOrigin = 'http://localhost:4001'; // Default
+  try {
+    if (env.PUBLIC_URL) {
+       const pubUrl = new URL(env.PUBLIC_URL);
+       viteOrigin = `${pubUrl.protocol}//${pubUrl.hostname}:4001`; // Assume Vite on 4001
+    }
+  } catch (e) { /* Ignore parsing errors */ }
+  
+  scriptSrc.push(viteOrigin);
+  scriptSrc.push("localhost:4001"); // Keep localhost as fallback?
 }
 
 if (env.GOOGLE_ANALYTICS_ID) {
@@ -51,6 +62,9 @@ if (env.CDN_URL) {
 
 export default function init(app: Koa = new Koa(), server?: Server) {
   void initI18n();
+
+  // Trust proxy headers in all environments when behind a proxy
+  app.proxy = true;
 
   if (env.isProduction) {
     // Force redirect to HTTPS protocol unless explicitly disabled
@@ -70,12 +84,20 @@ export default function init(app: Koa = new Koa(), server?: Server) {
     }
 
     // trust header fields set by our proxy. eg X-Forwarded-For
-    app.proxy = true;
+    // app.proxy = true; <-- Already set above
   }
 
   app.use(compress());
+  
+  // Mount specific routes first
   app.use(mount("/auth", auth));
   app.use(mount("/api", api));
+
+  // Apply core authentication AFTER specific routes but BEFORE domain/app routing
+  app.use(coreAuthMiddleware({ optional: true }));
+
+  // Resolve custom domain configuration *after* potential authentication
+  app.use(customDomainResolver());
 
   // Monitor server connections
   if (server) {
@@ -132,6 +154,7 @@ export default function init(app: Koa = new Koa(), server?: Server) {
     })
   );
 
+  // Mount main app/map routes last
   app.use(mount(routes));
 
   return app;

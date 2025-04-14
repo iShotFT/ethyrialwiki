@@ -30,8 +30,11 @@ export function getSessionsInCookie(ctx: Context) {
 export async function signIn(
   ctx: Context,
   service: string,
-  { user, team, client, isNewTeam }: AuthenticationResult
+  authResult: AuthenticationResult,
+  originalHost?: string
 ) {
+  const { user, team, client, isNewTeam } = authResult;
+
   if (team.isSuspended) {
     return ctx.redirect("/?notice=team-suspended");
   }
@@ -75,8 +78,15 @@ export async function signIn(
     },
     ip: ctx.request.ip,
   });
-  const domain = getCookieDomain(ctx.request.hostname, env.isCloudHosted);
+
+  const hostForCookie = originalHost || ctx.request.hostname;
+  const domain = getCookieDomain(hostForCookie, env.isCloudHosted);
   const expires = addMonths(new Date(), 3);
+
+  if (env.DEBUG_AUTH) {
+    Logger.debug("authentication", `[signIn] Determined host for cookies: [${hostForCookie}]`);
+    Logger.debug("authentication", `[signIn] Calculated cookie domain: [${domain}]`);
+  }
 
   // set a cookie for which service we last signed in with. This is
   // only used to display a UI hint for the user for next time
@@ -122,9 +132,14 @@ export async function signIn(
       );
     }
   } else {
+    // *** Set accessToken cookie with correct domain ***
+    if (env.DEBUG_AUTH) {
+      Logger.debug("authentication", `[signIn] Setting accessToken cookie for domain [${domain}]`);
+    }
     ctx.cookies.set("accessToken", user.getJwtToken(expires), {
       sameSite: "lax",
       expires,
+      domain,
     });
 
     const defaultCollectionId = team.defaultCollectionId;
@@ -153,10 +168,27 @@ export async function signIn(
     ]);
     const hasViewedDocuments = !!view;
 
+    // *** Construct redirect URL using originalHost ***
+    let redirectBaseUrl: string;
+    try {
+      // Use the host passed from the state, fallback to PUBLIC_URL, then internal URL
+      const determinedHost = originalHost || env.PUBLIC_URL || env.URL;
+      const urlObject = new URL(determinedHost.startsWith('http') ? determinedHost : `http://${determinedHost}`);
+      // Construct base URL including port
+      redirectBaseUrl = `${urlObject.protocol}//${urlObject.hostname}${urlObject.port ? ':' + urlObject.port : ''}`;
+    } catch (e) {
+      Logger.error("Failed to determine redirect base URL, falling back", e, { originalHost });
+      redirectBaseUrl = env.URL; // Fallback to internal URL on error
+    }
+    if (env.DEBUG_AUTH) {
+      Logger.debug("authentication", `[signIn] Using redirect base URL: [${redirectBaseUrl}]`);
+    }
+    // *********************************************
+
     ctx.redirect(
       !hasViewedDocuments && collection
-        ? `${team.url}${collection.url}`
-        : `${team.url}/home`
+        ? `${redirectBaseUrl}${collection.url}` // Use redirectBaseUrl
+        : `${redirectBaseUrl}/home`              // Use redirectBaseUrl
     );
   }
 }

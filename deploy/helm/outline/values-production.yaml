@@ -144,6 +144,8 @@ env:
 
   # URLs and Networking
   URL: "https://ethyrial.wiki"
+  BASE_DOMAIN: "ethyrial.wiki"
+  PUBLIC_URL: "https://ethyrial.wiki"
   COLLABORATION_URL: "wss://ethyrial.wiki/collaboration"
   PORT: 3000
   FORCE_HTTPS: false

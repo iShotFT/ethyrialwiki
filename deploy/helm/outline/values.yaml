@@ -78,6 +78,8 @@ smtp:
 # Outline environment variables
 env:
   URL: "http://localhost:3000"
+  BASE_DOMAIN: "localhost"
+  PUBLIC_URL: "http://localhost:3000"
   PORT: 3000
   DEBUG: ""
   FORCE_HTTPS: true

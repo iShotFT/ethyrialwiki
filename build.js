@@ -3,6 +3,8 @@
 /* eslint-disable no-undef */
 const { exec } = require("child_process");
 const { readdirSync, existsSync } = require("fs");
+const fs = require("fs-extra");
+const path = require("path");
 
 const getDirectories = (source) =>
   readdirSync(source, { withFileTypes: true })
@@ -27,15 +29,20 @@ function execAsync(cmd) {
 }
 
 async function build() {
+  const buildDir = path.resolve(__dirname, "build");
+  const serverBuildDir = path.join(buildDir, "server");
+  const pluginsBuildDir = path.join(buildDir, "plugins");
+  const pluginsSourceDir = path.resolve(__dirname, "plugins");
+
   // Clean previous build
   console.log("Clean previous build…");
 
   await Promise.all([
-    execAsync("rm -rf ./build/server"),
-    execAsync("rm -rf ./build/plugins"),
+    fs.remove(serverBuildDir),
+    fs.remove(pluginsBuildDir),
   ]);
 
-  const d = getDirectories("./plugins");
+  const d = getDirectories(pluginsSourceDir);
 
   // Compile server and shared
   console.log("Compiling…");
@@ -47,19 +54,20 @@ async function build() {
       "yarn babel --extensions .ts,.tsx --quiet -d ./build/shared ./shared"
     ),
     ...d.map(async (plugin) => {
-      const hasServer = existsSync(`./plugins/${plugin}/server`);
+      const pluginSourcePath = path.join(pluginsSourceDir, plugin);
+      const pluginBuildPath = path.join(pluginsBuildDir, plugin);
 
+      const hasServer = await fs.pathExists(path.join(pluginSourcePath, "server"));
       if (hasServer) {
         await execAsync(
-          `yarn babel --extensions .ts,.tsx --quiet -d "./build/plugins/${plugin}/server" "./plugins/${plugin}/server"`
+          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(pluginBuildPath, "server")}" "${path.join(pluginSourcePath, "server")}"`
         );
       }
 
-      const hasShared = existsSync(`./plugins/${plugin}/shared`);
-
+      const hasShared = await fs.pathExists(path.join(pluginSourcePath, "shared"));
       if (hasShared) {
         await execAsync(
-          `yarn babel --extensions .ts,.tsx --quiet -d "./build/plugins/${plugin}/shared" "./plugins/${plugin}/shared"`
+          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(pluginBuildPath, "shared")}" "${path.join(pluginSourcePath, "shared")}"`
         );
       }
     }),
@@ -68,21 +76,27 @@ async function build() {
   // Copy static files
   console.log("Copying static files…");
   await Promise.all([
-    execAsync(
-      "cp ./server/collaboration/Procfile ./build/server/collaboration/Procfile"
+    fs.copy(
+      path.resolve(__dirname, "server/collaboration/Procfile"),
+      path.join(serverBuildDir, "collaboration/Procfile")
     ),
-    execAsync(
-      "cp ./server/static/error.dev.html ./build/server/error.dev.html"
+    fs.copy(
+      path.resolve(__dirname, "server/static/error.dev.html"),
+      path.join(buildDir, "server/error.dev.html")
     ),
-    execAsync(
-      "cp ./server/static/error.prod.html ./build/server/error.prod.html"
+    fs.copy(
+      path.resolve(__dirname, "server/static/error.prod.html"),
+      path.join(buildDir, "server/error.prod.html")
     ),
-    execAsync("cp package.json ./build"),
-    ...d.map(async (plugin) =>
-      execAsync(
-        `mkdir -p ./build/plugins/${plugin} && cp ./plugins/${plugin}/plugin.json ./build/plugins/${plugin}/plugin.json 2>/dev/null || :`
-      )
-    ),
+    fs.copy(path.resolve(__dirname, "package.json"), path.join(buildDir, "package.json")),
+    ...d.map(async (plugin) => {
+      const pluginSourceFile = path.join(pluginsSourceDir, plugin, "plugin.json");
+      const pluginDestFile = path.join(pluginsBuildDir, plugin, "plugin.json");
+      await fs.ensureDir(path.dirname(pluginDestFile));
+      if (await fs.pathExists(pluginSourceFile)) {
+        await fs.copy(pluginSourceFile, pluginDestFile);
+      }
+    }),
   ]);
 
   console.log("Done!");
