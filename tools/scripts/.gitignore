@@ -2,7 +2,5 @@
 !.gitignore
 !source
 !output
-!minimap_data
-
 !*.py
 !*.md

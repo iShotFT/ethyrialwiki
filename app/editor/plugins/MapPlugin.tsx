@@ -1,7 +1,7 @@
-import * as React from "react";
-import { Plugin } from "prosemirror-state";
 import { Node } from "prosemirror-model";
+import { Plugin } from "prosemirror-state";
 import { NodeView } from "prosemirror-view";
+import * as React from "react";
 import MapComponent from "../components/MapComponent";
 
 /**
@@ -68,7 +68,9 @@ class ReactMapNodeView implements NodeView {
   }
 
   update(node: Node) {
-    if (node.type !== this.node.type) return false;
+    if (node.type !== this.node.type) {
+      return false;
+    }
     this.node = node;
     this.renderComponent();
     return true;
@@ -92,14 +94,12 @@ class ReactMapNodeView implements NodeView {
 /**
  * MapPlugin provides React-based rendering of map blocks
  */
-export const MapPlugin = () => {
-  return new Plugin({
+export const MapPlugin = () =>
+  new Plugin({
     props: {
       nodeViews: {
-        map_block: (node, view, getPos) => {
-          return new ReactMapNodeView(node, view, getPos as () => number);
-        },
+        map_block: (node, view, getPos) =>
+          new ReactMapNodeView(node, view, getPos as () => number),
       },
     },
   });
-};

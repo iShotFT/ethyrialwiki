@@ -1,6 +1,6 @@
 import * as ol from "ol";
-import TileLayer from "ol/layer/Tile";
 import View from "ol/View";
+import TileLayer from "ol/layer/Tile";
 import { fromLonLat } from "ol/proj";
 import { OSM } from "ol/source";
 import * as React from "react";

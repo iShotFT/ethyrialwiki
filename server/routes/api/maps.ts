@@ -1,11 +1,15 @@
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import Router from "koa-router";
+import env from "@server/env";
+import { NotFoundError } from "@server/errors";
+import Logger from "@server/logging/Logger";
 import auth from "@server/middlewares/authentication"; // Optional: for protected endpoints later
 import { Map, MapIcon, MarkerCategory, Marker } from "@server/models";
-import { NotFoundError } from "@server/errors";
-import { presentMap, presentMarkerCategory, presentMarker } from "@server/presenters"; // Need to create these
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import env from "@server/env";
-import Logger from "@server/logging/Logger";
+import {
+  presentMap,
+  presentMarkerCategory,
+  presentMarker,
+} from "@server/presenters"; // Need to create these
 
 const router = new Router();
 
@@ -23,12 +27,20 @@ const s3Client = new S3Client({
 // --- Map Info Endpoint ---
 router.get("/:mapId", async (ctx) => {
   const { mapId } = ctx.params;
-  Logger.info("utils", `[API /maps/:mapId] Received request for mapId: [${mapId}]`);
+  Logger.info(
+    "utils",
+    `[API /maps/:mapId] Received request for mapId: [${mapId}]`
+  );
 
   const map = await Map.findByPk(mapId);
-  Logger.info("utils", `[API /maps/:mapId] Map.findByPk result: ${map ? `Found Map Title: ${map.getDataValue('title')}` : 'NOT FOUND'}`);
+  Logger.info(
+    "utils",
+    `[API /maps/:mapId] Map.findByPk result: ${
+      map ? `Found Map Title: ${map.getDataValue("title")}` : "NOT FOUND"
+    }`
+  );
 
-  if (!map || !map.getDataValue('public')) {
+  if (!map || !map.getDataValue("public")) {
     throw NotFoundError("Map not found or access denied");
   }
 
@@ -41,7 +53,7 @@ router.get("/:mapId", async (ctx) => {
 router.get("/:mapId/categories", async (ctx) => {
   const { mapId } = ctx.params;
   const map = await Map.findByPk(mapId, { attributes: ["id", "public"] });
-  if (!map || !map.getDataValue('public')) {
+  if (!map || !map.getDataValue("public")) {
     throw NotFoundError("Map not found or access denied");
   }
 
@@ -49,23 +61,23 @@ router.get("/:mapId/categories", async (ctx) => {
   const categories = await MarkerCategory.findAll({
     where: { public: true, parentId: null }, // Only top-level categories
     include: [
-      { model: MapIcon, as: 'icon' },
-      { 
-        model: MarkerCategory, 
-        as: 'children',
-        include: [{ model: MapIcon, as: 'icon' }] // Include icons for children too
-      } 
+      { model: MapIcon, as: "icon" },
+      {
+        model: MarkerCategory,
+        as: "children",
+        include: [{ model: MapIcon, as: "icon" }], // Include icons for children too
+      },
     ],
     order: [
-      ['title', 'ASC'],
-      [{ model: MarkerCategory, as: 'children' }, 'title', 'ASC'] // Order children
+      ["title", "ASC"],
+      [{ model: MarkerCategory, as: "children" }, "title", "ASC"], // Order children
     ],
   });
 
   // Need a presenter that handles the nested structure
   // Simplified for now - assumes presenter handles children
   ctx.body = {
-    data: categories.map(presentMarkerCategory), 
+    data: categories.map(presentMarkerCategory),
   };
 });
 
@@ -73,16 +85,16 @@ router.get("/:mapId/categories", async (ctx) => {
 router.get("/:mapId/markers", async (ctx) => {
   const { mapId } = ctx.params;
   const map = await Map.findByPk(mapId, { attributes: ["id", "public"] });
-  if (!map || !map.getDataValue('public')) {
+  if (!map || !map.getDataValue("public")) {
     throw NotFoundError("Map not found or access denied");
   }
 
   const markers = await Marker.findAll({
     where: {
-      mapId: mapId,
+      mapId,
       public: true,
     },
-    include: [{ model: MapIcon, as: 'icon' }],
+    include: [{ model: MapIcon, as: "icon" }],
   });
 
   ctx.body = {
@@ -97,19 +109,25 @@ router.get("/:mapId/tiles/:z/:x/:y", async (ctx) => {
   const y = yMatch ? yMatch[1] : null;
 
   if (!y) {
-      ctx.throw(400, "Invalid Y coordinate format");
+    ctx.throw(400, "Invalid Y coordinate format");
   }
 
-  const map = await Map.findByPk(mapId, { attributes: ["id", "public", "path"] });
-  const mapIsPublic = map?.getDataValue('public');
-  const mapPath = map?.getDataValue('path');
+  const map = await Map.findByPk(mapId, {
+    attributes: ["id", "public", "path"],
+  });
+  const mapIsPublic = map?.getDataValue("public");
+  const mapPath = map?.getDataValue("path");
 
   if (!map || !mapIsPublic) {
     ctx.status = 404;
     return;
   }
   if (!mapPath) {
-    Logger.error("Map found but path is missing", new Error("Map path missing"), { mapId });
+    Logger.error(
+      "Map found but path is missing",
+      new Error("Map path missing"),
+      { mapId }
+    );
     ctx.status = 500;
     return;
   }
@@ -117,7 +135,10 @@ router.get("/:mapId/tiles/:z/:x/:y", async (ctx) => {
   const s3Bucket = env.AWS_S3_UPLOAD_BUCKET_NAME;
   const s3Key = `${mapPath}/${z}/${x}-${y}-${z}.png`;
 
-  Logger.debug("http", `Attempting to fetch tile from S3: ${s3Bucket}/${s3Key}`);
+  Logger.debug(
+    "http",
+    `Attempting to fetch tile from S3: ${s3Bucket}/${s3Key}`
+  );
 
   try {
     const command = new GetObjectCommand({
@@ -126,12 +147,11 @@ router.get("/:mapId/tiles/:z/:x/:y", async (ctx) => {
     });
     const response = await s3Client.send(command);
 
-    ctx.set('Content-Type', response.ContentType || 'image/png');
-    ctx.set('Cache-Control', 'public, max-age=31536000, immutable');
+    ctx.set("Content-Type", response.ContentType || "image/png");
+    ctx.set("Cache-Control", "public, max-age=31536000, immutable");
     ctx.body = response.Body;
-
   } catch (error) {
-    if (error.name === 'NoSuchKey') {
+    if (error.name === "NoSuchKey") {
       Logger.warn(`Tile not found in S3: ${s3Bucket}/${s3Key}`);
       ctx.status = 404;
     } else {
@@ -141,4 +161,4 @@ router.get("/:mapId/tiles/:z/:x/:y", async (ctx) => {
   }
 });
 
-export default router; 
+export default router;

@@ -4,6 +4,7 @@ import Router from "koa-router";
 import userAgent, { UserAgentContext } from "koa-useragent";
 import env from "@server/env";
 import { NotFoundError } from "@server/errors";
+import Logger from "@server/logging/Logger";
 import coalesceBody from "@server/middlewares/coaleseBody";
 import { AppState, AppContext } from "@server/types";
 import { Hook, PluginManager } from "@server/utils/PluginManager";
@@ -23,6 +24,7 @@ import groups from "./groups";
 import imports from "./imports";
 import installation from "./installation";
 import integrations from "./integrations";
+import maps from "./maps";
 import apiErrorHandler from "./middlewares/apiErrorHandler";
 import apiResponse from "./middlewares/apiResponse";
 import apiTracer from "./middlewares/apiTracer";
@@ -41,8 +43,6 @@ import urls from "./urls";
 import userMemberships from "./userMemberships";
 import users from "./users";
 import views from "./views";
-import maps from "./maps";
-import Logger from "@server/logging/Logger";
 
 const api = new Koa<AppState, AppContext>();
 const router = new Router();
@@ -74,7 +74,12 @@ PluginManager.getHooks(Hook.API).forEach((hook) =>
 
 // Mount the new map API router with a specific prefix
 router.use("/maps", maps.routes());
-Logger.info("utils", `Registered Map API Routes under /api/maps: ${JSON.stringify(maps.stack.map(l => l.path))}`);
+Logger.info(
+  "utils",
+  `Registered Map API Routes under /api/maps: ${JSON.stringify(
+    maps.stack.map((l) => l.path)
+  )}`
+);
 
 // routes
 router.use("/", auth.routes());

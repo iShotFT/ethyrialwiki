@@ -1,10 +1,10 @@
-import * as React from "react";
-import { useEffect } from "react";
 import * as ol from "ol";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import { fromLonLat } from "ol/proj";
 import { OSM } from "ol/source";
+import { useEffect } from "react";
+import * as React from "react";
 
 /**
  * This component finds map placeholders and initializes OpenLayers maps

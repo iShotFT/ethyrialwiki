@@ -1,5 +1,14 @@
-import { BelongsTo, Column, DataType, ForeignKey, Index, Table, PrimaryKey, Default } from "sequelize-typescript";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Index,
+  Table,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 import Team from "./Team";
 import Model from "./base/Model";
 
@@ -11,7 +20,10 @@ export type HandlerConfig = {
 };
 
 @Table({ tableName: "custom_domains", timestamps: true })
-export default class CustomDomain extends Model<InferAttributes<CustomDomain>, InferCreationAttributes<CustomDomain>> {
+export default class CustomDomain extends Model<
+  InferAttributes<CustomDomain>,
+  InferCreationAttributes<CustomDomain>
+> {
   // Use PrimaryKey, Default, Column decorators without IsUUID for compatibility
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -26,7 +38,8 @@ export default class CustomDomain extends Model<InferAttributes<CustomDomain>, I
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    comment: "Type of handler for this domain (e.g., 'map_view', 'default_app')",
+    comment:
+      "Type of handler for this domain (e.g., 'map_view', 'default_app')",
   })
   handlerType: string;
 
@@ -45,4 +58,4 @@ export default class CustomDomain extends Model<InferAttributes<CustomDomain>, I
 
   @BelongsTo(() => Team, "teamId")
   team: Team | null;
-} 
+}

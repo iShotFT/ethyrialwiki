@@ -2,6 +2,7 @@ import { Next } from "koa";
 import capitalize from "lodash/capitalize";
 import { UserRole } from "@shared/types";
 import { UserRoleHelper } from "@shared/utils/UserRoleHelper";
+import env from "@server/env";
 import Logger from "@server/logging/Logger";
 import tracer, {
   addTags,
@@ -15,7 +16,6 @@ import {
   AuthorizationError,
   UserSuspendedError,
 } from "../errors";
-import env from "@server/env";
 
 type AuthenticationOptions = {
   /** Role requuired to access the route. */
@@ -60,7 +60,12 @@ export default function auth(options: AuthenticationOptions = {}) {
 
     try {
       if (!token) {
-        if (env.DEBUG_AUTH) Logger.debug("authentication", `[authMiddleware] No token found for host [${ctx.hostname}] path [${ctx.path}]`);
+        if (env.DEBUG_AUTH) {
+          Logger.debug(
+            "authentication",
+            `[authMiddleware] No token found for host [${ctx.hostname}] path [${ctx.path}]`
+          );
+        }
         throw AuthenticationError("Authentication required");
       }
 
@@ -108,13 +113,27 @@ export default function auth(options: AuthenticationOptions = {}) {
         await apiKey.updateActiveAt();
       } else {
         type = AuthenticationType.APP;
-        if (env.DEBUG_AUTH) Logger.debug("authentication", `[authMiddleware] Attempting JWT verification for host [${ctx.hostname}] path [${ctx.path}]`);
+        if (env.DEBUG_AUTH) {
+          Logger.debug(
+            "authentication",
+            `[authMiddleware] Attempting JWT verification for host [${ctx.hostname}] path [${ctx.path}]`
+          );
+        }
         user = await getUserForJWT(String(token));
-        if (env.DEBUG_AUTH) Logger.debug("authentication", `[authMiddleware] JWT verification result for host [${ctx.hostname}] path [${ctx.path}]: User ID [${user?.id}]`);
+        if (env.DEBUG_AUTH) {
+          Logger.debug(
+            "authentication",
+            `[authMiddleware] JWT verification result for host [${ctx.hostname}] path [${ctx.path}]: User ID [${user?.id}]`
+          );
+        }
       }
 
       if (!user) {
-        if (env.DEBUG_AUTH) Logger.warn(`[authMiddleware] User not found after verification for host [${ctx.hostname}] path [${ctx.path}]`);
+        if (env.DEBUG_AUTH) {
+          Logger.warn(
+            `[authMiddleware] User not found after verification for host [${ctx.hostname}] path [${ctx.path}]`
+          );
+        }
         throw AuthenticationError("User not found for token");
       }
 
@@ -146,7 +165,12 @@ export default function auth(options: AuthenticationOptions = {}) {
         Logger.error("Failed to update team activeAt", err);
       });
 
-      if (env.DEBUG_AUTH) Logger.debug("authentication", `[authMiddleware] Setting ctx.state.auth for host [${ctx.hostname}] path [${ctx.path}]: User ID [${user.id}]`);
+      if (env.DEBUG_AUTH) {
+        Logger.debug(
+          "authentication",
+          `[authMiddleware] Setting ctx.state.auth for host [${ctx.hostname}] path [${ctx.path}]: User ID [${user.id}]`
+        );
+      }
       ctx.state.auth = {
         user,
         token: String(token),
@@ -164,9 +188,19 @@ export default function auth(options: AuthenticationOptions = {}) {
         );
       }
     } catch (err) {
-      if (env.DEBUG_AUTH) Logger.warn(`[authMiddleware] Error during auth for host [${ctx.hostname}] path [${ctx.path}]. Optional=${options.optional}`, err);
+      if (env.DEBUG_AUTH) {
+        Logger.warn(
+          `[authMiddleware] Error during auth for host [${ctx.hostname}] path [${ctx.path}]. Optional=${options.optional}`,
+          err
+        );
+      }
       if (options.optional) {
-        if (env.DEBUG_AUTH) Logger.debug("authentication", `[authMiddleware] Auth is optional, setting empty ctx.state.auth for host [${ctx.hostname}] path [${ctx.path}]`);
+        if (env.DEBUG_AUTH) {
+          Logger.debug(
+            "authentication",
+            `[authMiddleware] Auth is optional, setting empty ctx.state.auth for host [${ctx.hostname}] path [${ctx.path}]`
+          );
+        }
         ctx.state.auth = {};
       } else {
         throw err;

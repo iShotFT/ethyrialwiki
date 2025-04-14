@@ -1,14 +1,14 @@
-import { Map, MapIcon, MarkerCategory } from "@server/models";
 import env from "@server/env";
+import { Map, MapIcon, MarkerCategory } from "@server/models";
 
 // Basic presenter stub for Map
 export function presentMap(map: Map) {
   return {
-    id: map.getDataValue('id'),
-    title: map.getDataValue('title'),
-    description: map.getDataValue('description'),
-    path: map.getDataValue('path'), // Include path if needed by frontend
-    public: map.getDataValue('public'),
+    id: map.getDataValue("id"),
+    title: map.getDataValue("title"),
+    description: map.getDataValue("description"),
+    path: map.getDataValue("path"), // Include path if needed by frontend
+    public: map.getDataValue("public"),
     // Add other relevant fields later
   };
 }
@@ -26,16 +26,23 @@ interface PresentedCategory {
 }
 
 // Basic presenter stub for MarkerCategory
-export function presentMarkerCategory(category: MarkerCategory): PresentedCategory {
-  const iconPath = category.icon?.getDataValue('path');
+export function presentMarkerCategory(
+  category: MarkerCategory
+): PresentedCategory {
+  const iconPath = category.icon?.getDataValue("path");
+  // Explicitly use getDataValue for children
+  const childrenData = category.getDataValue("children");
+
   return {
-    id: category.getDataValue('id'),
-    title: category.getDataValue('title'),
-    description: category.getDataValue('description'),
-    iconId: category.getDataValue('iconId'),
-    iconUrl: iconPath ? `${env.CDN_URL || ""}/${iconPath}` : null, 
-    public: category.getDataValue('public'),
-    parentId: category.getDataValue('parentId'),
-    children: category.children ? category.children.map(presentMarkerCategory) : [],
+    id: category.getDataValue("id"),
+    title: category.getDataValue("title"),
+    description: category.getDataValue("description"),
+    iconId: category.getDataValue("iconId"),
+    iconUrl: iconPath ? `${env.CDN_URL || ""}/${iconPath}` : null,
+    public: category.getDataValue("public"),
+    parentId: category.getDataValue("parentId"),
+    children: childrenData
+      ? childrenData.map(presentMarkerCategory) // Map over the retrieved children data
+      : [],
   };
-} 
+}

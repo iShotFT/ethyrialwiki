@@ -1,10 +1,21 @@
-import { Column, DataType, HasMany, Table, IsUUID, PrimaryKey, Default } from "sequelize-typescript";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import {
+  Column,
+  DataType,
+  HasMany,
+  Table,
+  IsUUID,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 import Marker from "./Marker";
 import Model from "./base/Model";
 
 @Table({ tableName: "maps", timestamps: true, paranoid: true })
-export default class Map extends Model<InferAttributes<Map>, InferCreationAttributes<Map>> {
+export default class Map extends Model<
+  InferAttributes<Map>,
+  InferCreationAttributes<Map>
+> {
   @IsUUID(4)
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -26,4 +37,4 @@ export default class Map extends Model<InferAttributes<Map>, InferCreationAttrib
   // Associations
   @HasMany(() => Marker)
   markers: Marker[];
-} 
+}

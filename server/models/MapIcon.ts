@@ -1,11 +1,22 @@
-import { Column, DataType, HasMany, Table, IsUUID, PrimaryKey, Default } from "sequelize-typescript";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import {
+  Column,
+  DataType,
+  HasMany,
+  Table,
+  IsUUID,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 import Marker from "./Marker";
 import MarkerCategory from "./MarkerCategory";
 import Model from "./base/Model";
 
 @Table({ tableName: "map_icons", timestamps: true, paranoid: true })
-export default class MapIcon extends Model<InferAttributes<MapIcon>, InferCreationAttributes<MapIcon>> {
+export default class MapIcon extends Model<
+  InferAttributes<MapIcon>,
+  InferCreationAttributes<MapIcon>
+> {
   @IsUUID(4)
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -24,4 +35,4 @@ export default class MapIcon extends Model<InferAttributes<MapIcon>, InferCreati
 
   @HasMany(() => Marker)
   markers: Marker[];
-} 
+}

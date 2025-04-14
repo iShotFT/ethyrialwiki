@@ -9,12 +9,12 @@ import { IntegrationType, TeamPreference } from "@shared/types";
 import { unicodeCLDRtoISO639 } from "@shared/utils/date";
 import documentLoader from "@server/commands/documentLoader";
 import env from "@server/env";
+import Logger from "@server/logging/Logger";
 import { Integration, User } from "@server/models";
 import presentEnv from "@server/presenters/env";
 import { getTeamFromContext } from "@server/utils/passport";
 import prefetchTags from "@server/utils/prefetchTags";
 import readManifestFile from "@server/utils/readManifestFile";
-import Logger from "@server/logging/Logger";
 
 const readFile = util.promisify(fs.readFile);
 const entry = "app/index.tsx";
@@ -222,18 +222,26 @@ export const renderMap = async (
   const shortcutIcon = `${env.CDN_URL || ""}/images/favicon-32.png`; // Use default
   const mapEntry = "app/mapIndex.tsx"; // Our new entry point
 
-  const page = await readFile(path.resolve(__dirname, "../../../public/map.html"));
+  const page = await readFile(
+    path.resolve(__dirname, "../../../public/map.html")
+  );
 
   // Prepare environment variables for the map page
   // Include user info directly in the env object
 
   // *** Add specific logging for ctx.state.auth and ctx.state.user ***
   if (env.DEBUG_AUTH) {
-    Logger.debug("authentication", `[renderMap] ctx.state.auth value: ${JSON.stringify(ctx.state.auth)}`);
+    Logger.debug(
+      "authentication",
+      `[renderMap] ctx.state.auth value: ${JSON.stringify(ctx.state.auth)}`
+    );
   }
   const user = ctx.state.auth?.user as User | null; // Use optional chaining
   if (env.DEBUG_AUTH) {
-    Logger.debug("authentication", `[renderMap] Extracted user value: ${user ? user.id : 'null'}`);
+    Logger.debug(
+      "authentication",
+      `[renderMap] Extracted user value: ${user ? user.id : "null"}`
+    );
   }
   // ***************************************************************
 

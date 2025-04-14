@@ -84,8 +84,14 @@ export async function signIn(
   const expires = addMonths(new Date(), 3);
 
   if (env.DEBUG_AUTH) {
-    Logger.debug("authentication", `[signIn] Determined host for cookies: [${hostForCookie}]`);
-    Logger.debug("authentication", `[signIn] Calculated cookie domain: [${domain}]`);
+    Logger.debug(
+      "authentication",
+      `[signIn] Determined host for cookies: [${hostForCookie}]`
+    );
+    Logger.debug(
+      "authentication",
+      `[signIn] Calculated cookie domain: [${domain}]`
+    );
   }
 
   // set a cookie for which service we last signed in with. This is
@@ -134,7 +140,10 @@ export async function signIn(
   } else {
     // *** Set accessToken cookie with correct domain ***
     if (env.DEBUG_AUTH) {
-      Logger.debug("authentication", `[signIn] Setting accessToken cookie for domain [${domain}]`);
+      Logger.debug(
+        "authentication",
+        `[signIn] Setting accessToken cookie for domain [${domain}]`
+      );
     }
     ctx.cookies.set("accessToken", user.getJwtToken(expires), {
       sameSite: "lax",
@@ -173,22 +182,33 @@ export async function signIn(
     try {
       // Use the host passed from the state, fallback to PUBLIC_URL, then internal URL
       const determinedHost = originalHost || env.PUBLIC_URL || env.URL;
-      const urlObject = new URL(determinedHost.startsWith('http') ? determinedHost : `http://${determinedHost}`);
+      const urlObject = new URL(
+        determinedHost.startsWith("http")
+          ? determinedHost
+          : `http://${determinedHost}`
+      );
       // Construct base URL including port
-      redirectBaseUrl = `${urlObject.protocol}//${urlObject.hostname}${urlObject.port ? ':' + urlObject.port : ''}`;
+      redirectBaseUrl = `${urlObject.protocol}//${urlObject.hostname}${
+        urlObject.port ? ":" + urlObject.port : ""
+      }`;
     } catch (e) {
-      Logger.error("Failed to determine redirect base URL, falling back", e, { originalHost });
+      Logger.error("Failed to determine redirect base URL, falling back", e, {
+        originalHost,
+      });
       redirectBaseUrl = env.URL; // Fallback to internal URL on error
     }
     if (env.DEBUG_AUTH) {
-      Logger.debug("authentication", `[signIn] Using redirect base URL: [${redirectBaseUrl}]`);
+      Logger.debug(
+        "authentication",
+        `[signIn] Using redirect base URL: [${redirectBaseUrl}]`
+      );
     }
     // *********************************************
 
     ctx.redirect(
       !hasViewedDocuments && collection
         ? `${redirectBaseUrl}${collection.url}` // Use redirectBaseUrl
-        : `${redirectBaseUrl}/home`              // Use redirectBaseUrl
+        : `${redirectBaseUrl}/home` // Use redirectBaseUrl
     );
   }
 }

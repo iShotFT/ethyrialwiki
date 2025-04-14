@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import path from "path";
 import fs from "fs/promises";
+import path from "path";
 import { formatRFC7231 } from "date-fns";
 import Koa, { BaseContext } from "koa";
 import Router from "koa-router";
@@ -12,6 +12,8 @@ import { parseDomain } from "@shared/utils/domains";
 import { Day } from "@shared/utils/time";
 import env from "@server/env";
 import { NotFoundError } from "@server/errors";
+import Logger from "@server/logging/Logger";
+import { DomainConfig } from "@server/middlewares/customDomainResolver";
 import shareDomains from "@server/middlewares/shareDomains";
 import { Integration } from "@server/models";
 import { opensearchResponse } from "@server/utils/opensearch";
@@ -21,8 +23,6 @@ import apexRedirect from "../middlewares/apexRedirect";
 import { renderApp, renderShare, renderMap } from "./app";
 import { renderEmbed } from "./embeds";
 import errors from "./errors";
-import { DomainConfig } from "@server/middlewares/customDomainResolver";
-import Logger from "@server/logging/Logger";
 
 const koa = new Koa();
 const router = new Router();
@@ -138,7 +138,10 @@ router.get("/embeds/pinterest", renderEmbed);
 // catch all for application
 router.get("*", async (ctx, next) => {
   const domainConfig: DomainConfig = ctx.state.domainConfig;
-  Logger.debug("http", `>>> Router received domainConfig: ${JSON.stringify(domainConfig)}`);
+  Logger.debug(
+    "http",
+    `>>> Router received domainConfig: ${JSON.stringify(domainConfig)}`
+  );
 
   switch (domainConfig?.type) {
     case "map_view":

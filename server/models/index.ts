@@ -66,6 +66,9 @@ export { default as CustomDomain } from "./CustomDomain";
 
 // Map related models
 export { default as Map } from "./Map";
+
 export { default as MapIcon } from "./MapIcon";
+
 export { default as MarkerCategory } from "./MarkerCategory";
+
 export { default as Marker } from "./Marker";

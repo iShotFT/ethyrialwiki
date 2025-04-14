@@ -3,20 +3,21 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { HelmetProvider } from "react-helmet-async"; // Import HelmetProvider
 import stores from "~/stores";
-import Analytics from "~/components/Analytics"; // Import Analytics
-import Theme from "~/components/Theme"; // Import Theme provider
-import ErrorBoundary from "~/components/ErrorBoundary";
 import MapScene from "~/scenes/Map"; // Import the Map scene
+import Analytics from "~/components/Analytics"; // Import Analytics
+import ErrorBoundary from "~/components/ErrorBoundary";
+import Theme from "~/components/Theme"; // Import Theme provider
+import "./styles/tailwind.css"; // Import Tailwind CSS
 
 // Define the expected shape of window.env for the map page
 interface MapEnv {
-  currentUser: { 
-    id: string; 
-    name: string; 
-    email: string; 
-    teamId: string; 
+  currentUser: {
+    id: string;
+    name: string;
+    email: string;
+    teamId: string;
   } | null;
-  handlerConfig?: { 
+  handlerConfig?: {
     mapId?: string;
     [key: string]: any;
   } | null;
@@ -45,4 +46,4 @@ if (element) {
   );
 
   ReactDOM.render(<App />, element);
-} 
+}

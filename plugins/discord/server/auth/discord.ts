@@ -14,6 +14,7 @@ import { slugifyDomain } from "@shared/utils/domains";
 import { parseEmail } from "@shared/utils/email";
 import slugify from "@shared/utils/slugify";
 import accountProvisioner from "@server/commands/accountProvisioner";
+import serverEnv from "@server/env";
 import { InvalidRequestError, TeamDomainRequiredError } from "@server/errors";
 import passportMiddleware from "@server/middlewares/passport";
 import { User } from "@server/models";
@@ -26,7 +27,6 @@ import {
 } from "@server/utils/passport";
 import config from "../../plugin.json";
 import pluginEnv from "../env";
-import serverEnv from "@server/env";
 import { DiscordGuildError, DiscordGuildRoleError } from "../errors";
 
 const router = new Router();
@@ -113,7 +113,9 @@ if (pluginEnv.DISCORD_CLIENT_ID && pluginEnv.DISCORD_CLIENT_SECRET) {
             );
 
             /** Find the guild that matches the configured server ID */
-            const guild = guilds?.find((g) => g.id === pluginEnv.DISCORD_SERVER_ID);
+            const guild = guilds?.find(
+              (g) => g.id === pluginEnv.DISCORD_SERVER_ID
+            );
 
             /** If the user is not in the server, throw an error */
             if (!guild) {

@@ -1,5 +1,15 @@
-import { BelongsTo, Column, DataType, ForeignKey, Index, Table, IsUUID, PrimaryKey, Default } from "sequelize-typescript";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Index,
+  Table,
+  IsUUID,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 import Map from "./Map";
 import MapIcon from "./MapIcon";
 import MarkerCategory from "./MarkerCategory";
@@ -13,7 +23,10 @@ export type Coordinate = {
 };
 
 @Table({ tableName: "markers", timestamps: true, paranoid: true })
-export default class Marker extends Model<InferAttributes<Marker>, InferCreationAttributes<Marker>> {
+export default class Marker extends Model<
+  InferAttributes<Marker>,
+  InferCreationAttributes<Marker>
+> {
   @IsUUID(4)
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -64,4 +77,4 @@ export default class Marker extends Model<InferAttributes<Marker>, InferCreation
 
   @BelongsTo(() => Map, "mapId")
   map: Map;
-} 
+}

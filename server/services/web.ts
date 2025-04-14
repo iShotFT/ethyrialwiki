@@ -19,11 +19,11 @@ import Logger from "@server/logging/Logger";
 import Metrics from "@server/logging/Metrics";
 import ShutdownHelper, { ShutdownOrder } from "@server/utils/ShutdownHelper";
 import { initI18n } from "@server/utils/i18n";
+import coreAuthMiddleware from "../middlewares/authentication";
+import customDomainResolver from "../middlewares/customDomainResolver";
 import routes from "../routes";
 import api from "../routes/api";
 import auth from "../routes/auth";
-import customDomainResolver from "../middlewares/customDomainResolver";
-import coreAuthMiddleware from "../middlewares/authentication";
 
 // Construct scripts CSP based on services in use by this installation
 const defaultSrc = ["'self'"];
@@ -38,14 +38,16 @@ if (env.isCloudHosted) {
 // Allow to load assets from Vite
 if (!env.isProduction) {
   // Construct Vite dev server URL based on PUBLIC_URL if available, else default
-  let viteOrigin = 'http://localhost:4001'; // Default
+  let viteOrigin = "http://localhost:4001"; // Default
   try {
     if (env.PUBLIC_URL) {
-       const pubUrl = new URL(env.PUBLIC_URL);
-       viteOrigin = `${pubUrl.protocol}//${pubUrl.hostname}:4001`; // Assume Vite on 4001
+      const pubUrl = new URL(env.PUBLIC_URL);
+      viteOrigin = `${pubUrl.protocol}//${pubUrl.hostname}:4001`; // Assume Vite on 4001
     }
-  } catch (e) { /* Ignore parsing errors */ }
-  
+  } catch (e) {
+    /* Ignore parsing errors */
+  }
+
   scriptSrc.push(viteOrigin);
   scriptSrc.push("localhost:4001"); // Keep localhost as fallback?
 }
@@ -88,7 +90,7 @@ export default function init(app: Koa = new Koa(), server?: Server) {
   }
 
   app.use(compress());
-  
+
   // Mount specific routes first
   app.use(mount("/auth", auth));
   app.use(mount("/api", api));

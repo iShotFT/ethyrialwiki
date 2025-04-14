@@ -14,6 +14,7 @@ import { AttachmentValidation } from "@shared/validations";
 import ClickablePadding from "~/components/ClickablePadding";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import type { Props as EditorProps, Editor as SharedEditor } from "~/editor";
+import MapNodeViewLoader from "~/editor/components/MapNodeViewLoader";
 import useCurrentUser from "~/hooks/useCurrentUser";
 import useDictionary from "~/hooks/useDictionary";
 import useEditorClickHandlers from "~/hooks/useEditorClickHandlers";
@@ -21,7 +22,6 @@ import useEmbeds from "~/hooks/useEmbeds";
 import useStores from "~/hooks/useStores";
 import { uploadFile, uploadFileFromUrl } from "~/utils/files";
 import lazyWithRetry from "~/utils/lazyWithRetry";
-import MapNodeViewLoader from "~/editor/components/MapNodeViewLoader";
 
 const LazyLoadedEditor = lazyWithRetry(() => import("~/editor"));
 

@@ -3,8 +3,8 @@
 /* eslint-disable no-undef */
 const { exec } = require("child_process");
 const { readdirSync, existsSync } = require("fs");
-const fs = require("fs-extra");
 const path = require("path");
+const fs = require("fs-extra");
 
 const getDirectories = (source) =>
   readdirSync(source, { withFileTypes: true })
@@ -37,10 +37,7 @@ async function build() {
   // Clean previous build
   console.log("Clean previous build…");
 
-  await Promise.all([
-    fs.remove(serverBuildDir),
-    fs.remove(pluginsBuildDir),
-  ]);
+  await Promise.all([fs.remove(serverBuildDir), fs.remove(pluginsBuildDir)]);
 
   const d = getDirectories(pluginsSourceDir);
 
@@ -57,17 +54,27 @@ async function build() {
       const pluginSourcePath = path.join(pluginsSourceDir, plugin);
       const pluginBuildPath = path.join(pluginsBuildDir, plugin);
 
-      const hasServer = await fs.pathExists(path.join(pluginSourcePath, "server"));
+      const hasServer = await fs.pathExists(
+        path.join(pluginSourcePath, "server")
+      );
       if (hasServer) {
         await execAsync(
-          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(pluginBuildPath, "server")}" "${path.join(pluginSourcePath, "server")}"`
+          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(
+            pluginBuildPath,
+            "server"
+          )}" "${path.join(pluginSourcePath, "server")}"`
         );
       }
 
-      const hasShared = await fs.pathExists(path.join(pluginSourcePath, "shared"));
+      const hasShared = await fs.pathExists(
+        path.join(pluginSourcePath, "shared")
+      );
       if (hasShared) {
         await execAsync(
-          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(pluginBuildPath, "shared")}" "${path.join(pluginSourcePath, "shared")}"`
+          `yarn babel --extensions .ts,.tsx --quiet -d "${path.join(
+            pluginBuildPath,
+            "shared"
+          )}" "${path.join(pluginSourcePath, "shared")}"`
         );
       }
     }),
@@ -88,9 +95,16 @@ async function build() {
       path.resolve(__dirname, "server/static/error.prod.html"),
       path.join(buildDir, "server/error.prod.html")
     ),
-    fs.copy(path.resolve(__dirname, "package.json"), path.join(buildDir, "package.json")),
+    fs.copy(
+      path.resolve(__dirname, "package.json"),
+      path.join(buildDir, "package.json")
+    ),
     ...d.map(async (plugin) => {
-      const pluginSourceFile = path.join(pluginsSourceDir, plugin, "plugin.json");
+      const pluginSourceFile = path.join(
+        pluginsSourceDir,
+        plugin,
+        "plugin.json"
+      );
       const pluginDestFile = path.join(pluginsBuildDir, plugin, "plugin.json");
       await fs.ensureDir(path.dirname(pluginDestFile));
       if (await fs.pathExists(pluginSourceFile)) {

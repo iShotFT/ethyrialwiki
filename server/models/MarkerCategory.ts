@@ -1,12 +1,26 @@
-import { BelongsTo, Column, DataType, ForeignKey, HasMany, Index, Table, IsUUID, PrimaryKey, Default } from "sequelize-typescript";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Index,
+  Table,
+  IsUUID,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 import MapIcon from "./MapIcon";
 import Marker from "./Marker";
 import Model from "./base/Model";
 
 @Table({ tableName: "marker_categories", timestamps: true, paranoid: true })
-export default class MarkerCategory extends Model<InferAttributes<MarkerCategory>, InferCreationAttributes<MarkerCategory>> {
-  @IsUUID('all')
+export default class MarkerCategory extends Model<
+  InferAttributes<MarkerCategory>,
+  InferCreationAttributes<MarkerCategory>
+> {
+  @IsUUID("all")
   @PrimaryKey
   @Column({ type: DataType.UUID })
   id: string;
@@ -43,4 +57,4 @@ export default class MarkerCategory extends Model<InferAttributes<MarkerCategory
 
   @HasMany(() => MarkerCategory, "parentId")
   children: MarkerCategory[];
-} 
+}
