@@ -1,16 +1,21 @@
 import { observer } from "mobx-react";
+import type { Map as OlMap } from "ol";
+import type { Extent } from "ol/extent";
 import * as React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { useRouteMatch } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import styled from "styled-components";
-import RootStore from "~/stores/RootStore";
+import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import EthyrialMapFull from "~/components/EthyrialMapFull";
+import HeatmapOverlayPanel from "~/components/HeatmapOverlayPanel";
 import { LoadingIndicatorBar } from "~/components/LoadingIndicator";
 import MapOverlayPanel from "~/components/MapOverlayPanel";
-import HeatmapOverlayPanel from "~/components/HeatmapOverlayPanel";
-import useStores from "~/hooks/useStores";
 import { client } from "~/utils/ApiClient";
 import Logger from "~/utils/Logger";
+
+// Define type for heatmap data prop passed to EthyrialMapFull
+interface HeatmapData {
+  points: AggregatedPoint[];
+}
 
 // Define types for heatmap data (can be moved later)
 interface HeatmapCategory {
@@ -47,9 +52,13 @@ interface ApiMarkerData {
   coordinate: { x: number; y: number; z: number } | null;
   categoryId: string;
   iconId: string | null;
+  iconUrl: string | null;
+  isLabel: boolean;
+  categoryIsLabel: boolean;
 }
 
 // Interface for MapOverlayPanel props
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface MapOverlayPanelProps {
   labelCategories: ApiCategoryData[]; // Use specific name
   markerCategories: ApiCategoryData[]; // Use specific name
@@ -59,12 +68,16 @@ interface MapOverlayPanelProps {
 }
 
 // Interface for EthyrialMapFull props
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface EthyrialMapFullProps {
   mapId: string;
   mapData: any; // Use specific type if available
   allMarkers: ApiMarkerData[];
   visibleCategoryIds: Record<string, boolean>; // Combined visibility state
   labelCategoryIds: Set<string>;
+  heatmapData: HeatmapData | null;
+  onMapReady: (map: OlMap) => void;
+  onViewChange: (zoom: number, extent: Extent) => void;
 }
 
 // Styled components for layout
@@ -83,30 +96,42 @@ const ErrorMessage = styled.div`
 `;
 
 function MapScene() {
-  const stores = useStores();
-  const { ui } = stores;
   const [mapData, setMapData] = useState<any>(null);
   const [allMarkers, setAllMarkers] = useState<ApiMarkerData[]>([]);
   const [labelCategories, setLabelCategories] = useState<ApiCategoryData[]>([]);
-  const [markerCategories, setMarkerCategories] = useState<ApiCategoryData[]>([]);
-  const [visibleCategoryIds, setVisibleCategoryIds] = useState<Record<string, boolean>>({});
-  const [heatmapCategories, setHeatmapCategories] = useState<HeatmapCategory[]>([]);
-  const [heatmapItems, setHeatmapItems] = useState<Record<string, HeatmapItem[]>>({});
-  const [activeHeatmapCategorySlug, setActiveHeatmapCategorySlug] = useState<string | null>(null);
-  const [isLoadingHeatmapItems, setIsLoadingHeatmapItems] = useState<boolean>(false);
+  const [markerCategories, setMarkerCategories] = useState<ApiCategoryData[]>(
+    []
+  );
+  const [visibleCategoryIds, setVisibleCategoryIds] = useState<
+    Record<string, boolean>
+  >({});
+  const [heatmapCategories, setHeatmapCategories] = useState<HeatmapCategory[]>(
+    []
+  );
+  const [heatmapItems, setHeatmapItems] = useState<
+    Record<string, HeatmapItem[]>
+  >({});
+  const [activeHeatmapCategorySlug, setActiveHeatmapCategorySlug] = useState<
+    string | null
+  >(null);
+  const [isLoadingHeatmapItems, setIsLoadingHeatmapItems] =
+    useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [labelCategoryIds, setLabelCategoryIds] = useState<Set<string>>(new Set());
+  const [labelCategoryIds, setLabelCategoryIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null); // Heatmap data state
+  const [isLoadingHeatmap, setIsLoadingHeatmap] = useState<boolean>(false); // Loading state for heatmap
+  const [currentHeatmapItemId, setCurrentHeatmapItemId] = useState<
+    string | null
+  >(null); // Track current item
+
+  // Refs for map instance and view state
+  const mapInstanceRef = useRef<OlMap | null>(null);
+  const viewStateRef = useRef<{ zoom: number; extent: Extent } | null>(null);
 
   const mapId = useMemo(() => window.env?.handlerConfig?.mapId, []);
-
-  /* Remove background color effect
-  useEffect(() => {
-    // Set the background directly for fullscreen effect
-    ui.setBackgroundColor(ui.theme.background);
-    return () => ui.resetBackgroundColor();
-  }, [ui, ui.theme]);
-  */
 
   useEffect(() => {
     if (!mapId) {
@@ -119,24 +144,25 @@ function MapScene() {
       setIsLoading(true);
       setError(null);
       try {
-        const [mapJson, categoriesJson, markersJson, heatmapCategoriesJson] = await Promise.all([
-          client.get(`/maps/${mapId}`, {}),
-          client.get(`/maps/${mapId}/categories`, {}), // Fetches categories with isLabel
-          client.get(`/maps/${mapId}/markers`, {}), // Fetches markers with categoryIsLabel
-          client.get(`/game-data/categories/by-group/HEATMAP`, {}),
-        ]);
+        const [mapJson, categoriesJson, markersJson, heatmapCategoriesJson] =
+          await Promise.all([
+            client.get(`/maps/${mapId}`, {}),
+            client.get(`/maps/${mapId}/categories`, {}), // Fetches categories with isLabel
+            client.get(`/maps/${mapId}/markers`, {}), // Fetches markers with categoryIsLabel
+            client.get(`/game-data/categories/by-group/HEATMAP`, {}),
+          ]);
 
         // Set map data
         setMapData(mapJson.data);
 
         // --- Process Categories --- //
         const fetchedCategories: ApiCategoryData[] = categoriesJson.data || [];
-        const labelCats = fetchedCategories.filter(c => c.isLabel);
-        const markerCats = fetchedCategories.filter(c => !c.isLabel);
+        const labelCats = fetchedCategories.filter((c) => c.isLabel);
+        const markerCats = fetchedCategories.filter((c) => !c.isLabel);
         setLabelCategories(labelCats);
         setMarkerCategories(markerCats);
         // Create set of label category IDs
-        setLabelCategoryIds(new Set(labelCats.map(c => c.id)));
+        setLabelCategoryIds(new Set(labelCats.map((c) => c.id)));
 
         // Initialize visibility (all true initially)
         const initialVisibility: Record<string, boolean> = {};
@@ -158,7 +184,6 @@ function MapScene() {
         setHeatmapCategories(fetchedHeatmapCategories);
         setHeatmapItems({}); // Start with empty items
         setActiveHeatmapCategorySlug(null); // Ensure starts closed
-
       } catch (err: any) {
         Logger.error("Failed to load map data", err);
         setError(`Failed to load map data: ${err.message || "Unknown error"}`);
@@ -169,13 +194,98 @@ function MapScene() {
     void fetchData();
   }, [mapId]);
 
+  // --- Heatmap Fetching Logic ---
+  const fetchHeatmapData = useCallback(
+    async (itemId: string) => {
+      if (!mapId || !viewStateRef.current) {
+        Logger.warn(
+          "utils",
+          new Error("Map ID or view state not available for heatmap fetch.")
+        );
+        return;
+      }
+
+      const { zoom, extent } = viewStateRef.current;
+      const [minX, minY, maxX, maxY] = extent;
+
+      // Use integer zoom level
+      const intZoom = Math.round(zoom);
+
+      const apiUrl = `/game-data/heatmap/${mapId}/${itemId}/${intZoom}?minX=${minX}&minY=${minY}&maxX=${maxX}&maxY=${maxY}`;
+
+      setIsLoadingHeatmap(true);
+      try {
+        Logger.debug("http", `Fetching heatmap data: ${apiUrl}`);
+        const heatmapJson = await client.get(apiUrl, {});
+        setHeatmapData({ points: heatmapJson.data || [] });
+        setCurrentHeatmapItemId(itemId);
+        Logger.debug(
+          "http",
+          `Received ${heatmapJson.data?.length || 0} heatmap points.`
+        );
+      } catch (err: any) {
+        Logger.error(`Failed to load heatmap data for item ${itemId}`, err);
+        setError(
+          `Failed to load heatmap data: ${err.message || "Unknown error"}`
+        );
+        setHeatmapData(null);
+        setCurrentHeatmapItemId(null);
+      } finally {
+        setIsLoadingHeatmap(false);
+      }
+    },
+    [mapId]
+  ); // Added mapId dependency
+
+  // Callback to receive map instance from EthyrialMapFull
+  const handleMapReady = useCallback((map: OlMap) => {
+    mapInstanceRef.current = map;
+    const view = map.getView();
+    const zoom = view.getZoom();
+    const extent = view.calculateExtent(map.getSize());
+    if (zoom !== undefined) {
+      viewStateRef.current = { zoom, extent }; // Store initial state
+      Logger.info(
+        "misc",
+        `Map ready. Initial view: zoom=${zoom}, extent=${extent}`
+      );
+    }
+  }, []);
+
+  // Callback triggered by EthyrialMapFull on view change
+  const handleViewChange = useCallback(
+    (zoom: number, extent: Extent) => {
+      const roundedZoom = Math.round(zoom);
+      // Check if zoom or extent actually changed significantly to avoid rapid refetching
+      const previousState = viewStateRef.current;
+      if (
+        previousState &&
+        previousState.zoom === roundedZoom &&
+        previousState.extent.every((val, i) => Math.abs(val - extent[i]) < 1)
+      ) {
+        // Skip refetch if view hasn't changed significantly
+        return;
+      }
+
+      viewStateRef.current = { zoom: roundedZoom, extent };
+      if (currentHeatmapItemId) {
+        // Debounce or throttle this call in a real app if needed
+        void fetchHeatmapData(currentHeatmapItemId);
+      }
+    },
+    [currentHeatmapItemId, fetchHeatmapData]
+  ); // Dependencies
+
   // Visibility handler needs to accept the full state from the panel
-  const handleVisibilityChange = (newVisibilityState: Record<string, boolean>) => {
-      setVisibleCategoryIds(newVisibilityState);
+  const handleVisibilityChange = (
+    newVisibilityState: Record<string, boolean>
+  ) => {
+    setVisibleCategoryIds(newVisibilityState);
   };
 
   const handleSearch = (query: string) => {
-    console.log("Search Query:", query);
+    // Placeholder for future search implementation
+    Logger.debug("misc", `Search triggered with query: ${query}`);
   };
 
   // Handler for heatmap CATEGORY clicks (fetch items)
@@ -188,22 +298,32 @@ function MapScene() {
       if (!heatmapItems[slug]) {
         setIsLoadingHeatmapItems(true);
         try {
-          const itemsJson = await client.get(`/game-data/items/by-category/${slug}`, {});
-          setHeatmapItems(prev => ({ ...prev, [slug]: itemsJson.data || [] }));
+          const itemsJson = await client.get(
+            `/game-data/items/by-category/${slug}`,
+            {}
+          );
+          setHeatmapItems((prev) => ({
+            ...prev,
+            [slug]: itemsJson.data || [],
+          }));
         } catch (itemError) {
-            Logger.error(`Failed to fetch heatmap items for ${slug}`, itemError as Error);
-            setHeatmapItems(prev => ({ ...prev, [slug]: [] })); // Set empty on error
+          Logger.error(
+            `Failed to fetch heatmap items for ${slug}`,
+            itemError as Error
+          );
+          setHeatmapItems((prev) => ({ ...prev, [slug]: [] })); // Set empty on error
         } finally {
-            setIsLoadingHeatmapItems(false);
+          setIsLoadingHeatmapItems(false);
         }
       }
     }
   };
 
-  // Handler for heatmap ITEM clicks (placeholder)
+  // Update heatmap item click handler
   const handleHeatmapItemClick = (itemId: string) => {
-    console.log("Heatmap item clicked:", itemId);
-    // TODO: Implement heatmap display logic here
+    Logger.info("misc", `Heatmap item clicked: ${itemId}`);
+    // Fetch data using the new function
+    void fetchHeatmapData(itemId);
   };
 
   if (error) {
@@ -222,6 +342,9 @@ function MapScene() {
         allMarkers={allMarkers}
         visibleCategoryIds={visibleCategoryIds}
         labelCategoryIds={labelCategoryIds}
+        heatmapData={heatmapData} // Pass heatmap data
+        onMapReady={handleMapReady} // Pass callback
+        onViewChange={handleViewChange} // Pass callback
       />
       <MapOverlayPanel
         labelCategories={labelCategories}
@@ -230,13 +353,15 @@ function MapScene() {
         onVisibilityChange={handleVisibilityChange}
         onSearch={handleSearch}
       />
+      {/* Add loading indicator specifically for heatmap */}
+      {isLoadingHeatmap && <LoadingIndicatorBar />}
       <HeatmapOverlayPanel
         categories={heatmapCategories}
         itemsByCategory={heatmapItems}
         activeCategorySlug={activeHeatmapCategorySlug}
         isLoadingItems={isLoadingHeatmapItems}
         onCategoryClick={handleHeatmapCategoryClick}
-        onItemClick={handleHeatmapItemClick}
+        onItemClick={handleHeatmapItemClick} // Use updated handler
       />
     </MapSceneContainer>
   );

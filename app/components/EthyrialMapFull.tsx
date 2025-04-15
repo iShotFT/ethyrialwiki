@@ -7,7 +7,6 @@ import {
   faMapMarkerAlt,
   faQuestionCircle,
   faCity,
-  faLandmark,
   faCrosshairs,
   faScroll,
   faDragon,
@@ -17,28 +16,29 @@ import {
   faChessRook, // Dungeon
   faUniversity, // Bank
 } from "@fortawesome/free-solid-svg-icons";
-import * as ol from "ol";
-import Feature from "ol/Feature";
+import type { Map as OlMap } from "ol";
+import Feature, { FeatureLike } from "ol/Feature";
 import Map from "ol/Map";
 import Overlay from "ol/Overlay";
 import View from "ol/View";
-import { getCenter, getTopLeft, getBottomLeft } from "ol/extent";
+import { getCenter, getBottomLeft } from "ol/extent";
+import type { Extent } from "ol/extent";
 import Point from "ol/geom/Point";
+import HeatmapLayer from "ol/layer/Heatmap";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import Projection from "ol/proj/Projection";
 import TileImage from "ol/source/TileImage";
 import VectorSource from "ol/source/Vector";
-import { Icon, Style, Circle, Fill, Stroke, Text } from "ol/style";
+import { Icon, Style, Fill, Stroke, Text } from "ol/style";
 import TileGrid from "ol/tilegrid/TileGrid";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { v5 as uuidv5 } from "uuid";
 import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
+import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import Logger from "~/utils/Logger";
-import { Coordinate as OlCoordinate } from 'ol/coordinate';
-import { FeatureLike } from 'ol/Feature';
 
 // Define the namespace used in the seeder
 const NAMESPACE_UUID = "f5d7a4e8-6a3b-4e6f-8a4c-7f3d7a1b9e0f";
@@ -56,6 +56,11 @@ interface ApiMarkerData {
   categoryIsLabel: boolean; // Added categoryIsLabel
 }
 
+// Type for heatmap data prop (update to match Scene)
+interface HeatmapData {
+  points: AggregatedPoint[];
+}
+
 // Props expected by the component
 type Props = {
   mapId: string;
@@ -63,6 +68,9 @@ type Props = {
   allMarkers: ApiMarkerData[];
   visibleCategoryIds: Record<string, boolean>;
   labelCategoryIds: Set<string>;
+  heatmapData: HeatmapData | null;
+  onMapReady: (map: OlMap) => void;
+  onViewChange: (zoom: number, extent: Extent) => void;
 };
 
 // Styled component for the map container
@@ -121,24 +129,27 @@ const iconStyleCache: Record<string, Style> = {};
 // Define Label Style
 const labelStyleBase = new Style({
   text: new Text({
-    font: 'bold 18px Asul, sans-serif', // Use Asul font, adjust size/weight
-    fill: new Fill({ color: '#FFFFFF' }),
-    stroke: new Stroke({ color: '#000000', width: 2 }), // Text stroke for readability
-    textAlign: 'center',
-    textBaseline: 'middle',
+    font: "bold 18px Asul, sans-serif", // Use Asul font, adjust size/weight
+    fill: new Fill({ color: "#FFFFFF" }),
+    stroke: new Stroke({ color: "#000000", width: 2 }), // Text stroke for readability
+    textAlign: "center",
+    textBaseline: "middle",
     overflow: true, // Allow text to overflow if needed
-  })
+  }),
 });
 
-const getMarkerStyle = (feature: FeatureLike, labelCategoryIds: Set<string>): Style => {
-  const categoryId = feature.get('categoryId') as string;
+const getMarkerStyle = (
+  feature: FeatureLike,
+  labelCategoryIds: Set<string>
+): Style => {
+  const categoryId = feature.get("categoryId") as string;
 
   // Check if the marker's category ID is in the set of label category IDs
   if (labelCategoryIds.has(categoryId)) {
     // Clone base style to avoid modifying it for all labels
     const style = labelStyleBase.clone();
     // Set the text for the label style dynamically
-    style.getText()?.setText(feature.get('title') || '');
+    style.getText()?.setText(feature.get("title") || "");
     return style;
   }
 
@@ -176,21 +187,15 @@ const getMarkerStyle = (feature: FeatureLike, labelCategoryIds: Set<string>): St
   return iconStyleCache[cacheKey];
 };
 
-// Define a default style for markers without icons
-const defaultMarkerStyle = new Style({
-  image: new Circle({
-    radius: 5,
-    fill: new Fill({ color: "rgba(255, 0, 0, 0.8)" }), // Red fill
-    stroke: new Stroke({ color: "rgba(150, 0, 0, 1)", width: 1 }), // Darker red stroke
-  }),
-});
-
 const EthyrialMapFull: React.FC<Props> = ({
   mapId,
   mapData,
   allMarkers,
   visibleCategoryIds,
   labelCategoryIds,
+  heatmapData,
+  onMapReady,
+  onViewChange,
 }) => {
   // Log received props
   Logger.debug(
@@ -203,11 +208,16 @@ const EthyrialMapFull: React.FC<Props> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<Map | null>(null);
   const vectorSourceRef = useRef<VectorSource>(new VectorSource());
+  const heatmapSourceRef = useRef<VectorSource>(new VectorSource());
+  const heatmapLayerRef = useRef<HeatmapLayer | null>(null);
   const [error, setError] = useState<string | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const popupContentRef = useRef<HTMLDivElement>(null);
-  const popupCloserRef = useRef<HTMLAnchorElement>(null);
   const overlayRef = useRef<Overlay | null>(null);
+  // Ref to store the moveend handler function
+  const moveEndHandlerRef = useRef<(() => void) | null>(null);
+  // Ref to store the timeout ID for moveend debouncing
+  const timeoutIdRef = useRef<number | undefined>();
 
   // === OpenLayers Setup Effect ===
   useEffect(() => {
@@ -215,8 +225,11 @@ const EthyrialMapFull: React.FC<Props> = ({
       return;
     }
     if (mapInstanceRef.current) {
-       Logger.warn("utils", new Error("Attempted to re-initialize map that already exists."));
-       return;
+      Logger.warn(
+        "utils",
+        new Error("Attempted to re-initialize map that already exists.")
+      );
+      return;
     }
 
     try {
@@ -240,7 +253,7 @@ const EthyrialMapFull: React.FC<Props> = ({
       // const resolutions = [1];
       // Define multiple resolutions to ALLOW zooming out (scaling tiles)
       const resolutions = [32, 16, 8, 4, 2, 1, 0.5, 0.25]; // Added 32
-      const maxZoom = resolutions.length -1 + 4;
+      const maxZoom = resolutions.length - 1 + 4;
       const minZoom = 0;
       const displayZLevel = 1;
 
@@ -249,9 +262,9 @@ const EthyrialMapFull: React.FC<Props> = ({
       let initialZoom = 4;
 
       // Check URL hash for initial state
-      const hash = window.location.hash.replace('#map=', '');
+      const hash = window.location.hash.replace("#map=", "");
       if (hash) {
-        const parts = hash.split('/');
+        const parts = hash.split("/");
         if (parts.length === 3) {
           const z = parseInt(parts[0], 10);
           const x = parseInt(parts[1], 10);
@@ -259,7 +272,10 @@ const EthyrialMapFull: React.FC<Props> = ({
           if (!isNaN(z) && !isNaN(x) && !isNaN(y)) {
             initialZoom = z;
             initialCenter = [x, y];
-            Logger.info("misc", `Setting initial view from URL: zoom=${z}, center=[${x},${y}]`);
+            Logger.info(
+              "misc",
+              `Setting initial view from URL: zoom=${z}, center=[${x},${y}]`
+            );
           }
         }
       }
@@ -302,11 +318,22 @@ const EthyrialMapFull: React.FC<Props> = ({
 
       // 4. Vector Source & Layers
       vectorSourceRef.current = new VectorSource();
+      heatmapSourceRef.current = new VectorSource();
       const tileLayer = new TileLayer({ source: tileSource });
       const markerLayer = new VectorLayer({
         source: vectorSourceRef.current,
         style: (feature) => getMarkerStyle(feature, labelCategoryIds),
+        zIndex: 2,
       });
+      const heatmapLayer = new HeatmapLayer({
+        source: heatmapSourceRef.current,
+        blur: 15,
+        radius: 10,
+        weight: (feature) => feature.get("weight") || 1,
+        opacity: 0.7,
+        zIndex: 1,
+      });
+      heatmapLayerRef.current = heatmapLayer;
 
       // 5. Create View
       const view = new View({
@@ -322,49 +349,67 @@ const EthyrialMapFull: React.FC<Props> = ({
       // 6. Create Map Instance
       const map = new Map({
         target: mapRef.current,
-        layers: [tileLayer, markerLayer],
+        layers: [tileLayer, heatmapLayer, markerLayer],
         view,
         controls: [], // Start with no controls
       });
       mapInstanceRef.current = map;
 
-      // Manual URL hash update on moveend
-      let updateTimeout: number | undefined;
-      map.on('moveend', () => {
-        clearTimeout(updateTimeout);
-        // Use timeout to avoid spamming history during rapid zooms
-        updateTimeout = window.setTimeout(() => {
-          const view = map.getView();
-          const center = view.getCenter();
-          const zoom = Math.round(view.getZoom() ?? initialZoom); // Round zoom
-          if (center) {
-            const roundedCenter = [Math.round(center[0]), Math.round(center[1])];
-            const newHash = `#map=${zoom}/${roundedCenter[0]}/${roundedCenter[1]}`;
-            // Use replaceState to avoid polluting browser history
-            window.history.replaceState(null, '', newHash);
+      if (onMapReady) {
+        onMapReady(map);
+      }
+
+      // Define handleMoveEnd and store it in the ref
+      moveEndHandlerRef.current = () => {
+        // Clear previous timeout using the ref
+        clearTimeout(timeoutIdRef.current);
+        // Set new timeout and store its ID in the ref
+        timeoutIdRef.current = window.setTimeout(() => {
+          const currentView = map.getView();
+          const zoom = currentView.getZoom();
+          const center = currentView.getCenter();
+
+          // Update URL Hash
+          if (center && zoom !== undefined) {
+            const roundedZoom = Math.round(zoom);
+            const roundedCenter = [
+              Math.round(center[0]),
+              Math.round(center[1]),
+            ];
+            const newHash = `#map=${roundedZoom}/${roundedCenter[0]}/${roundedCenter[1]}`;
+            window.history.replaceState(null, "", newHash);
           }
-        }, 100); // 100ms delay
-      });
+
+          // Trigger onViewChange callback
+          if (onViewChange && zoom !== undefined) {
+            const extent = currentView.calculateExtent(map.getSize());
+            onViewChange(Math.round(zoom), extent);
+          }
+        }, 150);
+      };
+
+      // Attach listener using the handler ref
+      map.on("moveend", moveEndHandlerRef.current);
 
       // Create Popup Overlay (The element exists in JSX below)
       if (popupRef.current && !overlayRef.current) {
         const overlay = new Overlay({
           element: popupRef.current,
           autoPan: { animation: { duration: 250 } },
-          positioning: 'bottom-center', // Adjust positioning if needed
+          positioning: "bottom-center", // Adjust positioning if needed
           offset: [0, -10], // Offset slightly above the point
         });
         overlayRef.current = overlay;
         map.addOverlay(overlay);
 
         // Setup closer click handler (Target the button inside the popup now)
-        const closerElement = popupRef.current.querySelector('.popup-closer');
+        const closerElement = popupRef.current.querySelector(".popup-closer");
         if (closerElement) {
-           closerElement.addEventListener('click', () => {
-               overlay.setPosition(undefined);
-               // No need to blur a button usually
-               return false;
-           });
+          closerElement.addEventListener("click", () => {
+            overlay.setPosition(undefined);
+            // No need to blur a button usually
+            return false;
+          });
         }
       }
 
@@ -408,11 +453,21 @@ const EthyrialMapFull: React.FC<Props> = ({
 
     // Cleanup on unmount
     return () => {
-      mapInstanceRef.current?.setTarget(undefined);
+      // Clear any pending timeout on unmount using the ref
+      clearTimeout(timeoutIdRef.current);
+
+      const mapInstance = mapInstanceRef.current;
+      const handler = moveEndHandlerRef.current;
+      // Use the map instance and handler from refs/closure
+      if (mapInstance && handler) {
+        mapInstance.un("moveend", handler);
+        mapInstance.setTarget(undefined);
+      }
       mapInstanceRef.current = null;
+      moveEndHandlerRef.current = null; // Clear handler ref
       Logger.info("misc", "OpenLayers map disposed");
     };
-  }, [mapId, labelCategoryIds]); // Correct dependencies
+  }, [mapId, labelCategoryIds, onMapReady, onViewChange]);
 
   // === Marker Update/Filter Effect ===
   useEffect(() => {
@@ -421,11 +476,11 @@ const EthyrialMapFull: React.FC<Props> = ({
     }
     vectorSourceRef.current.clear();
     const features = allMarkers
-      .filter(marker => {
-          return visibleCategoryIds[marker.categoryId] !== false;
-      })
+      .filter((marker) => visibleCategoryIds[marker.categoryId] !== false)
       .map((marker) => {
-        if (!marker.coordinate) return null;
+        if (!marker.coordinate) {
+          return null;
+        }
         try {
           const feature = new Feature({
             geometry: new Point([marker.coordinate.x, marker.coordinate.y]),
@@ -445,9 +500,52 @@ const EthyrialMapFull: React.FC<Props> = ({
       .filter(Boolean) as Feature[];
 
     vectorSourceRef.current.addFeatures(features);
-    Logger.debug("misc", `Added ${features.length} visible features to vector source.`);
+    Logger.debug(
+      "misc",
+      `Added ${features.length} visible features to vector source.`
+    );
+  }, [allMarkers, visibleCategoryIds]);
 
-  }, [allMarkers, visibleCategoryIds]); // Only depends on these now
+  // === Heatmap Update Effect ===
+  useEffect(() => {
+    if (!heatmapSourceRef.current) {
+      return;
+    }
+
+    heatmapSourceRef.current.clear();
+
+    if (heatmapData && heatmapData.points.length > 0) {
+      Logger.debug(
+        "misc",
+        `Updating heatmap with ${heatmapData.points.length} points.`
+      );
+      const heatmapFeatures = heatmapData.points
+        .map((point) => {
+          try {
+            const feature = new Feature({
+              geometry: new Point([point.x, point.y]),
+              weight: point.weight,
+            });
+            return feature;
+          } catch (error) {
+            Logger.error(
+              `Error creating heatmap feature for point at [${point.x}, ${point.y}]`,
+              error
+            );
+            return null;
+          }
+        })
+        .filter(Boolean) as Feature[];
+
+      heatmapSourceRef.current.addFeatures(heatmapFeatures);
+      Logger.debug(
+        "misc",
+        `Added ${heatmapFeatures.length} features to heatmap source.`
+      );
+    } else {
+      Logger.debug("misc", "Clearing heatmap layer as no data was provided.");
+    }
+  }, [heatmapData]);
 
   if (error) {
     return <MapContainer>Error: {error}</MapContainer>;
@@ -467,13 +565,13 @@ const EthyrialMapFull: React.FC<Props> = ({
         <div className="relative bg-[#151515] text-white px-2 py-1 rounded-sm border-t border-l border-[#4e443a] border-b border-r border-[#2c2824]">
           {/* Closer button */}
           <button
-             className="popup-closer absolute top-0 right-0 px-1 text-lg text-gray-400 hover:text-white"
-             aria-label="Close popup"
-           >
+            className="popup-closer absolute top-0 right-0 px-1 text-lg text-gray-400 hover:text-white"
+            aria-label="Close popup"
+          >
             &times;
           </button>
           {/* Content will be set via innerHTML */}
-          <div ref={popupContentRef} className="pt-1 pr-4"></div>
+          <div ref={popupContentRef} className="pt-1 pr-4" />
         </div>
       </div>
     </MapContainer>
