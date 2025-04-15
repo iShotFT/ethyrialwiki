@@ -8,8 +8,7 @@ import {
   faSkullCrossbones, // Example Enemy
   faMapMarkerAlt, // Example POI/Other
   faQuestionCircle, // Default/Other
-  faCity, // Example Town
-  faLandmark, // Example Bank
+  faCity, // Example Bank
   faCrosshairs, // Example NPC
   faScroll, // Example Quest
   faDragon, // Example Boss/Raid
@@ -18,22 +17,39 @@ import {
   faChessRook, // Updated
   faUniversity, // Updated
   faCaretDown, // Icons for dropdown
-  faCaretRight, // Icons for dropdown
+  faCaretRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { useState, useCallback, useEffect } from "react";
-import { DndProvider, useDrag, useDrop, useDragLayer } from "react-dnd";
+import { useState, useEffect, useMemo } from "react";
+import { DndProvider, useDrag, useDragLayer } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import styled, { CSSProperties } from "styled-components";
 import Flex from "~/components/Flex";
 import Input from "~/components/Input";
-import Tooltip from "~/components/Tooltip";
 import Logger from "~/utils/Logger"; // Import Logger
-
+import IngameBorderedDiv from '~/components/EthyrialStyle/IngameBorderedDiv';
+import { cn } from "~/utils/twMerge";
+import IngameCheckbox from '~/components/EthyrialStyle/IngameCheckbox';
+import IngameTooltip from '~/components/EthyrialStyle/IngameTooltip';
 // Define Coordinate type locally
 type Coordinate = { x: number; y: number };
+
+// Helper function to format category titles
+const formatCategoryTitle = (title: string): string => {
+  if (!title) return '';
+
+  // Handle specific abbreviations first
+  if (title.toUpperCase() === 'POI') return 'POI';
+  if (title.toUpperCase() === 'NPC') return 'NPC';
+
+  // General formatting for others
+  return title
+    .toLowerCase() // Convert to lowercase first
+    .replace(/_/g, ' ') // Replace underscores with spaces
+    .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+};
 
 // Local storage key
 const LOCAL_STORAGE_KEY = "mapOverlayPanelPosition";
@@ -47,41 +63,30 @@ type Category = {
   children: Category[];
 };
 
-type Props = {
-  categories: Category[]; // Now includes nested children
+// Interface from MapScene was moved here for clarity
+interface ApiCategoryData {
+  id: string;
+  slug: string;
+  title: string;
+  iconUrl: string | null;
+  parentId: string | null;
+  children: ApiCategoryData[];
+  isLabel: boolean;
+}
+
+// Props interface matching MapScene
+interface Props {
+  labelCategories: ApiCategoryData[];
+  markerCategories: ApiCategoryData[];
+  visibleCategoryIds: Record<string, boolean>;
   onVisibilityChange: (visibilityState: Record<string, boolean>) => void;
   onSearch: (query: string) => void;
-};
+}
 
 // Add ItemType for react-dnd
 const ItemTypes = {
   PANEL: "panel",
 };
-
-// Update PanelContainer to accept drag ref and styles
-const PanelContainer = styled.div<{
-  $isCollapsed: boolean;
-  $isDragging: boolean;
-  // Add style props for top/left
-  style: React.CSSProperties;
-}>`
-  position: absolute;
-  // top: 16px; // Removed fixed value
-  // left: 16px; // Removed fixed value
-  z-index: 10;
-  background: ${(props) => props.theme.sidebarBackground};
-  color: ${(props) => props.theme.sidebarText};
-  border-radius: 8px;
-  padding: ${(props) => (props.$isCollapsed ? "8px" : "16px")};
-  box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 12px;
-  max-height: calc(100vh - 40px); // Prevent overflow
-  overflow-y: auto;
-  width: ${(props) => (props.$isCollapsed ? "auto" : "300px")};
-  // Hide original element while dragging, show preview instead
-  opacity: ${(props) => (props.$isDragging ? 0 : 1)};
-  cursor: ${(props) => (props.$isDragging ? "grabbing" : "grab")};
-  user-select: none;
-`;
 
 const PanelHeader = styled(Flex)`
   margin-bottom: 12px;
@@ -196,13 +201,14 @@ const DragLayerContainer = styled.div`
   height: 100%;
 `;
 
-const DragPreview = styled.div`
+const DragPreview = styled.div<{ $isCollapsed: boolean }>`
   position: relative; // Needed for pseudo-element positioning
   overflow: hidden; // Ensure pseudo-element respects border-radius
   border-radius: 8px;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 15px;
   border: 1px dashed ${(props) => props.theme.sidebarText}; // Opaque border
   box-sizing: border-box;
+  width: ${(props) => (props.$isCollapsed ? "auto" : "300px")};
 
   // Pseudo-element for semi-transparent background
   &::before {
@@ -254,7 +260,7 @@ const CustomDragLayer: React.FC = () => {
   }));
 
   // Read dimensions from the dragged item
-  const { width, height } = item || {}; // Get width/height from item
+  const { width, height, isCollapsed } = item || {};
 
   if (!isDragging || itemType !== ItemTypes.PANEL) {
     return null;
@@ -262,26 +268,59 @@ const CustomDragLayer: React.FC = () => {
 
   return (
     <DragLayerContainer>
-      {/* Pass dimensions to getItemStyles */}
-      <DragPreview style={getItemStyles(initialOffset, currentOffset, width, height)} />
+      <DragPreview $isCollapsed={isCollapsed} style={getItemStyles(initialOffset, currentOffset, width, height)} />
     </DragLayerContainer>
   );
 };
 // ------------------------- //
 
+// Type for Marker/Label data passed from MapScene
+// Remove this duplicate if not needed
+/*
+interface MarkerData {
+  id: string;
+  title: string;
+}
+*/
+
+// Add a styled separator/header for divisions
+const DivisionHeader = styled.div`
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: ${(props) => props.theme.textSecondary};
+  text-transform: uppercase;
+  // Add flex for alignment
+  display: flex;
+  justify-content: space-between; // Align items (text and checkbox)
+  align-items: center;
+`;
+
 const MapOverlayPanel: React.FC<Props> = ({
-  categories,
+  labelCategories,
+  markerCategories,
+  visibleCategoryIds,
   onVisibilityChange,
   onSearch,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [visibleCategories, setVisibleCategories] = useState<
-    Record<string, boolean>
-  >({});
-  const [expandedParents, setExpandedParents] = useState<
-    Record<string, boolean>
-  >({}); // State for parent dropdowns
+  const [visibleLabels, setVisibleLabels] = useState<Record<string, boolean>>({});
+  const [visibleMarkerCats, setVisibleMarkerCats] = useState<Record<string, boolean>>({});
+  const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
+
+  // Calculate separate toggle states
+  const areAllLabelsVisible = useMemo(() =>
+    labelCategories.every(cat => visibleCategoryIds[cat.id] ?? true)
+  , [labelCategories, visibleCategoryIds]);
+
+  const areAllMarkersVisible = useMemo(() => {
+    const checkVisibility = (cats: ApiCategoryData[]): boolean =>
+        cats.every(cat => (visibleCategoryIds[cat.id] ?? true) && checkVisibility(cat.children || []));
+    return checkVisibility(markerCategories);
+  }, [markerCategories, visibleCategoryIds]);
+
   const panelRef = React.useRef<HTMLDivElement>(null); // Ref for the draggable element
 
   // State for panel position
@@ -313,43 +352,13 @@ const MapOverlayPanel: React.FC<Props> = ({
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(position));
   }, [position]);
 
-  // Calculate if all categories are currently visible
-  const areAllVisible = React.useMemo(() =>
-    Object.values(visibleCategories).every(v => v)
-  , [visibleCategories]);
-
-  // Effect to call onVisibilityChange *after* state update
-  useEffect(() => {
-    // Check if visibleCategories is not empty to avoid initial call
-    if (Object.keys(visibleCategories).length > 0) {
-      onVisibilityChange(visibleCategories);
-    }
-  }, [visibleCategories, onVisibilityChange]);
-
-  // Initialize visibility state
-  React.useEffect(() => {
-    // Log received categories prop structure
-    Logger.debug("misc", "[MapOverlayPanel] Received categories:", categories);
-    const initial: Record<string, boolean> = {};
-    const initializeVisibility = (cats: Category[]) => {
-      cats.forEach((cat) => {
-        initial[cat.id] = true;
-        if (cat.children) {
-          initializeVisibility(cat.children);
-        }
-      });
-    };
-    initializeVisibility(categories);
-    setVisibleCategories(initial);
-  }, [categories]);
-
   // Drag and Drop Hooks
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.PANEL,
-    // Capture and pass dimensions in the item factory function
     item: () => ({
         width: panelRef.current?.offsetWidth,
         height: panelRef.current?.offsetHeight,
+        isCollapsed: isCollapsed,
     }),
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
@@ -380,116 +389,122 @@ const MapOverlayPanel: React.FC<Props> = ({
     onSearch(event.target.value);
   };
 
-  // Handler to toggle all categories on/off
-  const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const isChecked = event.target.checked;
-    setVisibleCategories(prev => {
-      const newState: Record<string, boolean> = {};
-      for (const key in prev) {
-        newState[key] = isChecked;
-      }
-      // onVisibilityChange will be called by the useEffect hook
-      return newState;
-    });
-  };
-
-  // Handle toggling for parent and children
-  const handleCategoryChange = (categoryId: string, checked: boolean) => {
-    let newState: Record<string, boolean> = {}; // Declare newState outside
-
-    setVisibleCategories((prev) => {
-      newState = { ...prev, [categoryId]: checked };
-      // Helper to find children recursively
-      const findChildrenRecursive = (
-        catId: string,
-        allCats: Category[]
-      ): string[] => {
-        let childIds: string[] = [];
-        const parentCat =
-          allCats.find((c) => c.id === catId) ||
-          allCats.flatMap((c) => c.children || []).find((c) => c.id === catId);
-        parentCat?.children?.forEach((child) => {
-          childIds.push(child.id);
-          childIds = childIds.concat(
-            findChildrenRecursive(child.id, categories) // Use original categories
-          );
+  // Init visibility AND expansion state
+  useEffect(() => {
+    const initialVis: Record<string, boolean> = {};
+    const initialExp: Record<string, boolean> = {};
+    const processCats = (cats: ApiCategoryData[]) => {
+        cats.forEach(cat => {
+            initialVis[cat.id] = true; // Start all visible
+            initialExp[cat.id] = false; // Start all collapsed
+            if (cat.children) {
+                processCats(cat.children);
+            }
         });
-        return childIds;
-      };
+    };
+    processCats([...labelCategories, ...markerCategories]);
+    setExpandedParents(initialExp);
+  }, [labelCategories, markerCategories]); // Depend on categories
 
-      // Apply state to children based on parent's new state
-      const childrenIds = findChildrenRecursive(categoryId, categories);
-      childrenIds.forEach((id) => (newState[id] = checked)); // Update children state
-
-      // If checking a child, ensure parent is checked (only if checked is true)
-      if (checked) {
-        const findParentRecursive = (
-          catId: string,
-          allCats: Category[]
-        ): Category | null => {
-          for (const cat of allCats) {
-            if (cat.children?.some((child) => child.id === catId)) {
-              return cat;
-            }
-            const parent = findParentRecursive(catId, cat.children || []);
-            if (parent) {
-              return parent;
-            }
+  // --- Visibility Handlers --- //
+  const handleCombinedVisibilityChange = (updates: Record<string, boolean>) => {
+      const newState = { ...visibleCategoryIds, ...updates };
+      onVisibilityChange(newState);
+  };
+  // Toggle All handlers update visibility only
+  const handleToggleAllLabels = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = event.target.checked;
+    const updates: Record<string, boolean> = {};
+    labelCategories.forEach(cat => { updates[cat.id] = isChecked; });
+    handleCombinedVisibilityChange(updates);
+  };
+  const handleToggleAllMarkers = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = event.target.checked;
+    const updates: Record<string, boolean> = {};
+    const applyToChildren = (category: ApiCategoryData) => {
+        updates[category.id] = isChecked;
+        category.children?.forEach(applyToChildren);
+    };
+    markerCategories.forEach(applyToChildren);
+    handleCombinedVisibilityChange(updates);
+  };
+  // Category change updates visibility only
+  const handleCategoryChange = (categoryId: string, checked: boolean) => {
+      const updates: Record<string, boolean> = { [categoryId]: checked };
+      // Find the category (either label or marker)
+      const allCats = [...labelCategories, ...markerCategories]; // Simple merge for finding
+      const findCategory = (cats: ApiCategoryData[], id: string): ApiCategoryData | undefined => {
+          for (const cat of cats) {
+              if (cat.id === id) return cat;
+              const foundInChildren = cat.children ? findCategory(cat.children, id) : undefined;
+              if (foundInChildren) return foundInChildren;
           }
-          return null;
-        };
-        let currentCatId = categoryId;
-        let parent = findParentRecursive(currentCatId, categories);
-        while (parent) {
-          newState[parent.id] = true;
-          currentCatId = parent.id;
-          parent = findParentRecursive(currentCatId, categories);
-        }
+          return undefined;
+      };
+      const currentCat = findCategory(allCats, categoryId);
+
+      if (currentCat) {
+          // Apply to children (only if it's a marker category - labels don't have children here)
+          if (!currentCat.isLabel) {
+              const applyToChildren = (category: ApiCategoryData) => {
+                  category.children?.forEach(child => {
+                      updates[child.id] = checked;
+                      applyToChildren(child);
+                  });
+              };
+              applyToChildren(currentCat);
+          }
+
+          // Apply to parents if checking a child
+          if (checked && currentCat.parentId) {
+              let parent = findCategory(allCats, currentCat.parentId);
+              while (parent) {
+                  updates[parent.id] = true;
+                  parent = parent.parentId ? findCategory(allCats, parent.parentId) : undefined;
+              }
+          }
       }
-      return newState;
-    });
+      handleCombinedVisibilityChange(updates);
   };
 
+  // --- Expansion Handler --- //
   const toggleParent = (parentId: string) => {
     setExpandedParents((prev) => ({ ...prev, [parentId]: !prev[parentId] }));
   };
 
-  // Recursive function to render categories
-  const renderCategories = (cats: Category[], isChild = false) =>
-    cats.map((category) => {
+ // renderCategories function
+ const renderCategories = (cats: ApiCategoryData[], isChild = false) => {
+    return cats.map((category) => {
       const isParent = category.children && category.children.length > 0;
-      const isExpanded = !!expandedParents[category.id];
+      // Use dedicated state for expansion
+      const isExpanded = expandedParents[category.id] ?? false;
 
       return (
         <React.Fragment key={category.id}>
           <CategoryItem $isChild={isChild}>
-            {isParent && (
-              <ParentCategoryToggle onClick={() => toggleParent(category.id)}>
-                <FontAwesomeIcon
-                  icon={isExpanded ? faCaretDown : faCaretRight}
-                  fixedWidth
-                />
-              </ParentCategoryToggle>
-            )}
-            {!isParent && (
-              <span style={{ width: 19, display: "inline-block" }} />
-            )}{" "}
-            {/* Spacer */}
+            <div className="flex items-center justify-center w-5 h-5 mr-1">
+              {isParent && (
+                // Toggle uses dedicated handler now
+                <ParentCategoryToggle onClick={() => toggleParent(category.id)} >
+                  <FontAwesomeIcon icon={isExpanded ? faCaretDown : faCaretRight} />
+                </ParentCategoryToggle>
+              )}
+            </div>
             <FontAwesomeIcon
               className="fa-icon"
               icon={categoryIconMap[category.title] || faQuestionCircle}
               fixedWidth
             />
-            <input
-              type="checkbox"
-              id={`cat-${category.id}`}
-              checked={visibleCategories[category.id] ?? true}
-              onChange={(e) =>
-                handleCategoryChange(category.id, e.target.checked)
-              }
+            <IngameCheckbox
+                id={`cat-${category.id}`}
+                checked={visibleCategoryIds[category.id] ?? true} // Checked state from visibility
+                onChange={(e) => handleCategoryChange(category.id, e.target.checked)} // Change affects visibility
+                label={formatCategoryTitle(category.title)}
+                labelClassName="ml-2 flex-grow cursor-pointer text-gray-300"
+                className="flex-grow"
             />
-            <label htmlFor={`cat-${category.id}`}>{category.title}</label>
           </CategoryItem>
+          {/* Children rendered based on *expansion* state */} 
           {isParent && isExpanded && (
             <CategoryList>
               {renderCategories(category.children, true)}
@@ -498,59 +513,90 @@ const MapOverlayPanel: React.FC<Props> = ({
         </React.Fragment>
       );
     });
+ };
 
   return (
-    // Attach ref to the container
-    <PanelContainer
+    <IngameBorderedDiv
       ref={panelRef}
-      $isCollapsed={isCollapsed}
-      $isDragging={isDragging}
-      // Apply dynamic style for position
-      style={{ top: `${position.y}px`, left: `${position.x}px` }}
+      style={{ 
+        top: `${position.y}px`, 
+        left: `${position.x}px`,
+        opacity: isDragging ? 0 : 1, // Hide original while dragging
+      }}
+      className={cn(
+        'absolute',
+        'w-[300px]', // Base width when expanded
+        isCollapsed && 'w-auto', // Override width when collapsed
+        'min-w-[300px]', // Add min-width
+        'z-20' // Add z-index to ensure it's above the map
+      )}
     >
       <PanelHeader justify="space-between" align="center">
-        {!isCollapsed && <span>Filters & Search</span>}
-        <Tooltip
-          content={isCollapsed ? "Expand Panel" : "Collapse Panel"}
-          placement="right"
-        >
+        <span className="text-[#ffd5ae]">{!isCollapsed ? "Labels & Markers" : "L&M"}</span>
+        <IngameTooltip content={isCollapsed ? "Expand Panel" : "Collapse Panel"} placement="left">
           <CollapseButton
             onClick={handleToggleCollapse}
             aria-label={isCollapsed ? "Expand Panel" : "Collapse Panel"}
+            className="text-[#ffd5ae]"
           >
             <FontAwesomeIcon icon={isCollapsed ? faExpandAlt : faCompressAlt} />
           </CollapseButton>
-        </Tooltip>
+        </IngameTooltip>
       </PanelHeader>
 
       {!isCollapsed && (
         <>
           <Input
             type="search"
-            placeholder="Search markers..."
+            placeholder="Search markers/labels..."
             value={searchTerm}
             onChange={handleSearchChange}
             icon={<FontAwesomeIcon icon={faSearch} size="sm" />}
-            short
+            className="w-full mb-2 pl-8 pr-2 py-1"
           />
 
-          <ToggleAllContainer align="center">
-            <input
-              type="checkbox"
-              id="toggle-all-categories"
-              checked={areAllVisible}
-              onChange={handleToggleAll}
-              style={{ marginRight: '8px', cursor: 'pointer' }}
-            />
-            <label htmlFor="toggle-all-categories" style={{ cursor: 'pointer' }}>
-              Toggle All
-            </label>
-          </ToggleAllContainer>
+          {/* --- Labels Section --- */}
+          <DivisionHeader>
+             <span>Labels</span>
+             <IngameTooltip content="Toggle All Labels" placement="top">
+              <IngameCheckbox
+                id="toggle-all-labels"
+                checked={areAllLabelsVisible}
+                onChange={handleToggleAllLabels}
+              />
+            </IngameTooltip>
+          </DivisionHeader>
+          <CategoryList>
+            {labelCategories.map(labelCat => ( // Use labelCategories
+                <CategoryItem key={labelCat.id} $isChild={false}>
+                    <div className="w-5 h-5 mr-1"></div>
+                    <IngameCheckbox
+                        id={`cat-${labelCat.id}`} // Use category ID
+                        checked={visibleCategoryIds[labelCat.id] ?? true} // Use combined state
+                        onChange={(e) => handleCategoryChange(labelCat.id, e.target.checked)} // Use combined handler
+                        label={labelCat.title}
+                        labelClassName="ml-2 flex-grow cursor-pointer text-gray-300"
+                        className="flex-grow"
+                    />
+                </CategoryItem>
+            ))}
+          </CategoryList>
 
-          <CategoryList>{renderCategories(categories)}</CategoryList>
+          {/* --- Markers Section --- */}
+          <DivisionHeader>
+            <span>Markers</span>
+            <IngameTooltip content="Toggle All Markers" placement="top">
+              <IngameCheckbox
+                id="toggle-all-markers"
+                checked={areAllMarkersVisible}
+                onChange={handleToggleAllMarkers}
+              />
+            </IngameTooltip>
+          </DivisionHeader>
+          <CategoryList>{renderCategories(markerCategories)}</CategoryList>
         </>
       )}
-    </PanelContainer>
+    </IngameBorderedDiv>
   );
 };
 

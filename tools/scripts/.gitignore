@@ -4,3 +4,6 @@
 !output
 !*.py
 !*.md
+!scrape*.json
+!terrain.png
+!background.png

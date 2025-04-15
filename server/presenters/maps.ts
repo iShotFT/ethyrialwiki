@@ -23,6 +23,8 @@ interface PresentedCategory {
   public: boolean;
   parentId: string | null;
   children: PresentedCategory[];
+  displayGroup: string | null;
+  isLabel: boolean | null;
 }
 
 // Basic presenter stub for MarkerCategory
@@ -41,6 +43,9 @@ export function presentMarkerCategory(
     iconUrl: iconPath ? `${env.CDN_URL || ""}/${iconPath}` : null,
     public: category.getDataValue("public"),
     parentId: category.getDataValue("parentId"),
+    // Add displayGroup here if needed by frontend for filtering Marker categories
+    displayGroup: category.getDataValue("displayGroup"),
+    isLabel: category.getDataValue("isLabel"),
     children: childrenData
       ? childrenData.map(presentMarkerCategory) // Map over the retrieved children data
       : [],

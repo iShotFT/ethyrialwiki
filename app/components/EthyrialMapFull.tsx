@@ -29,98 +29,47 @@ import VectorLayer from "ol/layer/Vector";
 import Projection from "ol/proj/Projection";
 import TileImage from "ol/source/TileImage";
 import VectorSource from "ol/source/Vector";
-import { Icon, Style, Circle, Fill, Stroke } from "ol/style";
+import { Icon, Style, Circle, Fill, Stroke, Text } from "ol/style";
 import TileGrid from "ol/tilegrid/TileGrid";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { v5 as uuidv5 } from "uuid";
-import type { Coordinate } from "@server/models/Marker"; // Reuse type if possible
+import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
 import Logger from "~/utils/Logger";
 import { Coordinate as OlCoordinate } from 'ol/coordinate';
+import { FeatureLike } from 'ol/Feature';
 
 // Define the namespace used in the seeder
 const NAMESPACE_UUID = "f5d7a4e8-6a3b-4e6f-8a4c-7f3d7a1b9e0f";
 
+// Type for marker data from API
+interface ApiMarkerData {
+  id: string;
+  title: string;
+  description: string | null;
+  coordinate: ServerCoordinate | null; // Use ServerCoordinate type alias
+  categoryId: string;
+  iconId: string | null;
+  iconUrl: string | null; // We might not need this if using GameItemIcon everywhere?
+  isLabel: boolean; // Added isLabel
+  categoryIsLabel: boolean; // Added categoryIsLabel
+}
+
 // Props expected by the component
 type Props = {
   mapId: string;
-  mapData: {
-    // Data fetched by the parent scene
-    id: string;
-    title: string;
-    // Add extent/bounds info here later if needed from API
-  };
-  markers: {
-    // Data fetched by the parent scene
-    id: string;
-    title: string;
-    description: string | null;
-    coordinate: Coordinate | null;
-    categoryId: string;
-    iconUrl: string | null;
-  }[];
+  mapData: any; // Use specific type
+  allMarkers: ApiMarkerData[];
+  visibleCategoryIds: Record<string, boolean>;
+  labelCategoryIds: Set<string>;
 };
 
 // Styled component for the map container
 const MapContainer = styled.div`
   width: 100%;
   height: 100%;
-  background-color: ${(props) => props.theme.background};
-`;
-
-// Styled component for the popup (similar to example)
-const PopupContainer = styled.div`
-  position: absolute;
-  background-color: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid #cccccc;
-  bottom: 12px;
-  left: -50px;
-  min-width: 200px;
-  max-width: 300px;
-  color: #333; // Ensure text is visible
-  font-size: 13px;
-
-  &:after,
-  &:before {
-    top: 100%;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-  }
-  &:after {
-    border-top-color: white;
-    border-width: 10px;
-    left: 48px;
-    margin-left: -10px;
-  }
-  &:before {
-    border-top-color: #cccccc;
-    border-width: 11px;
-    left: 48px;
-    margin-left: -11px;
-  }
-`;
-
-const PopupCloser = styled.a`
-  text-decoration: none;
-  position: absolute;
-  top: 2px;
-  right: 8px;
-  font-size: 18px;
-  color: #555;
-  cursor: pointer;
-`;
-
-const PopupContent = styled.div`
-  margin-top: 5px;
-  margin-bottom: 5px;
+  background-color: #2a61e2;
 `;
 
 // Reuse the category icon map (could be moved to a shared file)
@@ -169,8 +118,31 @@ const createFaDataUri = (
 // Cache for generated icon styles
 const iconStyleCache: Record<string, Style> = {};
 
-const getMarkerStyle = (feature: Feature): Style => {
-  const categoryId = feature.get("categoryId") as string;
+// Define Label Style
+const labelStyleBase = new Style({
+  text: new Text({
+    font: 'bold 18px Asul, sans-serif', // Use Asul font, adjust size/weight
+    fill: new Fill({ color: '#FFFFFF' }),
+    stroke: new Stroke({ color: '#000000', width: 2 }), // Text stroke for readability
+    textAlign: 'center',
+    textBaseline: 'middle',
+    overflow: true, // Allow text to overflow if needed
+  })
+});
+
+const getMarkerStyle = (feature: FeatureLike, labelCategoryIds: Set<string>): Style => {
+  const categoryId = feature.get('categoryId') as string;
+
+  // Check if the marker's category ID is in the set of label category IDs
+  if (labelCategoryIds.has(categoryId)) {
+    // Clone base style to avoid modifying it for all labels
+    const style = labelStyleBase.clone();
+    // Set the text for the label style dynamically
+    style.getText()?.setText(feature.get('title') || '');
+    return style;
+  }
+
+  // Existing Icon logic
   const cacheKey = categoryId || "default";
 
   // Log the category ID being looked up
@@ -213,13 +185,19 @@ const defaultMarkerStyle = new Style({
   }),
 });
 
-const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
+const EthyrialMapFull: React.FC<Props> = ({
+  mapId,
+  mapData,
+  allMarkers,
+  visibleCategoryIds,
+  labelCategoryIds,
+}) => {
   // Log received props
   Logger.debug(
     "misc",
     `[EthyrialMapFull] Received mapId: ${mapId}, mapData: ${
       mapData ? "Yes" : "No"
-    }, markers: ${markers?.length ?? 0}`
+    }, markers: ${allMarkers?.length ?? 0}`
   );
 
   const mapRef = useRef<HTMLDivElement>(null);
@@ -233,8 +211,12 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
 
   // === OpenLayers Setup Effect ===
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current || !mapId) {
+    if (!mapRef.current || !mapId) {
       return;
+    }
+    if (mapInstanceRef.current) {
+       Logger.warn("utils", new Error("Attempted to re-initialize map that already exists."));
+       return;
     }
 
     try {
@@ -257,9 +239,9 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
       // Only one resolution level since we always load the same detailed tiles
       // const resolutions = [1];
       // Define multiple resolutions to ALLOW zooming out (scaling tiles)
-      const resolutions = [16, 8, 4, 2, 1, 0.5, 0.25]; // Added more zoom levels
-      const maxZoom = resolutions.length -1 + 4; // Adjusted maxZoom to allow zooming in deeper
-      const minZoom = 0; // Allow zooming OUT to the lowest resolution
+      const resolutions = [32, 16, 8, 4, 2, 1, 0.5, 0.25]; // Added 32
+      const maxZoom = resolutions.length -1 + 4;
+      const minZoom = 0;
       const displayZLevel = 1;
 
       // Initial view settings (will be potentially overridden by URL hash)
@@ -323,7 +305,7 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
       const tileLayer = new TileLayer({ source: tileSource });
       const markerLayer = new VectorLayer({
         source: vectorSourceRef.current,
-        style: getMarkerStyle,
+        style: (feature) => getMarkerStyle(feature, labelCategoryIds),
       });
 
       // 5. Create View
@@ -333,7 +315,6 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
         zoom: initialZoom,
         resolutions, // Provide all allowed resolutions for view scaling
         extent: mapExtent,
-        // constrainResolution: true, // REMOVE this constraint
         minZoom, // Set minZoom
         maxZoom, // Keep maxZoom
       });
@@ -365,25 +346,26 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
         }, 100); // 100ms delay
       });
 
-      // Create Popup Overlay
-      if (
-        popupRef.current &&
-        popupContentRef.current &&
-        popupCloserRef.current &&
-        !overlayRef.current
-      ) {
+      // Create Popup Overlay (The element exists in JSX below)
+      if (popupRef.current && !overlayRef.current) {
         const overlay = new Overlay({
           element: popupRef.current,
           autoPan: { animation: { duration: 250 } },
+          positioning: 'bottom-center', // Adjust positioning if needed
+          offset: [0, -10], // Offset slightly above the point
         });
         overlayRef.current = overlay;
         map.addOverlay(overlay);
 
-        popupCloserRef.current.onclick = () => {
-          overlay.setPosition(undefined);
-          popupCloserRef.current?.blur();
-          return false;
-        };
+        // Setup closer click handler (Target the button inside the popup now)
+        const closerElement = popupRef.current.querySelector('.popup-closer');
+        if (closerElement) {
+           closerElement.addEventListener('click', () => {
+               overlay.setPosition(undefined);
+               // No need to blur a button usually
+               return false;
+           });
+        }
       }
 
       // Add Click Handler
@@ -400,8 +382,8 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
           const title = feature.get("title") || "Unnamed Marker";
           const description = feature.get("description") || "No description.";
 
-          // Simple HTML content for popup
-          contentEl.innerHTML = `<div style="font-weight: bold; margin-bottom: 5px;">${title}</div><div style="font-size: 0.9em;">${description}</div>`;
+          // Update content using innerHTML (keep simple)
+          contentEl.innerHTML = `<div class="font-bold mb-1">${title}</div><div class="text-xs">${description}</div>`;
           overlay.setPosition(coordinates);
         } else if (overlay) {
           overlay.setPosition(undefined);
@@ -430,51 +412,20 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
       mapInstanceRef.current = null;
       Logger.info("misc", "OpenLayers map disposed");
     };
-  }, [mapId]); // Re-initialize if mapId changes
+  }, [mapId, labelCategoryIds]); // Correct dependencies
 
-  // === Marker Update Effect ===
+  // === Marker Update/Filter Effect ===
   useEffect(() => {
-    if (!vectorSourceRef.current) {
-      // Logger.warn("[EthyrialMapFull] Marker useEffect ran before vectorSourceRef was ready.");
+    if (!vectorSourceRef.current || !allMarkers) {
       return;
     }
-    if (!markers) {
-      // Logger.warn("[EthyrialMapFull] Marker useEffect ran but markers prop is null/undefined.");
-      return;
-    }
-
-    // Logger.info("misc", "[EthyrialMapFull] Adding HARDCODED test marker.");
     vectorSourceRef.current.clear();
-
-    /*
-    // *** Hardcode a single test marker ***
-    const testCoordinate = [1311, 2826];
-    try {
-      // ... hardcoded feature creation ...
-      vectorSourceRef.current.addFeature(testFeature);
-      Logger.info("misc", `[EthyrialMapFull] Added hardcoded test marker at ${JSON.stringify(testCoordinate)}.`);
-    } catch(error) {
-       Logger.error("[EthyrialMapFull] Error creating hardcoded test feature", error);
-    }
-    // ************************************
-    */
-
-    // *** Original logic using props - RE-ENABLED ***
-    Logger.debug(
-      "misc",
-      `[EthyrialMapFull] Updating markers: ${markers.length} received.`
-    );
-    let featuresCreated = 0;
-    const features = markers
+    const features = allMarkers
+      .filter(marker => {
+          return visibleCategoryIds[marker.categoryId] !== false;
+      })
       .map((marker) => {
-        if (!marker.coordinate) {
-          // Skip markers without coordinates
-          return null;
-        }
-        // Skip markers without icons for now, use default style
-        // if (!marker.iconUrl) {
-        //   return null;
-        // }
+        if (!marker.coordinate) return null;
         try {
           const feature = new Feature({
             geometry: new Point([marker.coordinate.x, marker.coordinate.y]),
@@ -482,28 +433,21 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
             title: marker.title,
             description: marker.description,
             categoryId: marker.categoryId,
-            iconUrl: marker.iconUrl,
+            iconId: marker.iconId,
           });
           feature.setId(marker.id);
-          featuresCreated++;
           return feature;
         } catch (error) {
-          Logger.error(
-            `[EthyrialMapFull] Error creating feature for marker ${marker.id}`,
-            error
-          );
+          Logger.error(`Error creating feature for marker ${marker.id}`, error);
           return null;
         }
       })
       .filter(Boolean) as Feature[];
 
     vectorSourceRef.current.addFeatures(features);
-    Logger.debug(
-      "misc",
-      `[EthyrialMapFull] Added ${featuresCreated} features (out of ${markers.length}) to vector source.`
-    );
-    // ****************************************************
-  }, [markers]); // Add markers back to dependency array
+    Logger.debug("misc", `Added ${features.length} visible features to vector source.`);
+
+  }, [allMarkers, visibleCategoryIds]); // Only depends on these now
 
   if (error) {
     return <MapContainer>Error: {error}</MapContainer>;
@@ -511,13 +455,27 @@ const EthyrialMapFull: React.FC<Props> = ({ mapId, mapData, markers }) => {
 
   return (
     <MapContainer ref={mapRef}>
-      {/* Popup structure */}
-      <PopupContainer ref={popupRef}>
-        <PopupCloser ref={popupCloserRef} href="#">
-          &times;
-        </PopupCloser>
-        <PopupContent ref={popupContentRef} />
-      </PopupContainer>
+      {/* Popup structure with Tailwind classes mimicking IngameTooltip */}
+      <div
+        ref={popupRef}
+        className="absolute hidden z-20 border border-[#1A1A1A] rounded-sm p-1.5 bg-[#38322c] min-w-[150px] max-w-[300px]"
+        // Start hidden, OpenLayers controls visibility via overlay
+        // positioning: bottom-center is set in OL Overlay options
+      >
+        {/* Optional: Add arrow element if desired, requires more complex positioning sync */}
+        {/* Innermost content area */}
+        <div className="relative bg-[#151515] text-white px-2 py-1 rounded-sm border-t border-l border-[#4e443a] border-b border-r border-[#2c2824]">
+          {/* Closer button */}
+          <button
+             className="popup-closer absolute top-0 right-0 px-1 text-lg text-gray-400 hover:text-white"
+             aria-label="Close popup"
+           >
+            &times;
+          </button>
+          {/* Content will be set via innerHTML */}
+          <div ref={popupContentRef} className="pt-1 pr-4"></div>
+        </div>
+      </div>
     </MapContainer>
   );
 };

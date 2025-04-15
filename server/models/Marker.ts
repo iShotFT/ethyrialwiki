@@ -1,4 +1,4 @@
-import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import { InferAttributes, InferCreationAttributes } from "sequelize";
 import {
   BelongsTo,
   Column,
@@ -9,8 +9,9 @@ import {
   IsUUID,
   PrimaryKey,
   Default,
+  AllowNull,
 } from "sequelize-typescript";
-import Map from "./Map";
+import GameMap from "./GameMap";
 import MapIcon from "./MapIcon";
 import MarkerCategory from "./MarkerCategory";
 import User from "./User";
@@ -40,8 +41,10 @@ export default class Marker extends Model<
   description: string | null;
 
   @Column(DataType.JSONB)
-  coordinate: Coordinate;
+  coordinate: Coordinate | null;
 
+  @AllowNull(false)
+  @Default(false)
   @Column(DataType.BOOLEAN)
   public: boolean;
 
@@ -70,11 +73,11 @@ export default class Marker extends Model<
   @BelongsTo(() => User, "ownerId")
   owner: User | null;
 
-  @ForeignKey(() => Map)
+  @ForeignKey(() => GameMap)
   @Index
   @Column(DataType.UUID)
   mapId: string;
 
-  @BelongsTo(() => Map, "mapId")
-  map: Map;
+  @BelongsTo(() => GameMap, "mapId")
+  map: GameMap;
 }

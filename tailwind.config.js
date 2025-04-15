@@ -5,10 +5,22 @@ module.exports = {
     "./app/scenes/Map/**/*.{js,ts,jsx,tsx}",
     "./app/components/MapOverlayPanel.tsx",
     "./app/components/EthyrialMapFull.tsx",
+    "./app/components/**/*.{js,ts,jsx,tsx}",
     // Add other component paths if needed
   ],
   theme: {
-    extend: {},
+    extend: {
+      // Add a custom color for testing
+      colors: {
+        'debug-red': '#ff0000',
+      },
+      // Add Asul font family
+      fontFamily: {
+        asul: ['Asul', 'sans-serif'],
+      },
+    },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar-hide')
+  ],
 } 

@@ -6,6 +6,8 @@ import webpackStats from "rollup-plugin-webpack-stats";
 import { CommonServerOptions, defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import tailwindcssPostcssPlugin from '@tailwindcss/postcss';
+import autoprefixer from 'autoprefixer';
 import environment from "./server/utils/environment";
 
 let httpsConfig: CommonServerOptions["https"] | undefined;

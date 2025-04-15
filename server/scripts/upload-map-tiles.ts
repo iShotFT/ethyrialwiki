@@ -6,7 +6,7 @@ import { glob } from "glob";
 import mime from "mime-types";
 import env from "@server/env";
 import Logger from "@server/logging/Logger";
-import { Map as MapModel } from "@server/models";
+import { GameMap as MapModel } from "@server/models";
 
 // --- Configuration ---
 const SOURCE_TILES_DIR = path.resolve(

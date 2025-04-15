@@ -28,7 +28,7 @@ import auth from "../routes/auth";
 // Construct scripts CSP based on services in use by this installation
 const defaultSrc = ["'self'"];
 const scriptSrc = ["'self'", "www.googletagmanager.com"];
-const styleSrc = ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"];
+const styleSrc = ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 if (env.isCloudHosted) {
   scriptSrc.push("cdn.zapier.com");
@@ -127,6 +127,7 @@ export default function init(app: Koa = new Koa(), server?: Server) {
       directives: {
         defaultSrc,
         styleSrc,
+        fontSrc: ["'self'", "fonts.gstatic.com"],
         scriptSrc: [
           ...scriptSrc,
           env.DEVELOPMENT_UNSAFE_INLINE_CSP

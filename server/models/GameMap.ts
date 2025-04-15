@@ -1,4 +1,4 @@
-import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import { InferAttributes, InferCreationAttributes } from "sequelize";
 import {
   Column,
   DataType,
@@ -10,11 +10,12 @@ import {
 } from "sequelize-typescript";
 import Marker from "./Marker";
 import Model from "./base/Model";
+import GameResource from "./GameResource";
 
 @Table({ tableName: "maps", timestamps: true, paranoid: true })
-export default class Map extends Model<
-  InferAttributes<Map>,
-  InferCreationAttributes<Map>
+export default class GameMap extends Model<
+  InferAttributes<GameMap>,
+  InferCreationAttributes<GameMap>
 > {
   @IsUUID(4)
   @PrimaryKey
@@ -37,4 +38,7 @@ export default class Map extends Model<
   // Associations
   @HasMany(() => Marker)
   markers: Marker[];
+
+  @HasMany(() => GameResource, 'mapId')
+  gameResources: GameResource[];
 }

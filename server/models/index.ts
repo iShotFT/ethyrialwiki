@@ -65,10 +65,22 @@ export { default as Subscription } from "./Subscription";
 export { default as CustomDomain } from "./CustomDomain";
 
 // Map related models
-export { default as Map } from "./Map";
+export { default as GameMap } from "./GameMap";
 
 export { default as MapIcon } from "./MapIcon";
 
 export { default as MarkerCategory } from "./MarkerCategory";
 
 export { default as Marker } from "./Marker";
+
+// Game Data Models
+export { default as GameIcon } from "./GameIcon";
+export { default as GameItemRarity } from "./GameItemRarity";
+export { default as GameSkill } from "./GameSkill";
+export { default as GameItemCategory } from "./GameItemCategory";
+export { default as GameItem } from "./GameItem";
+export { default as GameItemItemCategory } from "./GameItemItemCategory";
+export { default as GameItemModifier } from "./GameItemModifier";
+export { default as GameBlueprint } from "./GameBlueprint";
+export { default as GameBlueprintSlot } from "./GameBlueprintSlot";
+export { default as GameResource } from "./GameResource";

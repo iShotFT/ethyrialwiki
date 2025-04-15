@@ -6,7 +6,7 @@ import { v5 as uuidv5 } from "uuid";
 // Rename imported Map model to avoid conflict with built-in Map
 import Logger from "@server/logging/Logger";
 import {
-  Map as MapModel,
+  GameMap,
   MapIcon,
   MarkerCategory,
   Marker,
@@ -185,6 +185,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_town", NAMESPACE_UUID),
         title: "TOWN",
         public: true,
+        isLabel: true,
         parentId: null,
       },
       {
@@ -192,6 +193,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_other", NAMESPACE_UUID),
         title: "OTHER",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -199,6 +201,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_dungeon", NAMESPACE_UUID),
         title: "DUNGEON",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -206,6 +209,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_bank", NAMESPACE_UUID),
         title: "BANK",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -213,6 +217,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_teleport", NAMESPACE_UUID),
         title: "TELEPORT",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -220,6 +225,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_daily_quest", NAMESPACE_UUID),
         title: "DAILY_QUEST",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -227,6 +233,7 @@ async function seedMapData() {
         iconId: uuidv5("icon_raid", NAMESPACE_UUID),
         title: "RAID",
         public: true,
+        isLabel: false,
         parentId: null,
       },
       {
@@ -234,23 +241,30 @@ async function seedMapData() {
         iconId: uuidv5("icon_world_boss", NAMESPACE_UUID),
         title: "WORLD_BOSS",
         public: true,
+        isLabel: false,
         parentId: null,
       },
     ];
     let createdCats = 0,
       updatedCats = 0;
     for (const catData of categories) {
-      // Update fields to include parentId
-      const [, created] = await MarkerCategory.findOrCreate({
+      // Ensure isLabel defaults to false if not specified
+      const defaults = { ...catData, isLabel: catData.isLabel ?? false };
+      const [instance, created] = await MarkerCategory.findOrCreate({
         where: { id: catData.id },
-        defaults: catData as any,
+        defaults: defaults as any,
         transaction,
       });
       if (!created) {
-        await MarkerCategory.update(catData as any, {
-          where: { id: catData.id },
+        // Update existing, make sure to include isLabel
+        await instance.update(defaults as any, {
           transaction,
         });
+        // Original alternative update method:
+        // await MarkerCategory.update(defaults as any, {
+        //   where: { id: catData.id },
+        //   transaction,
+        // });
         updatedCats++;
       } else {
         createdCats++;
@@ -286,7 +300,7 @@ async function seedMapData() {
         public: true,
       },
     ];
-    await MapModel.bulkCreate(maps as any, {
+    await GameMap.bulkCreate(maps as any, {
       transaction,
       updateOnDuplicate: [
         "title",

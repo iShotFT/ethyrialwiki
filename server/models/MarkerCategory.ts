@@ -1,4 +1,4 @@
-import { InferAttributes, InferCreationAttributes } from "sequelize/types";
+import { InferAttributes, InferCreationAttributes } from "sequelize";
 import {
   BelongsTo,
   Column,
@@ -10,6 +10,7 @@ import {
   IsUUID,
   PrimaryKey,
   Default,
+  AllowNull,
 } from "sequelize-typescript";
 import MapIcon from "./MapIcon";
 import Marker from "./Marker";
@@ -33,6 +34,11 @@ export default class MarkerCategory extends Model<
 
   @Column(DataType.BOOLEAN)
   public: boolean;
+
+  @AllowNull(false)
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isLabel: boolean;
 
   // Associations
   @ForeignKey(() => MapIcon)

@@ -1,30 +1,33 @@
-import React from 'react';
+import React, { forwardRef, ReactNode } from 'react';
 import { cn } from '~/utils/twMerge';
 
 interface GameHUDProps {
+  children?: ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-const GameHUD = ({
-  className,
-}: GameHUDProps) => {
-  return (
-    <div className={cn("relative select-none", className)}>
-      {/* Main panel container matching the exact image reference */}
-      <div className="w-full h-32 relative">
-        {/* Outer dark border - 1px */}
-        <div className="absolute inset-0 bg-[#1A1A1A] p-[1px]">
-          {/* Inner dark border with subtle gradient - 9px */}
-          <div className="w-full h-full p-[9px] bg-[#38322c]">
-            {/* Main content area - very dark charcoal/black */}
-            <div className="w-full h-full bg-[#151515] p-3 border-2 border-[#4e443a]">
-              {/* Content would go here */}
-            </div>
-          </div>
+const IngameBorderedDiv = forwardRef<HTMLDivElement, GameHUDProps>(
+  ({ children, className, style }, ref) => {
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={[
+          "select-none max-h-[80vh]",
+          "p-[9px] bg-[#38322c]",
+          "rounded-sm",
+          className
+        ].filter(Boolean).join(' ')}
+      >
+        <div className="w-full h-full bg-[#151515] p-3 border-t border-l border-[#4e443a] border-b border-r border-[#2c2824] shadow-sm overflow-y-auto rounded-sm">
+          {children}
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
 
-export default GameHUD;
+IngameBorderedDiv.displayName = 'IngameBorderedDiv';
+
+export default IngameBorderedDiv;

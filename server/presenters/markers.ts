@@ -16,6 +16,7 @@ export function presentMarker(marker: Marker) {
   }
 
   const iconPath = marker.icon?.getDataValue("path");
+  const iconId = marker.icon?.getDataValue("id");
 
   return {
     id: marker.getDataValue("id"),
@@ -24,7 +25,7 @@ export function presentMarker(marker: Marker) {
     coordinate,
     categoryId: marker.getDataValue("categoryId"),
     iconId: marker.getDataValue("iconId"),
-    iconUrl: iconPath ? `${env.CDN_URL || ""}/${iconPath}` : null,
+    iconUrl: iconPath ? `/api/game-data/icons/${iconId}` : null,
     ownerId: marker.getDataValue("ownerId"),
     public: marker.getDataValue("public"),
   };
