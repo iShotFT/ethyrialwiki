@@ -1,0 +1,224 @@
+name: Seed Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      seed_options:
+        description: "Seeder options (comma-separated)"
+        required: false
+        default: "--skip-tile-upload"
+        type: string
+      skip_redis_flush:
+        description: "Skip Redis flush"
+        required: false
+        default: false
+        type: boolean
+      skip_resources:
+        description: "Skip resource seeding (faster)"
+        required: false
+        default: false
+        type: boolean
+      upload_icons:
+        description: "Upload icons to S3"
+        required: false
+        default: false
+        type: boolean
+      batch_size:
+        description: "Database operation batch size"
+        required: false
+        default: "100"
+        type: string
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BASE: ishotft/ethyrialwiki
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Set namespace
+        id: namespace
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          NAMESPACE="ethyrial-$ENVIRONMENT"
+          echo "namespace=$NAMESPACE" >> $GITHUB_OUTPUT
+
+      - name: Get pod name
+        id: pod
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          WEB_POD=$(kubectl get pods -n $NAMESPACE -l app.kubernetes.io/component=web -o jsonpath="{.items[0].metadata.name}")
+          
+          if [ -z "$WEB_POD" ]; then
+            echo "No web pod found in namespace $NAMESPACE"
+            exit 1
+          fi
+          
+          echo "web_pod=$WEB_POD" >> $GITHUB_OUTPUT
+
+      - name: Extract environment variables
+        id: env_vars
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          WEB_POD=${{ steps.pod.outputs.web_pod }}
+          
+          echo "Extracting environment variables from pod $WEB_POD in namespace $NAMESPACE"
+          
+          # Get all environment variables from the pod and format them as a list of KEY=VALUE pairs
+          ENV_VARS=$(kubectl exec -n $NAMESPACE $WEB_POD -- bash -c "env | grep -E 'URL|AWS_|DATABASE_|REDIS_|URL|NODE_ENV|ENVIRONMENT|UTILS_SECRET|SECRET_KEY'")
+          
+          # Write environment variables to a file
+          echo "$ENV_VARS" > .env.extracted
+          
+          # Display the extracted variables (excluding secrets)
+          echo "Extracted environment variables (public only):"
+          grep -v -E 'SECRET|KEY|PASSWORD' .env.extracted || true
+          
+          echo "env_file=.env.extracted" >> $GITHUB_OUTPUT
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push seeder image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.seeder
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}-seeder:latest
+          build-args: |
+            NODE_ENV=production
+
+      - name: Run seeder in Kubernetes
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          ENV_FILE=${{ steps.env_vars.outputs.env_file }}
+          
+          # Prepare seeder options based on inputs
+          SEED_OPTIONS="${{ github.event.inputs.seed_options }}"
+          
+          if [[ "${{ github.event.inputs.skip_redis_flush }}" == "true" ]]; then
+            SEED_OPTIONS="$SEED_OPTIONS --skip-redis-flush"
+          fi
+          
+          if [[ "${{ github.event.inputs.skip_resources }}" == "true" ]]; then
+            SEED_OPTIONS="$SEED_OPTIONS --skip-resources"
+          fi
+          
+          if [[ "${{ github.event.inputs.upload_icons }}" == "true" ]]; then
+            SEED_OPTIONS="$SEED_OPTIONS --upload-icons"
+          fi
+          
+          SEED_OPTIONS="$SEED_OPTIONS --batch-size ${{ github.event.inputs.batch_size }}"
+          
+          echo "Running seeder with options: $SEED_OPTIONS"
+          
+          # Create a temporary ConfigMap from our extracted environment variables
+          kubectl create configmap seeder-env --from-env-file=$ENV_FILE -n $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Create a Job YAML file
+          cat <<EOF > seeder-job.yaml
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: ethyrial-seeder-job
+            namespace: $NAMESPACE
+          spec:
+            ttlSecondsAfterFinished: 600
+            template:
+              spec:
+                containers:
+                - name: seeder
+                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}-seeder:latest
+                  command: ["yarn", "seed:all"]
+                  args: $(echo $SEED_OPTIONS | jq -R 'split(" ")')
+                  envFrom:
+                  - configMapRef:
+                      name: seeder-env
+                  resources:
+                    limits:
+                      cpu: "2"
+                      memory: "4Gi"
+                    requests:
+                      cpu: "500m"
+                      memory: "1Gi"
+                restartPolicy: Never
+            backoffLimit: 1
+          EOF
+          
+          # Apply the job
+          kubectl apply -f seeder-job.yaml
+          
+          # Follow the logs
+          echo "Waiting for seeder job to start..."
+          sleep 10
+          
+          # Try to get job pod
+          SEEDER_POD=$(kubectl get pods -n $NAMESPACE -l job-name=ethyrial-seeder-job -o jsonpath="{.items[0].metadata.name}" --ignore-not-found)
+          
+          if [ -z "$SEEDER_POD" ]; then
+            echo "Seeder pod not found yet, waiting another 20 seconds..."
+            sleep 20
+            SEEDER_POD=$(kubectl get pods -n $NAMESPACE -l job-name=ethyrial-seeder-job -o jsonpath="{.items[0].metadata.name}" --ignore-not-found)
+          fi
+          
+          if [ -n "$SEEDER_POD" ]; then
+            echo "Following seeder logs from pod $SEEDER_POD:"
+            kubectl logs -f pod/$SEEDER_POD -n $NAMESPACE || echo "Failed to get logs, pod may have completed"
+          else
+            echo "Could not find seeder pod, check the job status manually"
+            kubectl describe job ethyrial-seeder-job -n $NAMESPACE
+          fi
+          
+          # Check job status
+          JOB_STATUS=$(kubectl get job ethyrial-seeder-job -n $NAMESPACE -o jsonpath="{.status.conditions[?(@.type=='Complete')].status}")
+          if [ "$JOB_STATUS" == "True" ]; then
+            echo "✅ Seeder job completed successfully!"
+            exit 0
+          else
+            JOB_FAILED=$(kubectl get job ethyrial-seeder-job -n $NAMESPACE -o jsonpath="{.status.conditions[?(@.type=='Failed')].status}")
+            if [ "$JOB_FAILED" == "True" ]; then
+              echo "❌ Seeder job failed!"
+              exit 1
+            else
+              echo "⚠️ Seeder job status is unclear, please check the Kubernetes dashboard"
+              exit 0
+            fi
+          fi
+
+      - name: Clean up
+        if: always()
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          
+          # Delete the ConfigMap
+          kubectl delete configmap seeder-env -n $NAMESPACE --ignore-not-found
+          
+          # Delete the job after 10 minutes (already set in ttlSecondsAfterFinished)
+          echo "The seeder job will be automatically deleted after 10 minutes." 
