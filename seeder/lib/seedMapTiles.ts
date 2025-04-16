@@ -5,6 +5,7 @@ import Logger from "@server/logging/Logger";
 import { GameMap as MapModel } from "@server/models";
 import { uploadFileToS3 } from "./s3Utils";
 import { OUTPUT_DIR } from "./utils";
+import { seederLogger } from "./seederLogger";
 
 const CONCURRENCY = 10; // Number of parallel uploads
 
@@ -52,6 +53,7 @@ export async function seedMapTiles(mapTitle: string): Promise<void> {
       "utils",
       new Error("No tile files found in the source directory. Skipping upload.")
     );
+    seederLogger.recordCounts("Map Tiles", 0, 0);
     return;
   }
 
@@ -106,6 +108,8 @@ export async function seedMapTiles(mapTitle: string): Promise<void> {
   Logger.info("utils", `Successfully uploaded: ${successfulUploads}`);
   Logger.info("utils", `Failed uploads:        ${failedUploads}`);
   Logger.info("utils", "----------------------");
+  
+  seederLogger.recordCounts("Map Tiles", successfulUploads, 0, failedUploads);
 
   if (failedUploads > 0) {
     throw new Error(`${failedUploads} tile uploads failed.`);

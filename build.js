@@ -32,12 +32,18 @@ async function build() {
   const buildDir = path.resolve(__dirname, "build");
   const serverBuildDir = path.join(buildDir, "server");
   const pluginsBuildDir = path.join(buildDir, "plugins");
+  const seederBuildDir = path.join(buildDir, "seeder");
   const pluginsSourceDir = path.resolve(__dirname, "plugins");
+  const seederSourceDir = path.resolve(__dirname, "seeder");
 
   // Clean previous build
   console.log("Clean previous build…");
 
-  await Promise.all([fs.remove(serverBuildDir), fs.remove(pluginsBuildDir)]);
+  await Promise.all([
+    fs.remove(serverBuildDir), 
+    fs.remove(pluginsBuildDir),
+    fs.remove(seederBuildDir)
+  ]);
 
   const d = getDirectories(pluginsSourceDir);
 
@@ -49,6 +55,9 @@ async function build() {
     ),
     execAsync(
       "yarn babel --extensions .ts,.tsx --quiet -d ./build/shared ./shared"
+    ),
+    execAsync(
+      "yarn babel --extensions .ts,.tsx --quiet -d ./build/seeder ./seeder"
     ),
     ...d.map(async (plugin) => {
       const pluginSourcePath = path.join(pluginsSourceDir, plugin);

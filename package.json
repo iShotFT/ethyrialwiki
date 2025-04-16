@@ -35,9 +35,11 @@
     "seed": "cross-env NODE_ENV=development tsx ./server/scripts/seed.ts",
     "seed:map": "cross-env NODE_ENV=development tsx ./server/scripts/seed-map.ts",
     "seed:game-resources": "cross-env NODE_ENV=development tsx ./server/scripts/seed-game-resources.ts",
+    "seed:domains": "cross-env NODE_ENV=development yarn seed:all --skip-python --skip-tile-upload --skip-resources",
+    "flush:redis": "cross-env NODE_ENV=development yarn seed:all --skip-python --skip-tile-upload --skip-resources --skip-custom-domains",
     "wipe:game-data": "cross-env NODE_ENV=development tsx ./server/scripts/wipe-game-data.ts",
     "upload:map-tiles": "cross-env NODE_ENV=development tsx ./server/scripts/upload-map-tiles.ts",
-    "seed:all": "cross-env NODE_ENV=development tsx ./seeder/scripts/run.ts"
+    "seed:all": "yarn build && cross-env NODE_ENV=development node ./build/seeder/scripts/run.js"
   },
   "funding": {
     "type": "GitHub Sponsors ❤",

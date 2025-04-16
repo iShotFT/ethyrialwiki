@@ -1,26 +1,17 @@
 using System;
 using System.Text.Json.Serialization;
-using UnityEngine; // Use stubbed UnityEngine
-// using RPGLibrary.Map; // Don't use original namespace if types are global now or stubbed
+using UnityEngine;
 
-// Recreate the TileData struct for deserialization, including necessary dependencies
-namespace RPGLibrary.Map // Keep the original namespace for BinaryFormatter
+namespace RPGLibrary.Map
 {
-    #pragma warning disable CS0649 // Disable warning about fields never being assigned to (BinaryFormatter does this)
-    [Serializable] // Crucial for BinaryFormatter
+    #pragma warning disable CS0649
+    [Serializable]
     public struct TileDataSerializable
     {
-        // --- Serialized Fields ---
-        // These MUST match the original definition for BinaryFormatter
-        // BinaryFormatter serializes fields, including private ones if marked [Serializable]
-        private int tileData; // Use the exact same name and type
-        private byte direction; // Use the exact same name and type
+        private int tileData;
+        private byte direction;
 
-        // --- Properties for Accessing Data (Post-Deserialization) ---
-        // These properties decode the packed tileData integer.
-        // They need access to stubbed dependencies like Mathf and SharedValues.
-
-        [JsonIgnore] // Exclude from JSON helpers if they cause issues
+        [JsonIgnore]
         public Directions Direction => (Directions)direction;
 
         [JsonIgnore]
@@ -48,14 +39,12 @@ namespace RPGLibrary.Map // Keep the original namespace for BinaryFormatter
         private bool _walkable => (int)((double)tileData / Math.Pow(10.0, 10.0) % 10.0 * 10.0) > 0;
 
         [JsonIgnore]
-        // Use global::SharedValues to ensure we get the stub class from the global namespace
         public bool Walkable => Tilt <= global::SharedValues.MaxWalkableTilt && (PathHeight > 0f || _walkable);
 
         [JsonIgnore]
         public short TileID => (short)(-1 + (int)((double)(tileData + 1) / Math.Pow(10.0, 7.0) % 100.0 * 10.0));
 
         [JsonIgnore]
-        // Use global::TileManager to ensure we get the stub class from the global namespace
         public TileInfo TileInfo => global::TileManager.GetInfo(TileID);
 
         [JsonIgnore]
@@ -71,7 +60,6 @@ namespace RPGLibrary.Map // Keep the original namespace for BinaryFormatter
             }
         }
 
-        // Properties needed for conditions like checking for resource nodes later
         [JsonIgnore]
         public bool NotEmpty => TileID != -1 || PathHeight > 0f || _walkable;
         [JsonIgnore]
@@ -80,35 +68,19 @@ namespace RPGLibrary.Map // Keep the original namespace for BinaryFormatter
         public bool IsInvisible => TileID <= 0;
         [JsonIgnore]
         public bool AIUnWalkable => TileID == 0 && PathHeight == 0f;
-
-        // --- Constructor (Needed for BinaryFormatter?) ---
-        // While BinaryFormatter primarily uses fields, having a constructor matching
-        // the original *might* sometimes be necessary depending on internal details.
-        // However, it often works without one if fields are public or the class is Serializable.
-        // Let's omit constructors initially unless deserialization fails.
-
-         // Parameterless constructor might be needed by some serializers/frameworks
-        // public TileDataSerializable() {
-        //     tileData = 0;
-        //     direction = (byte)Directions.Up;
-        // }
     }
-     #pragma warning restore CS0649
+    #pragma warning restore CS0649
 }
 
-// Helper class for cleaner JSON output from WorldPartCacheProcessor
 public class JsonTileData
 {
-    // Local coordinates within the 50x50 grid
     public int X { get; set; }
     public int Y { get; set; }
 
-    // Calculated World Coordinates
-    public int WorldX { get; set; } // Calculated based on part filename and X
-    public int WorldY { get; set; } // Calculated based on part filename and Y
-    public int WorldZ { get; set; } // From part filename (floor level)
+    public int WorldX { get; set; }
+    public int WorldY { get; set; }
+    public int WorldZ { get; set; }
 
-    // Decoded Tile Properties
     public short TileID { get; set; }
     public float Height { get; set; }
     public float Tilt { get; set; }
@@ -118,18 +90,15 @@ public class JsonTileData
     public string Direction { get; set; } = "Up";
     public int RawTileData { get; set; }
     public byte RawDirection { get; set; }
-    // Add other decoded properties if needed
 
-    // Updated constructor to accept world part origin coordinates
     public JsonTileData(int x, int y, int partOriginX, int partOriginY, int partOriginZ, RPGLibrary.Map.TileDataSerializable data)
     {
         X = x;
         Y = y;
-        WorldX = partOriginX * 50 + x; // Calculate World X
-        WorldY = partOriginY * 50 + y; // Calculate World Y
-        WorldZ = partOriginZ;           // Assign World Z (floor level)
+        WorldX = partOriginX * 50 + x;
+        WorldY = partOriginY * 50 + y;
+        WorldZ = partOriginZ;
 
-        // Wrap property access in try-catch in case stubs are incomplete
         try { TileID = data.TileID; } catch { TileID = -999; }
         try { Height = data.Height; } catch { Height = -999f; }
         try { Tilt = data.Tilt; } catch { Tilt = -999f; }
@@ -140,4 +109,4 @@ public class JsonTileData
         RawTileData = data.GetTileDataValue;
         RawDirection = (byte)data.Direction;
     }
-} 
+}

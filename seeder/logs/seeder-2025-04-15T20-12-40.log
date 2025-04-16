@@ -1,0 +1,73 @@
+[INFO] 2025-04-15T20:12:40.592Z - Seeder started at 2025-04-15T20:12:40.592Z
+[INFO] 2025-04-15T20:12:40.594Z - Log file: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\logs\seeder-2025-04-15T20-12-40.log
+[INFO] 2025-04-15T20:12:40.595Z - Starting Unified Seeder...
+[INFO] 2025-04-15T20:12:40.595Z - Starting step: Redis Cache Flush
+[INFO] 2025-04-15T20:12:40.609Z - Redis Keys Cleared: 46 created, 0 updated
+[INFO] 2025-04-15T20:12:40.609Z - Completed step: Redis Cache Flush in 0.01s
+[INFO] 2025-04-15T20:12:40.610Z - Starting step: Python Map Processing
+[INFO] 2025-04-15T20:12:40.610Z - Python logs will be written to: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs
+[INFO] 2025-04-15T20:13:38.914Z - Python extraction completed. Check logs in: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs\minimap_extract_*.log
+[INFO] 2025-04-15T20:13:38.915Z - Completed step: Python Map Processing in 58.30s
+[INFO] 2025-04-15T20:13:38.915Z - Starting step: C# Marker Extraction
+[INFO] 2025-04-15T20:13:43.754Z - Completed step: C# Marker Extraction in 4.84s
+[INFO] 2025-04-15T20:13:43.754Z - Starting step: Core Database Seeding
+[INFO] 2025-04-15T20:13:43.833Z - Seeding core data (skills, rarities)...
+[INFO] 2025-04-15T20:13:43.874Z - Game Skills: 23 created, 0 updated
+[INFO] 2025-04-15T20:13:43.880Z - Item Rarities: 8 created, 0 updated
+[INFO] 2025-04-15T20:13:43.880Z - Seeding map data (icons, categories, maps, markers)...
+[INFO] 2025-04-15T20:13:43.887Z - Map Icons: 16 created, 0 updated
+[INFO] 2025-04-15T20:13:44.019Z - Marker Categories: 17 created, 0 updated
+[INFO] 2025-04-15T20:13:44.024Z - Maps: 2 created, 0 updated
+[INFO] 2025-04-15T20:13:44.101Z - Markers: 185 created, 0 updated
+[INFO] 2025-04-15T20:13:44.101Z - Seeding items and icons...
+[INFO] 2025-04-15T20:13:44.101Z - Icon upload is ENABLED - will upload icons to S3
+[INFO] 2025-04-15T20:14:54.979Z - Game Icons: 5238 created, 0 updated
+[INFO] 2025-04-15T20:14:54.986Z - Item Categories: 2 created, 0 updated
+[INFO] 2025-04-15T20:14:55.000Z - Game Items: 11 created, 0 updated
+[INFO] 2025-04-15T20:14:55.005Z - Item-Category Relations: 11 created, 0 updated
+[INFO] 2025-04-15T20:14:55.006Z - Seeding custom domains...
+[INFO] 2025-04-15T20:14:55.006Z - Using local.test derived from PUBLIC_URL
+[INFO] 2025-04-15T20:14:55.006Z - Using base domain: local.test
+[INFO] 2025-04-15T20:14:55.018Z - Created custom domain: map.local.test
+[INFO] 2025-04-15T20:14:55.023Z - Created custom domain: app.local.test
+[INFO] 2025-04-15T20:14:55.023Z - Custom Domains: 2 created, 0 updated
+[INFO] 2025-04-15T20:14:55.024Z - Core database seeding transaction committed
+[INFO] 2025-04-15T20:14:55.033Z - Completed step: Core Database Seeding in 71.28s
+[INFO] 2025-04-15T20:14:55.034Z - Starting step: Resource Seeding
+[INFO] 2025-04-15T20:14:55.034Z - Using batch size of 100 for database operations
+[INFO] 2025-04-15T20:14:55.192Z - Resource Categories: 5 created, 0 updated
+[INFO] 2025-04-15T20:17:51.207Z - Resources Total: 46356 created, 0 updated
+[INFO] 2025-04-15T20:17:51.208Z - Resource Items: 4171 created, 0 updated
+[INFO] 2025-04-15T20:17:51.208Z - Completed step: Resource Seeding in 176.17s
+[INFO] 2025-04-15T20:17:51.208Z - Starting step: Map Tile Upload
+[INFO] 2025-04-15T20:17:51.208Z - Map tile upload is ENABLED - will upload tiles to S3
+[INFO] 2025-04-15T20:18:29.878Z - Map Tiles: 1260 created, 0 updated
+[INFO] 2025-04-15T20:18:29.879Z - Completed step: Map Tile Upload in 38.67s
+[INFO] 2025-04-15T20:18:29.879Z - Unified Seeder finished successfully in 349.28 seconds
+[INFO] 2025-04-15T20:18:29.879Z - 
+====================
+SEEDER SUMMARY
+====================
+Total runtime: 349.33s
+
+Records processed:
+- Redis Keys Cleared: 46
+- Game Skills: 23
+- Item Rarities: 8
+- Map Icons: 16
+- Marker Categories: 17
+- Maps: 2
+- Markers: 185
+- Game Icons: 5238
+- Item Categories: 2
+- Game Items: 11
+- Item-Category Relations: 11
+- Custom Domains: 2
+- Resource Categories: 5
+- Resources Total: 46356
+- Resource Items: 4171
+- Map Tiles: 1260
+
+Seeder completed at 2025-04-15T20:18:29.879Z
+====================
+

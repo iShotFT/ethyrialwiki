@@ -1,0 +1,26 @@
+[INFO] 2025-04-15T19:23:29.003Z - Seeder started at 2025-04-15T19:23:29.003Z
+[INFO] 2025-04-15T19:23:29.005Z - Log file: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\logs\seeder-2025-04-15T19-23-28.log
+[INFO] 2025-04-15T19:23:29.005Z - Starting Unified Seeder...
+[INFO] 2025-04-15T19:23:29.006Z - Starting step: Redis Cache Flush
+[INFO] 2025-04-15T19:23:29.017Z - Completed step: Redis Cache Flush in 0.01s
+[INFO] 2025-04-15T19:23:29.018Z - Starting step: Python Map Processing
+[INFO] 2025-04-15T19:23:29.018Z - Python logs will be written to: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs
+[INFO] 2025-04-15T19:24:07.823Z - Python extraction completed. Check logs in: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs\minimap_extract_*.log
+[INFO] 2025-04-15T19:24:07.824Z - Completed step: Python Map Processing in 38.81s
+[INFO] 2025-04-15T19:24:07.824Z - Starting step: C# Marker Extraction
+[INFO] 2025-04-15T19:24:09.541Z - Completed step: C# Marker Extraction in 1.72s
+[INFO] 2025-04-15T19:24:09.541Z - Starting step: Core Database Seeding
+[INFO] 2025-04-15T19:24:09.603Z - Seeding core data (skills, rarities)...
+[INFO] 2025-04-15T19:24:09.635Z - Seeding map data (icons, categories, maps, markers)...
+[INFO] 2025-04-15T19:24:09.830Z - Seeding items and icons...
+[INFO] 2025-04-15T19:24:09.831Z - Icon upload is DISABLED (default) - use --upload-icons to enable
+[INFO] 2025-04-15T19:24:10.589Z - Seeding custom domains...
+[INFO] 2025-04-15T19:24:10.589Z - Using local.test derived from PUBLIC_URL
+[INFO] 2025-04-15T19:24:10.590Z - Using base domain: local.test
+[INFO] 2025-04-15T19:24:10.597Z - Created custom domain: map.local.test
+[INFO] 2025-04-15T19:24:10.602Z - Created custom domain: app.local.test
+[INFO] 2025-04-15T19:24:10.602Z - Custom Domains: 2 created, 0 updated
+[INFO] 2025-04-15T19:24:10.603Z - Core database seeding transaction committed
+[INFO] 2025-04-15T19:24:10.611Z - Completed step: Core Database Seeding in 1.07s
+[INFO] 2025-04-15T19:24:10.611Z - Starting step: Resource Seeding
+[INFO] 2025-04-15T19:24:10.612Z - Using batch size of 100 for database operations

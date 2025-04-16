@@ -39,6 +39,9 @@ import { v5 as uuidv5 } from "uuid";
 import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
 import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import Logger from "~/utils/Logger";
+import { encodeResource, decodeResource, parseMapHash, updateMapHash } from "../utils/mapUtils";
+import { updateHeatmap, getHeatmapParams } from "../utils/heatmapUtils";
+import { createFaDataUri, createLabelStyleBase, createMarkerStyleFunction } from "../utils/markerStyleUtils";
 
 // Define the namespace used in the seeder
 const NAMESPACE_UUID = "f5d7a4e8-6a3b-4e6f-8a4c-7f3d7a1b9e0f";
@@ -71,6 +74,8 @@ type Props = {
   heatmapData: HeatmapData | null;
   onMapReady: (map: OlMap) => void;
   onViewChange: (zoom: number, extent: Extent) => void;
+  selectedResourceId?: string; // Add prop for currently selected resource
+  onResourceSelect?: (resourceId: string | null) => void; // Callback when resource is selected from URL
 };
 
 // Styled component for the map container
@@ -106,86 +111,14 @@ Logger.debug(
   `Category Icon Map Keys: ${JSON.stringify(Object.keys(categoryIconMap))}`
 );
 
-// Helper to create SVG Data URI from FA icon
-// Customize color, size etc. here
-const createFaDataUri = (
-  iconDef: IconDefinition | undefined,
-  color = "black"
-) => {
-  if (!iconDef) {
-    iconDef = faQuestionCircle; // Fallback icon
-  }
-  const { icon } = iconDef;
-  const pathData = Array.isArray(icon[4]) ? icon[4].join(" ") : icon[4];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${icon[0]} ${icon[1]}" width="24" height="24">
-      <path d="${pathData}" fill="${color}"></path>
-    </svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-};
-
-// Cache for generated icon styles
+// Keep the icon style cache
 const iconStyleCache: Record<string, Style> = {};
 
-// Define Label Style
-const labelStyleBase = new Style({
-  text: new Text({
-    font: "bold 18px Asul, sans-serif", // Use Asul font, adjust size/weight
-    fill: new Fill({ color: "#FFFFFF" }),
-    stroke: new Stroke({ color: "#000000", width: 2 }), // Text stroke for readability
-    textAlign: "center",
-    textBaseline: "middle",
-    overflow: true, // Allow text to overflow if needed
-  }),
-});
+// Replace the inline label style with the utility function
+const labelStyleBase = createLabelStyleBase();
 
-const getMarkerStyle = (
-  feature: FeatureLike,
-  labelCategoryIds: Set<string>
-): Style => {
-  const categoryId = feature.get("categoryId") as string;
-
-  // Check if the marker's category ID is in the set of label category IDs
-  if (labelCategoryIds.has(categoryId)) {
-    // Clone base style to avoid modifying it for all labels
-    const style = labelStyleBase.clone();
-    // Set the text for the label style dynamically
-    style.getText()?.setText(feature.get("title") || "");
-    return style;
-  }
-
-  // Existing Icon logic
-  const cacheKey = categoryId || "default";
-
-  // Log the category ID being looked up
-  // Logger.debug("misc", `Getting style for categoryId: [${categoryId}]`);
-  // Reduce log spam - enable if needed
-
-  if (!iconStyleCache[cacheKey]) {
-    const iconDefinition = categoryIconMap[categoryId]; // Direct lookup
-
-    // Log if lookup failed
-    if (!iconDefinition) {
-      Logger.warn(
-        `No icon definition found for categoryId: [${categoryId}], using fallback.`
-      ); // Use string only
-    }
-
-    const iconDataUri = createFaDataUri(
-      iconDefinition || faQuestionCircle,
-      "#D92A2A"
-    );
-
-    iconStyleCache[cacheKey] = new Style({
-      image: new Icon({
-        anchor: [0.5, 0.9], // Adjust anchor if needed for new icons
-        src: iconDataUri,
-        // Optional: scale the icon
-        // scale: 0.8,
-      }),
-    });
-  }
-  return iconStyleCache[cacheKey];
-};
+// Replace getMarkerStyle function with the utility version
+const getMarkerStyle = createMarkerStyleFunction(iconStyleCache, categoryIconMap, labelStyleBase);
 
 const EthyrialMapFull: React.FC<Props> = ({
   mapId,
@@ -196,6 +129,8 @@ const EthyrialMapFull: React.FC<Props> = ({
   heatmapData,
   onMapReady,
   onViewChange,
+  selectedResourceId,
+  onResourceSelect,
 }) => {
   // Log received props
   Logger.debug(
@@ -204,6 +139,18 @@ const EthyrialMapFull: React.FC<Props> = ({
       mapData ? "Yes" : "No"
     }, markers: ${allMarkers?.length ?? 0}`
   );
+
+  // Add debug logging for heatmap data
+  useEffect(() => {
+    if (heatmapData) {
+      Logger.debug(
+        "misc", 
+        `[HeatmapDebug] Received new heatmap data with ${heatmapData.points.length} points`
+      );
+    } else {
+      Logger.debug("misc", `[HeatmapDebug] Received null heatmap data`);
+    }
+  }, [heatmapData]);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<Map | null>(null);
@@ -218,10 +165,46 @@ const EthyrialMapFull: React.FC<Props> = ({
   const moveEndHandlerRef = useRef<(() => void) | null>(null);
   // Ref to store the timeout ID for moveend debouncing
   const timeoutIdRef = useRef<number | undefined>();
+  // Add ref to track heatmap initialization state
+  const heatmapInitializedRef = useRef<boolean>(false);
+
+  // === Track interaction state to help debug drag issues ===
+  const interactionStateRef = useRef({
+    isDragging: false,
+    lastDragEnd: 0,
+    dragCount: 0,
+    quickDragAttempts: 0,
+    viewUpdatesPending: 0,
+  });
+
+  // Track the last resource we encoded in the URL to avoid unnecessary updates
+  const lastEncodedResourceRef = useRef<string | null>(null);
+
+  // Replace updateUrlWithResource with the utility function
+  const updateUrlWithResource = (resourceId: string | undefined) => {
+    if (!mapInstanceRef.current) return;
+    
+    const map = mapInstanceRef.current;
+    const currentView = map.getView();
+    const zoom = Math.round(currentView.getZoom() || 0);
+    const center = currentView.getCenter();
+    
+    if (!center || zoom === undefined) return;
+    
+    // Use the utility function
+    updateMapHash(zoom, center as [number, number], resourceId);
+    
+    if (resourceId) {
+      Logger.debug("misc", `[ResourceDebug] Updated URL with resource: ${resourceId}`);
+    }
+  };
 
   // === OpenLayers Setup Effect ===
   useEffect(() => {
+    Logger.debug("misc", `[HeatmapDebug] Map setup starting. mapRef.current: ${!!mapRef.current}, mapId: ${!!mapId}`);
+    
     if (!mapRef.current || !mapId) {
+      Logger.debug("misc", `[HeatmapDebug] Map setup aborted - missing refs or mapId`);
       return;
     }
     if (mapInstanceRef.current) {
@@ -242,6 +225,7 @@ const EthyrialMapFull: React.FC<Props> = ({
       const maxY = 4;
       const mapExtent = [0, 0, 6000, 5000];
 
+      Logger.debug("misc", `[HeatmapDebug] Creating projection with extent: ${JSON.stringify(mapExtent)}`);
       const customProjection = new Projection({
         code: "pixel-coords", // More descriptive code
         units: "pixels",
@@ -260,22 +244,38 @@ const EthyrialMapFull: React.FC<Props> = ({
       // Initial view settings (will be potentially overridden by URL hash)
       let initialCenter = getCenter(mapExtent);
       let initialZoom = 4;
+      let initialResourceId: string | null = null;
 
-      // Check URL hash for initial state
+      // Change the hash parsing to use the utility function
+      // When you get to the URL hash parsing section:
       const hash = window.location.hash.replace("#map=", "");
       if (hash) {
-        const parts = hash.split("/");
-        if (parts.length === 3) {
-          const z = parseInt(parts[0], 10);
-          const x = parseInt(parts[1], 10);
-          const y = parseInt(parts[2], 10);
-          if (!isNaN(z) && !isNaN(x) && !isNaN(y)) {
-            initialZoom = z;
-            initialCenter = [x, y];
+        const parsedHash = parseMapHash(hash);
+        if (parsedHash) {
+          initialZoom = parsedHash.zoom;
+          initialCenter = parsedHash.center;
+          Logger.info(
+            "misc",
+            `Setting initial view from URL: zoom=${parsedHash.zoom}, center=[${parsedHash.center.join(',')}]`
+          );
+          
+          if (parsedHash.resourceId) {
+            initialResourceId = parsedHash.resourceId;
             Logger.info(
               "misc",
-              `Setting initial view from URL: zoom=${z}, center=[${x},${y}]`
+              `Found resource in URL hash: ${initialResourceId}`
             );
+            
+            // Set the last encoded resource ref to avoid immediate re-encoding
+            lastEncodedResourceRef.current = initialResourceId;
+            
+            // Trigger resource selection callback if provided
+            if (onResourceSelect) {
+              // Use setTimeout to ensure this happens after component initialization
+              setTimeout(() => {
+                onResourceSelect(initialResourceId);
+              }, 0);
+            }
           }
         }
       }
@@ -317,23 +317,40 @@ const EthyrialMapFull: React.FC<Props> = ({
       });
 
       // 4. Vector Source & Layers
+      Logger.debug("misc", `[HeatmapDebug] Creating vector sources and layers`);
       vectorSourceRef.current = new VectorSource();
       heatmapSourceRef.current = new VectorSource();
+      
+      Logger.debug("misc", `[HeatmapDebug] Vector sources created: vectorSource=${!!vectorSourceRef.current}, heatmapSource=${!!heatmapSourceRef.current}`);
+      
       const tileLayer = new TileLayer({ source: tileSource });
       const markerLayer = new VectorLayer({
         source: vectorSourceRef.current,
         style: (feature) => getMarkerStyle(feature, labelCategoryIds),
         zIndex: 2,
+        // Make marker layer properly visible at all zoom levels
+        minZoom,
+        maxZoom,
       });
+      
+      Logger.debug("misc", `[HeatmapDebug] Creating heatmap layer`);
+      
+      // Get initial heatmap parameters based on initial zoom
+      const initialHeatmapParams = getHeatmapParams(initialZoom);
+      
+      // Create heatmap layer with initial parameters
       const heatmapLayer = new HeatmapLayer({
         source: heatmapSourceRef.current,
-        blur: 15,
-        radius: 10,
+        blur: initialHeatmapParams.blur,
+        radius: initialHeatmapParams.radius,
         weight: (feature) => feature.get("weight") || 1,
-        opacity: 0.7,
+        opacity: initialHeatmapParams.opacity,
         zIndex: 1,
+        // Add custom gradient for better visibility
+        gradient: ['#0000ff', '#00ffff', '#00ff00', '#ffff00', '#ff0000'],
       });
       heatmapLayerRef.current = heatmapLayer;
+      Logger.debug("misc", `[HeatmapDebug] Heatmap layer created: ${!!heatmapLayerRef.current}`);
 
       // 5. Create View
       const view = new View({
@@ -347,6 +364,7 @@ const EthyrialMapFull: React.FC<Props> = ({
       });
 
       // 6. Create Map Instance
+      Logger.debug("misc", `[HeatmapDebug] Creating map instance with layers`);
       const map = new Map({
         target: mapRef.current,
         layers: [tileLayer, heatmapLayer, markerLayer],
@@ -354,30 +372,131 @@ const EthyrialMapFull: React.FC<Props> = ({
         controls: [], // Start with no controls
       });
       mapInstanceRef.current = map;
+      Logger.debug("misc", `[HeatmapDebug] Map instance created: ${!!mapInstanceRef.current}`);
+
+      // Add a listener to detect when map is actually rendered for the first time
+      map.once('rendercomplete', () => {
+        Logger.debug("misc", `[HeatmapDebug] Map initial render complete`);
+        heatmapInitializedRef.current = true;
+        
+        // Force an update of the heatmap after initialization is confirmed
+        if (heatmapData && heatmapSourceRef.current) {
+          Logger.debug("misc", `[HeatmapDebug] Forcing heatmap update after initial render`);
+          handleHeatmapUpdate(heatmapData);
+        }
+      });
+
+      // Add listener to update heatmap parameters on zoom change
+      // Keep track of last zoom to avoid unnecessary updates
+      let lastProcessedZoom = initialZoom;
+      
+      // Use a timeout to debounce parameter updates during continuous zooming
+      let zoomTimeoutId: number | undefined;
+      
+      map.getView().on('change:resolution', () => {
+        const currentZoom = Math.round(map.getView().getZoom() || 0);
+        
+        // Skip if no heatmap layer or zoom hasn't changed
+        if (!heatmapLayerRef.current || currentZoom === lastProcessedZoom) return;
+        
+        // Update last processed zoom
+        lastProcessedZoom = currentZoom;
+        
+        // Clear any pending zoom timeout
+        clearTimeout(zoomTimeoutId);
+        
+        // Wait for zooming to settle before applying parameter changes
+        zoomTimeoutId = window.setTimeout(() => {
+          if (!heatmapLayerRef.current) return;
+          
+          // Get parameters for current zoom level
+          const params = getHeatmapParams(currentZoom);
+          
+          // Apply new parameters without logging to reduce console spam
+          heatmapLayerRef.current.setRadius(params.radius);
+          heatmapLayerRef.current.setBlur(params.blur);
+          heatmapLayerRef.current.setOpacity(params.opacity);
+        }, 50); // Apply parameters after zooming settles
+      });
 
       if (onMapReady) {
         onMapReady(map);
       }
 
+      // Add listeners for drag debugging
+      map.on('pointerdrag', (event) => {
+        // Set dragging state to true
+        interactionStateRef.current.isDragging = true;
+        interactionStateRef.current.dragCount++;
+        
+        // Log every 10th drag event to avoid flooding console
+        if (interactionStateRef.current.dragCount % 10 === 0) {
+          Logger.debug("misc", `[DragDebug] Drag in progress (#${interactionStateRef.current.dragCount})`);
+        }
+        
+        // Cancel any pending view updates during drag
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          interactionStateRef.current.viewUpdatesPending--;
+          Logger.debug("misc", `[DragDebug] Cancelled pending view update during drag (${interactionStateRef.current.viewUpdatesPending} pending)`);
+        }
+      });
+
+      // Add pointer up to catch drag end
+      map.getViewport().addEventListener('pointerup', () => {
+        if (interactionStateRef.current.isDragging) {
+          const now = performance.now();
+          const timeSinceLastDrag = now - interactionStateRef.current.lastDragEnd;
+          
+          // Log and track quick attempts at dragging
+          if (timeSinceLastDrag < 200) {
+            interactionStateRef.current.quickDragAttempts++;
+            Logger.debug("misc", `[DragDebug] Quick drag detected! ${timeSinceLastDrag.toFixed(0)}ms since last drag (attempt #${interactionStateRef.current.quickDragAttempts})`);
+          } else {
+            interactionStateRef.current.quickDragAttempts = 0;
+          }
+          
+          interactionStateRef.current.isDragging = false;
+          interactionStateRef.current.lastDragEnd = now;
+          Logger.debug("misc", `[DragDebug] Drag ended after ${interactionStateRef.current.dragCount} movements`);
+          interactionStateRef.current.dragCount = 0;
+        }
+      });
+
       // Define handleMoveEnd and store it in the ref
       moveEndHandlerRef.current = () => {
+        // Log moveend firing
+        Logger.debug("misc", `[DragDebug] moveend triggered, isDragging=${interactionStateRef.current.isDragging}`);
+        
+        // Immediately ensure the map is interactive - do this BEFORE any other operations
+        if (map.getTargetElement()) {
+          requestAnimationFrame(() => {
+            if (map.getTargetElement()) {
+              map.getTargetElement().style.pointerEvents = 'auto';
+              Logger.debug("misc", `[DragDebug] Ensured pointer-events:auto on moveend`);
+            }
+          });
+        }
+        
         // Clear previous timeout using the ref
-        clearTimeout(timeoutIdRef.current);
-        // Set new timeout and store its ID in the ref
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          interactionStateRef.current.viewUpdatesPending--;
+          Logger.debug("misc", `[DragDebug] Cleared existing timeout (${interactionStateRef.current.viewUpdatesPending} pending)`);
+        }
+        
+        // Set new timeout and store its ID in the ref - reduce timeout to avoid delay
+        interactionStateRef.current.viewUpdatesPending++;
         timeoutIdRef.current = window.setTimeout(() => {
+          interactionStateRef.current.viewUpdatesPending--;
           const currentView = map.getView();
           const zoom = currentView.getZoom();
           const center = currentView.getCenter();
 
           // Update URL Hash
           if (center && zoom !== undefined) {
-            const roundedZoom = Math.round(zoom);
-            const roundedCenter = [
-              Math.round(center[0]),
-              Math.round(center[1]),
-            ];
-            const newHash = `#map=${roundedZoom}/${roundedCenter[0]}/${roundedCenter[1]}`;
-            window.history.replaceState(null, "", newHash);
+            // Use the updateMapHash utility
+            updateUrlWithResource(selectedResourceId);
           }
 
           // Trigger onViewChange callback
@@ -385,7 +504,15 @@ const EthyrialMapFull: React.FC<Props> = ({
             const extent = currentView.calculateExtent(map.getSize());
             onViewChange(Math.round(zoom), extent);
           }
-        }, 150);
+          
+          // Log that map movement has triggered a view update
+          Logger.debug("misc", `[DragDebug] View updated: zoom=${zoom}, center=${center?.join(',')}`);
+          
+          // Triple-ensure map is interactive after view update
+          if (map.getTargetElement()) {
+            map.getTargetElement().style.pointerEvents = 'auto';
+          }
+        }, 50); // Reduced from 150ms to make it feel more responsive
       };
 
       // Attach listener using the handler ref
@@ -433,6 +560,9 @@ const EthyrialMapFull: React.FC<Props> = ({
         } else if (overlay) {
           overlay.setPosition(undefined);
         }
+        
+        // Debug log when map is clicked
+        Logger.debug("misc", `[HeatmapDebug] Map clicked at pixel ${evt.pixel.join(',')}, feature=${!!feature}`);
       });
 
       // Add Pointer Move Handler (change cursor)
@@ -465,9 +595,40 @@ const EthyrialMapFull: React.FC<Props> = ({
       }
       mapInstanceRef.current = null;
       moveEndHandlerRef.current = null; // Clear handler ref
+      heatmapInitializedRef.current = false;
       Logger.info("misc", "OpenLayers map disposed");
     };
-  }, [mapId, labelCategoryIds, onMapReady, onViewChange]);
+  }, [mapId, labelCategoryIds, onMapReady, onViewChange, onResourceSelect, selectedResourceId]);
+
+  // Track if we're currently processing a heatmap update to prevent flash
+  const isProcessingHeatmapRef = useRef<boolean>(false);
+
+  // Replace the updateHeatmap function with a wrapper that uses the utility function
+  const handleHeatmapUpdate = (data: HeatmapData | null) => {
+    // Skip if already processing to avoid cascading updates
+    if (isProcessingHeatmapRef.current) {
+      Logger.debug("misc", `[HeatmapDebug] Skipping duplicate heatmap update during processing`);
+      return;
+    }
+
+    // Set processing flag
+    isProcessingHeatmapRef.current = true;
+    
+    try {
+      if (!heatmapSourceRef.current || !heatmapLayerRef.current || !mapInstanceRef.current) {
+        Logger.warn("misc", new Error("[HeatmapDebug] Missing required references for heatmap update"));
+        return;
+      }
+      
+      // Use the utility function
+      updateHeatmap(data, heatmapSourceRef.current, heatmapLayerRef.current);
+    } catch (e) {
+      Logger.error("misc", new Error(`[HeatmapDebug] Exception in heatmap update wrapper: ${e}`));
+    } finally {
+      // Always reset processing flag
+      isProcessingHeatmapRef.current = false;
+    }
+  };
 
   // === Marker Update/Filter Effect ===
   useEffect(() => {
@@ -508,44 +669,170 @@ const EthyrialMapFull: React.FC<Props> = ({
 
   // === Heatmap Update Effect ===
   useEffect(() => {
-    if (!heatmapSourceRef.current) {
+    // Skip empty updates
+    if (!heatmapData || heatmapData.points.length === 0) {
+      Logger.debug("misc", `[HeatmapDebug] Skipping empty heatmap update`);
       return;
     }
-
-    heatmapSourceRef.current.clear();
-
-    if (heatmapData && heatmapData.points.length > 0) {
-      Logger.debug(
-        "misc",
-        `Updating heatmap with ${heatmapData.points.length} points.`
-      );
-      const heatmapFeatures = heatmapData.points
-        .map((point) => {
-          try {
-            const feature = new Feature({
-              geometry: new Point([point.x, point.y]),
-              weight: point.weight,
-            });
-            return feature;
-          } catch (error) {
-            Logger.error(
-              `Error creating heatmap feature for point at [${point.x}, ${point.y}]`,
-              error
-            );
-            return null;
-          }
-        })
-        .filter(Boolean) as Feature[];
-
-      heatmapSourceRef.current.addFeatures(heatmapFeatures);
-      Logger.debug(
-        "misc",
-        `Added ${heatmapFeatures.length} features to heatmap source.`
-      );
+    
+    Logger.debug("misc", `[HeatmapDebug] Heatmap effect triggered: data=${!!heatmapData}, points=${heatmapData?.points?.length || 0}`);
+    
+    // Check if map is initialized
+    const mapInitialized = !!mapInstanceRef.current;
+    Logger.debug("misc", `[HeatmapDebug] Map initialized: ${mapInitialized}`);
+    
+    // Only proceed with update if initialized or schedule update for later
+    if (mapInitialized) {
+      Logger.debug("misc", `[HeatmapDebug] Proceeding with immediate heatmap update`);
+      
+      // Use requestAnimationFrame to ensure we're not disrupting any current renders
+      requestAnimationFrame(() => {
+        handleHeatmapUpdate(heatmapData);
+      });
     } else {
-      Logger.debug("misc", "Clearing heatmap layer as no data was provided.");
+      Logger.debug("misc", `[HeatmapDebug] Map not initialized, update will be triggered after initialization`);
+      // The updateHeatmap will be called by the 'rendercomplete' event handler
     }
   }, [heatmapData]);
+  
+  // === Enhanced drag prevention effects ===
+  useEffect(() => {
+    // Add a cleanup function for the movestart event
+    if (mapInstanceRef.current && heatmapLayerRef.current) {
+      const map = mapInstanceRef.current;
+      const heatmapLayer = heatmapLayerRef.current;
+      
+      // Save original heatmap visibility state on movestart
+      const handleMoveStart = () => {
+        Logger.debug("misc", `[DragDebug] movestart triggered`);
+        
+        // Set flag to indicate we're dragging the map
+        interactionStateRef.current.isDragging = true;
+        
+        if (isProcessingHeatmapRef.current) {
+          // Already processing a heatmap update during move - prevent flash
+          Logger.debug("misc", `[DragDebug] Cancelled heatmap processing during movestart`);
+          isProcessingHeatmapRef.current = false;
+        }
+        
+        // Ensure the map target is ready for interaction
+        if (map.getTargetElement()) {
+          map.getTargetElement().style.pointerEvents = 'auto';
+        }
+      };
+
+      // Add handler for preventing position reset on moveend
+      const handleMoveEnd = () => {
+        Logger.debug("misc", `[DragDebug] Custom moveend handler triggered`);
+        
+        // Reset drag flag
+        interactionStateRef.current.isDragging = false;
+        
+        // Aggressive approach: use multiple RAF calls to ensure map stays interactive
+        const makeInteractive = () => {
+          if (map && map.getTargetElement()) {
+            map.getTargetElement().style.pointerEvents = 'auto';
+            // Force layout calculation to ensure change is applied
+            void map.getTargetElement().offsetHeight;
+          }
+        };
+        
+        // Immediately make map ready for next interaction
+        makeInteractive();
+        
+        // Also ensure it happens in next animation frame
+        requestAnimationFrame(() => {
+          makeInteractive();
+          // And again after a brief delay to catch potential resets
+          setTimeout(makeInteractive, 0);
+          setTimeout(makeInteractive, 10);
+          setTimeout(makeInteractive, 50);
+        });
+      };
+      
+      // Add handler for pointer down to track quick drags
+      const handlePointerDown = () => {
+        if (performance.now() - interactionStateRef.current.lastDragEnd < 100) {
+          Logger.debug("misc", `[DragDebug] Quick pointer down detected after drag!`);
+          // Ensure map is interactive
+          if (map.getTargetElement()) {
+            map.getTargetElement().style.pointerEvents = 'auto';
+          }
+        }
+      };
+      
+      map.on('movestart', handleMoveStart);
+      map.on('moveend', handleMoveEnd);
+      
+      // Add pointerdown listener directly to viewport element
+      const viewport = map.getViewport();
+      if (viewport) {
+        viewport.addEventListener('pointerdown', handlePointerDown);
+      }
+      
+      return () => {
+        map.un('movestart', handleMoveStart);
+        map.un('moveend', handleMoveEnd);
+        if (viewport) {
+          viewport.removeEventListener('pointerdown', handlePointerDown);
+        }
+      };
+    }
+  }, []);
+
+  // Define moveEndHandlerRef setup separate from normal moveend (position reset issue)
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    
+    const map = mapInstanceRef.current;
+    
+    // Define handleMoveEnd and store it in the ref
+    moveEndHandlerRef.current = () => {
+      // Clear previous timeout using the ref
+      clearTimeout(timeoutIdRef.current);
+      
+      // Set new timeout and store its ID in the ref
+      timeoutIdRef.current = window.setTimeout(() => {
+        const currentView = map.getView();
+        const zoom = currentView.getZoom();
+        const center = currentView.getCenter();
+
+        // Update URL Hash
+        if (center && zoom !== undefined) {
+          const roundedZoom = Math.round(zoom);
+          const roundedCenter = [
+            Math.round(center[0]),
+            Math.round(center[1]),
+          ];
+          const newHash = `#map=${roundedZoom}/${roundedCenter[0]}/${roundedCenter[1]}`;
+          window.history.replaceState(null, "", newHash);
+        }
+
+        // Trigger onViewChange callback
+        if (onViewChange && zoom !== undefined) {
+          const extent = currentView.calculateExtent(map.getSize());
+          onViewChange(Math.round(zoom), extent);
+        }
+        
+        // Log that map movement has triggered a view update
+        Logger.debug("misc", `[DragDebug] Handler view updated: zoom=${zoom}, center=${center?.join(',')}`);
+        
+        // Ensure map is interactive
+        if (map.getTargetElement()) {
+          map.getTargetElement().style.pointerEvents = 'auto';
+        }
+      }, 50); // Reduced timeout
+    };
+
+    // Attach listener using the handler ref
+    map.on("moveend", moveEndHandlerRef.current);
+    
+    return () => {
+      if (map && moveEndHandlerRef.current) {
+        map.un("moveend", moveEndHandlerRef.current);
+      }
+    };
+  }, [onViewChange]);
 
   if (error) {
     return <MapContainer>Error: {error}</MapContainer>;

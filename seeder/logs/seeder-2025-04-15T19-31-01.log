@@ -1,0 +1,43 @@
+[INFO] 2025-04-15T19:31:01.283Z - Seeder started at 2025-04-15T19:31:01.283Z
+[INFO] 2025-04-15T19:31:01.285Z - Log file: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\logs\seeder-2025-04-15T19-31-01.log
+[INFO] 2025-04-15T19:31:01.286Z - Starting Unified Seeder...
+[INFO] 2025-04-15T19:31:01.286Z - Starting step: Redis Cache Flush
+[INFO] 2025-04-15T19:31:01.299Z - Completed step: Redis Cache Flush in 0.01s
+[INFO] 2025-04-15T19:31:01.300Z - Starting step: Python Map Processing
+[INFO] 2025-04-15T19:31:01.300Z - Python logs will be written to: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs
+[INFO] 2025-04-15T19:31:40.218Z - Python extraction completed. Check logs in: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\output\extracted_tiles\logs\minimap_extract_*.log
+[INFO] 2025-04-15T19:31:40.218Z - Completed step: Python Map Processing in 38.92s
+[INFO] 2025-04-15T19:31:40.219Z - Starting step: C# Marker Extraction
+[INFO] 2025-04-15T19:31:41.984Z - Completed step: C# Marker Extraction in 1.76s
+[INFO] 2025-04-15T19:31:41.985Z - Starting step: Core Database Seeding
+[INFO] 2025-04-15T19:31:42.039Z - Seeding core data (skills, rarities)...
+[INFO] 2025-04-15T19:31:42.066Z - Seeding map data (icons, categories, maps, markers)...
+[INFO] 2025-04-15T19:31:42.252Z - Seeding items and icons...
+[INFO] 2025-04-15T19:31:42.252Z - Icon upload is ENABLED - will upload icons to S3
+[INFO] 2025-04-15T19:32:51.219Z - Seeding custom domains...
+[INFO] 2025-04-15T19:32:51.220Z - Using local.test derived from PUBLIC_URL
+[INFO] 2025-04-15T19:32:51.221Z - Using base domain: local.test
+[INFO] 2025-04-15T19:32:51.230Z - Created custom domain: map.local.test
+[INFO] 2025-04-15T19:32:51.235Z - Created custom domain: app.local.test
+[INFO] 2025-04-15T19:32:51.235Z - Custom Domains: 2 created, 0 updated
+[INFO] 2025-04-15T19:32:51.235Z - Core database seeding transaction committed
+[INFO] 2025-04-15T19:32:51.245Z - Completed step: Core Database Seeding in 69.26s
+[INFO] 2025-04-15T19:32:51.245Z - Starting step: Resource Seeding
+[INFO] 2025-04-15T19:32:51.246Z - Using batch size of 100 for database operations
+[INFO] 2025-04-15T19:35:53.224Z - Completed step: Resource Seeding in 181.98s
+[INFO] 2025-04-15T19:35:53.225Z - Starting step: Map Tile Upload
+[INFO] 2025-04-15T19:35:53.225Z - Map tile upload is ENABLED - will upload tiles to S3
+[INFO] 2025-04-15T19:36:28.771Z - Completed step: Map Tile Upload in 35.55s
+[INFO] 2025-04-15T19:36:28.772Z - Unified Seeder finished successfully in 327.49 seconds
+[INFO] 2025-04-15T19:36:28.772Z - 
+====================
+SEEDER SUMMARY
+====================
+Total runtime: 327.51s
+
+Records processed:
+- Custom Domains: 2
+
+Seeder completed at 2025-04-15T19:36:28.772Z
+====================
+

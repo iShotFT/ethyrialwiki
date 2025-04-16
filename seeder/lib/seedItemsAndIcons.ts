@@ -22,6 +22,7 @@ import {
   NAMESPACE_UUID,
 } from "./utils";
 import env from "@server/env"; // For S3 bucket name
+import { seederLogger } from "./seederLogger";
 
 const CONCURRENCY = 10; // Number of parallel uploads
 const TARGET_S3_FOLDER = "icons"; // Target folder within the bucket
@@ -301,6 +302,7 @@ export async function seedItemsAndIcons(
     "utils",
     `Seeded/Updated ${iconDataToSeed.length} unique GameIcons.`
   );
+  seederLogger.recordCounts("Game Icons", iconDataToSeed.length, 0);
 
   // 4. Prepare and Seed Categories (Ores, Bars)
   const oreIcons = uniqueIconsToSeed.filter((icon) => icon.type === "Ore");
@@ -346,6 +348,7 @@ export async function seedItemsAndIcons(
     "utils",
     `Seeded/Updated ${categoriesToSeed.length} GameItemCategories (Ores, Bars).`
   );
+  seederLogger.recordCounts("Item Categories", categoriesToSeed.length, 0);
   const categoryIdMap = new Map(categoriesToSeed.map((c) => [c.slug, c.id]));
 
   // 5. Prepare and Seed GameItems (Ores, Bars)
@@ -438,6 +441,7 @@ export async function seedItemsAndIcons(
     ],
   });
   Logger.info("utils", `Seeded/Updated ${itemsToSeed.length} GameItems.`);
+  seederLogger.recordCounts("Game Items", itemsToSeed.length, 0);
 
   // 6. Seed Join Table: GameItemItemCategory
   const itemCategoryRelations = itemsToSeed
@@ -464,4 +468,5 @@ export async function seedItemsAndIcons(
     "utils",
     `Seeded/Updated ${itemCategoryRelations.length} GameItem <-> Category relationships.`
   );
+  seederLogger.recordCounts("Item-Category Relations", itemCategoryRelations.length, 0);
 }

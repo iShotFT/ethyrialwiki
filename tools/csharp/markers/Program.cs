@@ -5,21 +5,23 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.Json; // Added for JSON serialization
-using System.Text.Json.Serialization; // Added for attributes like [JsonPropertyName]
-using RPGLibrary; // For Position
-// Removed 'using Game;' since types are now global
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using RPGLibrary;
 
-// Main program class
 public class Program
 {
-    // Default paths removed, we'll use command-line args now
-    // const string InputFilePath = "../../../tools/scripts/source/markers.minimapdata";
-    // const string OutputJsonPath = "markers_output.json";
-
     public static void Main(string[] args)
     {
-        // --- New Argument Parsing for Re-serialization ---
+        bool nonInteractive = false;
+        
+        if (args.Contains("--non-interactive"))
+        {
+            nonInteractive = true;
+            args = args.Where(arg => arg != "--non-interactive").ToArray();
+            Console.WriteLine("Running in non-interactive mode (will not prompt for input)");
+        }
+
         if (args.Length == 3 && args[0].Equals("--reserialize", StringComparison.OrdinalIgnoreCase))
         {
             string sourcePath = args[1];
@@ -30,9 +32,9 @@ public class Program
             if (!File.Exists(sourcePath))
             {
                 Console.Error.WriteLine($"Error: Source input file not found: '{sourcePath}'");
-                ExitApp();
-            return;
-        }
+                ExitApp(nonInteractive);
+                return;
+            }
 
             bool reserializeSuccess = MarkerSerializer.TrySerializeMarkers(sourcePath, outputPath);
 
@@ -41,25 +43,22 @@ public class Program
                 Console.WriteLine("Re-serialization process completed successfully.");
             }
             else
-        {
+            {
                 Console.Error.WriteLine("Re-serialization process failed.");
-        }
-            ExitApp(); // Exit after attempting re-serialization
+            }
+            ExitApp(nonInteractive);
             return;
         }
 
-        // --- Existing Drag-and-Drop / Single File Processing Logic ---
         string? inputFilePath = null;
 
-        // Check for command-line arguments (drag-and-drop passes the file path)
-        if (args.Length == 1) // Expecting only one argument for drag-and-drop
+        if (args.Length == 1)
         {
             inputFilePath = args[0];
             Console.WriteLine($"Received file path from arguments (single file mode): {inputFilePath}");
         }
         else if (args.Length > 1 && !args[0].StartsWith("--"))
         {
-             // If more than one arg and the first doesn't look like a switch, assume it's drag-and-drop with spaces?
              inputFilePath = string.Join(" ", args);
              Console.WriteLine($"Received file path possibly containing spaces: {inputFilePath}");
         }
@@ -67,32 +66,29 @@ public class Program
         {
             Console.WriteLine("No file path provided for single file processing.");
             PrintUsage();
-            ExitApp();
+            ExitApp(nonInteractive);
             return;
         }
 
-        // --- File Existence Check ---
         if (string.IsNullOrEmpty(inputFilePath) || !File.Exists(inputFilePath))
         {
             Console.Error.WriteLine($"Error: Input file not found or path is invalid: '{inputFilePath ?? "NULL"}'");
             PrintUsage();
-            ExitApp();
+            ExitApp(nonInteractive);
             return;
         }
 
         Console.WriteLine($"Processing file: {Path.GetFullPath(inputFilePath)}");
 
-        // --- Determine File Type and Process ---
         string fileExtension = Path.GetExtension(inputFilePath).ToLowerInvariant();
         string baseOutputPath = Path.Combine(Path.GetDirectoryName(inputFilePath) ?? ".", Path.GetFileNameWithoutExtension(inputFilePath));
-        // --- Extract Map Name from Directory ---
         string mapName = "UNKNOWN_MAP";
         try
         {
             string? directoryPath = Path.GetDirectoryName(inputFilePath);
             if (!string.IsNullOrEmpty(directoryPath))
             {
-                mapName = Path.GetFileName(directoryPath); // Gets the last part of the directory path
+                mapName = Path.GetFileName(directoryPath);
                 Console.WriteLine($"Extracted map name from path: {mapName}");
                      }
                  }
@@ -159,13 +155,9 @@ public class Program
                 break;
         }
 
-        // Keep console open until user presses Enter, especially if run directly
-        ExitApp();
-
-        // --- REMOVED old deserialization and processing logic - MOVED TO MarkerProcessor.cs ---
+        ExitApp(nonInteractive);
     }
 
-    // Helper function to print usage instructions
     private static void PrintUsage()
     {
         Console.WriteLine();
@@ -175,52 +167,42 @@ public class Program
         Console.WriteLine("     markers.exe \"<path_to_file>\"");
         Console.WriteLine("  3. Run from command line to re-serialize markers:");
         Console.WriteLine("     markers.exe --reserialize \"<source_minimapdata>\" \"<output_minimapdata>\"");
+        Console.WriteLine("  4. Add --non-interactive flag to skip 'Press Enter to exit' prompt (useful for automation)");
+        Console.WriteLine("     markers.exe --non-interactive \"<path_to_file>\"");
         Console.WriteLine();
     }
 
-    // Helper function to wait for user input and exit
-    private static void ExitApp()
+    private static void ExitApp(bool nonInteractive = false)
     {
-        if (Environment.UserInteractive)
+        if (Environment.UserInteractive && !nonInteractive)
         {
             Console.WriteLine("Processing complete. Press Enter to exit.");
             Console.ReadLine();
         }
+        else if (!nonInteractive)
+        {
+            Console.WriteLine("Processing complete.");
+        }
     }
 }
 
-// --- Custom Binder (Keep this class definition as MarkerProcessor might need it) ---
-// Although moved logic, the binder might be generally useful or specifically needed by the MarkerProcessor
 public sealed class CustomSerializationBinder : SerializationBinder
 {
     public override Type? BindToType(string assemblyName, string typeName)
     {
-        // First, handle the known types explicitly, mapping them to our local definitions
-        // This ignores the assemblyName from the file and uses our tool's types.
-
-        // Marker types
         if (typeName.Contains("MinimapMarkerInfo")) return typeof(MinimapMarkerInfo);
         if (typeName.Contains("MinimapCustomMarkerInfo")) return typeof(MinimapCustomMarkerInfo);
         if (typeName.Contains("RPGLibrary.Position")) return typeof(RPGLibrary.Position);
         if (typeName.Contains("CustomMarkerTypes")) return typeof(CustomMarkerTypes);
-        // Handle generic lists specifically for markers
         if (typeName.StartsWith("System.Collections.Generic.List`1[[MinimapMarkerInfo")) return typeof(List<MinimapMarkerInfo>);
-        if (typeName.StartsWith("System.Collections.Generic.List`1[[MinimapCustomMarkerInfo")) return typeof(List<MinimapCustomMarkerInfo>); // Less likely but possible
+        if (typeName.StartsWith("System.Collections.Generic.List`1[[MinimapCustomMarkerInfo")) return typeof(List<MinimapCustomMarkerInfo>);
 
-        // WorldPartCache types
         if (typeName.Contains("WorldPartCache")) return typeof(WorldPartCacheSerializable);
-        // Explicitly map TileData when looking for it within the context of WorldPartCache
-        // The Contains check handles potential namespace variations in the serialized data
         if (typeName.Contains("TileData")) return typeof(RPGLibrary.Map.TileDataSerializable);
-        // Also handle Directions enum if it was serialized directly (less likely for TileData field)
         if (typeName.Contains("Directions")) return typeof(Directions);
 
-        // WorldSliceInfo types
         if (typeName.Contains("SerializedWorldSliceInfo")) return typeof(SerializedWorldSliceInfoSerializable);
-        // It uses int[][], which doesn't need special binding.
 
-
-        // --- Fallback Logic (Keep for potential unknown types or complex generics) ---
         Console.WriteLine($"Binder Warning: Explicit mapping failed for Type '{typeName}' (Assembly: '{assemblyName}'). Attempting fallback resolution...");
 
         Type? typeToDeserialize = null;
@@ -229,31 +211,26 @@ public sealed class CustomSerializationBinder : SerializationBinder
 
         try
         {
-            // 1. Try the fully qualified name in the *current* executing assembly
             typeToDeserialize = Type.GetType(qualifiedTypeNameCurrentAssembly, throwOnError: false);
 
-            // 2. Try the type name as provided (might resolve if assembly name matches or is findable)
             if (typeToDeserialize == null)
             {
                  typeToDeserialize = Type.GetType(typeName + ", " + assemblyName, throwOnError: false);
             }
 
-            // 3. Try just the type name (global namespace or implicitly loaded assembly)
             if (typeToDeserialize == null)
             {
                 typeToDeserialize = Type.GetType(typeName, throwOnError: false);
             }
 
-             // 4. Explicit namespace checks (as added before, useful for RPGLibrary types)
              if (typeToDeserialize == null)
              {
                 string rpgLibTypeName = $"RPGLibrary.{typeName}, {currentAssembly}";
                 typeToDeserialize = Type.GetType(rpgLibTypeName, throwOnError: false);
                 if (typeToDeserialize == null) {
-                     rpgLibTypeName = $"RPGLibrary.Map.{typeName}, {currentAssembly}"; // Check specific sub-namespace
+                     rpgLibTypeName = $"RPGLibrary.Map.{typeName}, {currentAssembly}";
                      typeToDeserialize = Type.GetType(rpgLibTypeName, throwOnError: false);
                 }
-                 // Add other known namespaces if necessary (e.g., UnityEngine stubs)
                  if (typeToDeserialize == null)
                  {
                      string unityEngineStubTypeName = $"UnityEngine.{typeName}, {currentAssembly}";

@@ -5,11 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using RPGLibrary; // For Position, MinimapMarkerInfo etc.
+using RPGLibrary;
 
 public static class MarkerSerializer
 {
-    // Returns true if processing was successful, false otherwise.
     public static bool TrySerializeMarkers(string sourceInputPath, string outputFilePath)
     {
         Console.WriteLine($"Attempting to read markers from: {Path.GetFullPath(sourceInputPath)}");
@@ -17,9 +16,8 @@ public static class MarkerSerializer
 
         object? deserializedObject = null;
         BinaryFormatter readerFormatter = new BinaryFormatter();
-        readerFormatter.Binder = new CustomSerializationBinder(); // Use binder for reading
+        readerFormatter.Binder = new CustomSerializationBinder();
 
-        // --- Deserialization from Source ---
         try
         {
             using (FileStream stream = new FileStream(sourceInputPath, FileMode.Open, FileAccess.Read))
@@ -34,34 +32,28 @@ public static class MarkerSerializer
         {
             Console.Error.WriteLine($"Error deserializing source file '{sourceInputPath}': {ex.Message}");
             if (ex.InnerException != null) Console.Error.WriteLine($"  Inner Exception: {ex.InnerException.Message}");
-            return false; // Indicate failure
+            return false;
         }
 
         if (deserializedObject == null)
         {
             Console.Error.WriteLine("Error: Deserialized object from source is null.");
-            return false; // Indicate failure
+            return false;
         }
 
         Console.WriteLine($"Source deserialized object type: {deserializedObject.GetType().FullName}");
 
-        // --- Type Casting (Re-use logic from MarkerProcessor for robustness) ---
-        // We need the actual collection object to re-serialize
         object? markerCollectionToSerialize = null;
         if (deserializedObject is List<MinimapMarkerInfo> || deserializedObject is ArrayList)
         {
-             // ArrayList or List<T> can often be serialized directly
              markerCollectionToSerialize = deserializedObject;
              Console.WriteLine("Using deserialized List/ArrayList directly for serialization.");
         }
-        else if (deserializedObject is IEnumerable enumerable) // Handle other IEnumerables
+        else if (deserializedObject is IEnumerable enumerable)
         {
-             // Attempt to cast to List<MinimapMarkerInfo> for serialization
-             // BinaryFormatter often works better with concrete collection types like List<> or arrays
              Console.WriteLine($"Deserialized as generic IEnumerable ({deserializedObject.GetType().FullName}). Attempting to cast to List for serialization.");
              try
              {
-                 // Need using System.Linq;
                  markerCollectionToSerialize = enumerable.Cast<MinimapMarkerInfo>().ToList();
                  Console.WriteLine($"Successfully cast IEnumerable elements to List<MinimapMarkerInfo>.");
              }
@@ -75,16 +67,12 @@ public static class MarkerSerializer
         else
         {
             Console.Error.WriteLine($"Error: Deserialized object is not a recognized collection type suitable for serialization. Actual type: {deserializedObject.GetType().FullName}");
-            return false; // Indicate failure
+            return false;
         }
 
-
-        // --- Re-serialization to Output ---
         if (markerCollectionToSerialize != null)
         {
             BinaryFormatter writerFormatter = new BinaryFormatter();
-            // *** DO NOT set a binder for writing ***
-            // We want it to use the assembly/type info of THIS tool's environment.
 
             try
             {
@@ -95,13 +83,13 @@ public static class MarkerSerializer
                     #pragma warning restore SYSLIB0011
                 }
                 Console.WriteLine($"Successfully re-serialized marker data to {Path.GetFullPath(outputFilePath)}");
-                return true; // Indicate success
+                return true;
             }
             catch (Exception ex)
             {
                  Console.Error.WriteLine($"Error serializing marker data to '{outputFilePath}': {ex.Message}");
                  if (ex.InnerException != null) Console.Error.WriteLine($"  Inner Exception: {ex.InnerException.Message}");
-                 return false; // Indicate failure
+                 return false;
             }
         }
         else
@@ -110,4 +98,4 @@ public static class MarkerSerializer
             return false;
         }
     }
-} 
+}

@@ -137,6 +137,8 @@ export default function init(app: Koa = new Koa(), server?: Server) {
         mediaSrc: ["*", "data:", "blob:"],
         imgSrc: ["*", "data:", "blob:"],
         frameSrc: ["*", "data:"],
+        // Add worker-src directive to allow blob URLs for OpenLayers Map
+        workerSrc: ["'self'", "blob:"],
         // Do not use connect-src: because self + websockets does not work in
         // Safari, ref: https://bugs.webkit.org/show_bug.cgi?id=201591
         connectSrc: ["*"],

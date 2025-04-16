@@ -1,0 +1,52 @@
+[INFO] 2025-04-15T22:45:07.175Z - Seeder started at 2025-04-15T22:45:07.175Z
+[INFO] 2025-04-15T22:45:07.177Z - Log file: D:\Documents\Development\ethyrialwiki\ethyrialwiki\seeder\logs\seeder-2025-04-15T22-45-07.log
+[INFO] 2025-04-15T22:45:07.178Z - Starting Unified Seeder...
+[INFO] 2025-04-15T22:45:07.178Z - Starting step: Redis Cache Flush
+[INFO] 2025-04-15T22:45:07.198Z - Redis Keys Cleared: 134 created, 0 updated
+[INFO] 2025-04-15T22:45:07.199Z - Completed step: Redis Cache Flush in 0.02s
+[INFO] 2025-04-15T22:45:07.200Z - Skipping Python map processing steps
+[INFO] 2025-04-15T22:45:07.200Z - Starting step: C# Marker Extraction
+[INFO] 2025-04-15T22:45:22.387Z - Completed step: C# Marker Extraction in 15.19s
+[INFO] 2025-04-15T22:45:22.387Z - Starting step: Core Database Seeding
+[INFO] 2025-04-15T22:45:22.467Z - Seeding core data (skills, rarities)...
+[INFO] 2025-04-15T22:45:22.514Z - Game Skills: 23 created, 0 updated
+[INFO] 2025-04-15T22:45:22.522Z - Item Rarities: 8 created, 0 updated
+[INFO] 2025-04-15T22:45:22.523Z - Seeding map data (icons, categories, maps, markers)...
+[INFO] 2025-04-15T22:45:22.538Z - Map Icons: 16 created, 0 updated
+[INFO] 2025-04-15T22:45:22.618Z - Marker Categories: 0 created, 17 updated
+[INFO] 2025-04-15T22:45:22.627Z - Maps: 2 created, 0 updated
+[INFO] 2025-04-15T22:45:22.711Z - Markers: 185 created, 0 updated
+[INFO] 2025-04-15T22:45:22.712Z - Seeding items and icons...
+[INFO] 2025-04-15T22:45:22.712Z - Icon upload is DISABLED (default) - use --upload-icons to enable
+[INFO] 2025-04-15T22:45:24.161Z - Game Icons: 5238 created, 0 updated
+[INFO] 2025-04-15T22:45:24.169Z - Item Categories: 2 created, 0 updated
+[INFO] 2025-04-15T22:45:24.185Z - Game Items: 11 created, 0 updated
+[INFO] 2025-04-15T22:45:24.192Z - Item-Category Relations: 11 created, 0 updated
+[INFO] 2025-04-15T22:45:24.192Z - Skipping custom domains seeding as requested
+[INFO] 2025-04-15T22:45:24.193Z - Core database seeding transaction committed
+[INFO] 2025-04-15T22:45:24.201Z - Completed step: Core Database Seeding in 1.81s
+[INFO] 2025-04-15T22:45:24.201Z - Skipping resource seeding (--skip-resources flag is set)
+[INFO] 2025-04-15T22:45:24.202Z - Map tile upload is DISABLED - remove --skip-tile-upload to enable
+[INFO] 2025-04-15T22:45:24.202Z - Unified Seeder finished successfully in 17.02 seconds
+[INFO] 2025-04-15T22:45:24.203Z - 
+====================
+SEEDER SUMMARY
+====================
+Total runtime: 17.09s
+
+Records processed:
+- Redis Keys Cleared: 134
+- Game Skills: 23
+- Item Rarities: 8
+- Map Icons: 16
+- Marker Categories: 17
+- Maps: 2
+- Markers: 185
+- Game Icons: 5238
+- Item Categories: 2
+- Game Items: 11
+- Item-Category Relations: 11
+
+Seeder completed at 2025-04-15T22:45:24.203Z
+====================
+

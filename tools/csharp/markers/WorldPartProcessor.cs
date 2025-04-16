@@ -6,17 +6,14 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Text.Json;
-using RPGLibrary.Map; // For TileDataSerializable
+using RPGLibrary.Map;
 
 public static class WorldPartProcessor
 {
-    // Returns true if processing was successful, false otherwise.
     public static bool TryProcessFile(string inputFilePath, string outputJsonPath, string outputFullDumpPath, string mapName)
     {
-        // --- Extract World Part Coordinates from Filename ---
         int partX = 0, partY = 0, partZ = 0;
         string filenameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
-        // Match filenames like "X-Y-Z" or "X_Y_Z" (e.g., 91-80-7 or 91_80_7)
         Match coordMatch = Regex.Match(filenameWithoutExt, @"^(-?\d+)[-_](-?\d+)[-_](-?\d+)$");
         if (coordMatch.Success)
         {
@@ -28,15 +25,12 @@ public static class WorldPartProcessor
         else
         {
             Console.WriteLine($"Warning: Could not parse world part coordinates (X-Y-Z) from filename: {filenameWithoutExt}");
-            // Decide how to handle - maybe skip? Or default to 0,0,0?
-            // For now, we'll proceed with 0,0,0, but world coordinates in JSON will be wrong.
         }
 
         WorldPartCacheSerializable? worldPartCache = null;
         BinaryFormatter formatter = new BinaryFormatter();
-        formatter.Binder = new CustomSerializationBinder(); // Use the same binder
+        formatter.Binder = new CustomSerializationBinder();
 
-        // --- Deserialization ---
         try
         {
             using (FileStream stream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
@@ -53,7 +47,6 @@ public static class WorldPartProcessor
                 else
                 {
                      Console.Error.WriteLine($"Error: Deserialized object is not of type WorldPartCacheSerializable. Actual type: {deserializedObject?.GetType().FullName ?? "null"}");
-                     // Optionally dump the raw object if it's not the expected type but deserialized anyway
                      if(deserializedObject != null) {
                         DumpFullObject(deserializedObject, outputFullDumpPath + ".unexpected_type");
                      }
@@ -66,13 +59,11 @@ public static class WorldPartProcessor
             Console.Error.WriteLine($"Serialization Error processing WorldPartCache: {ex.Message}");
             if (ex.InnerException != null) Console.Error.WriteLine($"Inner Exception: {ex.InnerException.Message}");
             Console.Error.WriteLine("Check WorldPartCacheSerializable and TileDataSerializable definitions.");
-            // Console.Error.WriteLine($"Stack Trace: {ex.StackTrace}"); // Can be verbose
             return false;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"An unexpected error occurred during WorldPartCache deserialization: {ex.Message}");
-            // Console.Error.WriteLine($"Stack Trace: {ex.StackTrace}");
             return false;
         }
 
@@ -82,7 +73,6 @@ public static class WorldPartProcessor
             return false;
         }
 
-        // --- Process and Output JSON ---
         try
         {
             Console.WriteLine($"Processing WorldPartCache (Revision: {worldPartCache.Revision}, Map: {mapName})...");
@@ -94,18 +84,16 @@ public static class WorldPartProcessor
 
             if (worldPartCache.DataCache != null)
             {
-                for (int y = 0; y < height; y++) // Typically Y is rows (outer loop)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++) // Typically X is columns (inner loop)
+                    for (int x = 0; x < width; x++)
                     {
                         TileDataSerializable tileData = worldPartCache.DataCache[x, y];
-                        // Pass parsed coordinates to JsonTileData constructor
                         tileListJson.Add(new JsonTileData(x, y, partX, partY, partZ, tileData));
                     }
                 }
             }
 
-            // Create an encompassing object for better JSON structure
              var jsonOutputObject = new {
                  MapName = mapName,
                  PartX = partX,
@@ -119,14 +107,13 @@ public static class WorldPartProcessor
 
             if (!WriteJsonFile(jsonOutputObject, outputJsonPath, "world part tile data"))
             {
-                return false; // Indicate failure if JSON writing fails
+                return false;
             }
 
-            // Dump the raw deserialized WorldPartCache object
             DumpFullObject(worldPartCache, outputFullDumpPath);
 
             Console.WriteLine($"Successfully processed WorldPartCache with {tileListJson.Count} tiles.");
-            return true; // Indicate success
+            return true;
         }
         catch (Exception ex)
         {
@@ -136,7 +123,6 @@ public static class WorldPartProcessor
         }
     }
 
-    // --- JSON Helper Methods (Duplicated from MarkerProcessor - consider moving to a shared utility class) ---
     private static bool WriteJsonFile(object data, string filePath, string description)
     {
         try
@@ -177,4 +163,4 @@ public static class WorldPartProcessor
             Console.Error.WriteLine($"Error writing full JSON dump to {filePath}: {ex.Message}");
         }
     }
-} 
+}

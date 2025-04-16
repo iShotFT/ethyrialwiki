@@ -3,6 +3,7 @@ import { GameSkill, GameItemRarity } from "@server/models";
 import { GameSkillType } from "@server/models/GameSkill";
 import { generateId } from "./utils";
 import { Transaction } from "sequelize";
+import { seederLogger } from "./seederLogger";
 
 // --- Skill Data --- (Copied from seed-game-data.ts)
 const skills = [
@@ -118,6 +119,7 @@ export async function seedCoreData(transaction: Transaction): Promise<{
     ],
   });
   Logger.info("utils", `Seeded ${skillDataToSeed.length} GameSkills.`);
+  seederLogger.recordCounts("Game Skills", skillDataToSeed.length, 0);
   const skillIdMap = new Map(skillDataToSeed.map((s) => [s.slug, s.id]));
 
   // --- Seed GameItemRarity ---
@@ -132,6 +134,7 @@ export async function seedCoreData(transaction: Transaction): Promise<{
     updateOnDuplicate: ["title", "colorHex", "updatedAt"],
   });
   Logger.info("utils", `Seeded ${rarityDataToSeed.length} GameItemRarities.`);
+  seederLogger.recordCounts("Item Rarities", rarityDataToSeed.length, 0);
   const rarityIdMap = new Map(rarityDataToSeed.map((r) => [r.title, r.id]));
 
   return { skillIdMap, rarityIdMap };

@@ -217,12 +217,61 @@ function MapScene() {
       try {
         Logger.debug("http", `Fetching heatmap data: ${apiUrl}`);
         const heatmapJson = await client.get(apiUrl, {});
+        
+        // Set data and current item ID
         setHeatmapData({ points: heatmapJson.data || [] });
         setCurrentHeatmapItemId(itemId);
+        
         Logger.debug(
           "http",
           `Received ${heatmapJson.data?.length || 0} heatmap points.`
         );
+        
+        // Use a more comprehensive approach to ensure rendering works properly
+        // This will trigger multiple rendering techniques in sequence with appropriate timing
+        if (mapInstanceRef.current) {
+          const map = mapInstanceRef.current;
+          const view = map.getView();
+          
+          // Store current state
+          const currentCenter = view.getCenter();
+          const currentZoom = view.getZoom();
+          
+          if (currentCenter && currentZoom !== undefined) {
+            // Multi-stage approach to force rendering
+            
+            // First force an immediate render
+            map.render();
+            
+            // Then apply a sequence of small view changes with delays between them
+            setTimeout(() => {
+              // Stage 1: Shift map slightly (less than 1 pixel, users won't notice)
+              view.setCenter([currentCenter[0] + 0.2, currentCenter[1]]);
+              map.render();
+              
+              // Stage 2: Continue sequence after short delay
+              setTimeout(() => {
+                // Return to original position
+                view.setCenter(currentCenter);
+                map.render();
+                
+                // Stage 3: Final render with sync
+                setTimeout(() => {
+                  map.renderSync();
+                  
+                  // Finally, mark loading as complete after everything has settled
+                  setTimeout(() => {
+                    setIsLoadingHeatmap(false);
+                  }, 100);
+                }, 100);
+              }, 100);
+            }, 100);
+          } else {
+            setIsLoadingHeatmap(false);
+          }
+        } else {
+          setIsLoadingHeatmap(false);
+        }
       } catch (err: any) {
         Logger.error(`Failed to load heatmap data for item ${itemId}`, err);
         setError(
@@ -230,12 +279,11 @@ function MapScene() {
         );
         setHeatmapData(null);
         setCurrentHeatmapItemId(null);
-      } finally {
         setIsLoadingHeatmap(false);
       }
     },
     [mapId]
-  ); // Added mapId dependency
+  );
 
   // Callback to receive map instance from EthyrialMapFull
   const handleMapReady = useCallback((map: OlMap) => {
@@ -322,8 +370,18 @@ function MapScene() {
   // Update heatmap item click handler
   const handleHeatmapItemClick = (itemId: string) => {
     Logger.info("misc", `Heatmap item clicked: ${itemId}`);
-    // Fetch data using the new function
-    void fetchHeatmapData(itemId);
+    
+    // If it's the same item, clean and re-fetch to ensure refresh
+    if (currentHeatmapItemId === itemId) {
+      setHeatmapData(null);
+      // Small delay to ensure clear happens first
+      setTimeout(() => {
+        void fetchHeatmapData(itemId);
+      }, 50);
+    } else {
+      // Fetch data using the new function
+      void fetchHeatmapData(itemId);
+    }
   };
 
   if (error) {

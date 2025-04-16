@@ -4,6 +4,7 @@ import { Transaction } from "sequelize";
 import Logger from "@server/logging/Logger";
 import { GameMap, MapIcon, MarkerCategory, Marker } from "@server/models";
 import { generateId, INPUT_DIR } from "./utils";
+import { seederLogger } from "./seederLogger";
 
 // Type for the raw marker data from JSON
 interface RawMarkerData {
@@ -66,6 +67,7 @@ export async function seedMapData(transaction: Transaction): Promise<void> {
     updateOnDuplicate: ["path", "public", "updatedAt"],
   });
   Logger.info("utils", `Upserted ${icons.length} map icons.`);
+  seederLogger.recordCounts("Map Icons", icons.length, 0);
 
   // === 2. Upsert Marker Categories ===
   Logger.info("utils", "Upserting marker categories...");
@@ -225,6 +227,7 @@ export async function seedMapData(transaction: Transaction): Promise<void> {
     "utils",
     `Upserted ${categories.length} marker categories (${createdCats} created, ${updatedCats} updated).`
   );
+  seederLogger.recordCounts("Marker Categories", createdCats, updatedCats);
   const categoryMap = new Map(categories.map((c) => [c.title, c.id]));
 
   // === 3. Upsert Maps ===
@@ -250,6 +253,7 @@ export async function seedMapData(transaction: Transaction): Promise<void> {
     updateOnDuplicate: ["title", "description", "path", "public", "updatedAt"],
   });
   Logger.info("utils", `Upserted ${maps.length} maps.`);
+  seederLogger.recordCounts("Maps", maps.length, 0);
   const irumesaMapId = generateId("Irumesa");
 
   // === 4. Process and Upsert Markers ===
@@ -360,6 +364,7 @@ export async function seedMapData(transaction: Transaction): Promise<void> {
     );
   }
 
+  let markerCount = 0;
   if (markersToUpsert.length > 0) {
     Logger.info("utils", `Upserting ${markersToUpsert.length} markers...`);
     await Marker.bulkCreate(markersToUpsert as any, {
@@ -376,11 +381,14 @@ export async function seedMapData(transaction: Transaction): Promise<void> {
         "updatedAt",
       ],
     });
+    markerCount = markersToUpsert.length;
     Logger.info(
       "utils",
       `Successfully upserted ${markersToUpsert.length} markers.`
     );
+    seederLogger.recordCounts("Markers", markerCount, 0, skippedMarkers);
   } else {
     Logger.info("utils", "No valid markers found to upsert.");
+    seederLogger.recordCounts("Markers", 0, 0, skippedMarkers);
   }
 }

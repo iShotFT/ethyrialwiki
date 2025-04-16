@@ -1,0 +1,6110 @@
+{
+  "$id": "1",
+  "$values": [
+    {
+      "$id": "2",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2366,
+          "y": 2236,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2366,
+          "y": 2236,
+          "z": 1
+        },
+        "x": 2366,
+        "y": 2236,
+        "z": 1,
+        "X": 2366,
+        "Y": 2236,
+        "Z": 1
+      },
+      "Guid": "612a9043-7722-4e58-8faf-4f0d5aae9266",
+      "GetTitle": "POI: Mushy Grounds",
+      "GetDescription": "Enemies: Mycoli and Campestris",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "3",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1311,
+          "y": 2826,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1311,
+          "y": 2826,
+          "z": 1
+        },
+        "x": 1311,
+        "y": 2826,
+        "z": 1,
+        "X": 1311,
+        "Y": 2826,
+        "Z": 1
+      },
+      "Guid": "8ad57d5c-dee4-4fca-a63e-963201a85602",
+      "GetTitle": "POI: Shroomy Dirt",
+      "GetDescription": "Enemies: Mycoli and Campestris",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "4",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4013,
+          "y": 2037,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4013,
+          "y": 2037,
+          "z": 1
+        },
+        "x": 4013,
+        "y": 2037,
+        "z": 1,
+        "X": 4013,
+        "Y": 2037,
+        "Z": 1
+      },
+      "Guid": "d9a5eb7f-2e94-4a7d-933a-3eaf3d96da6a",
+      "GetTitle": "POI: Lightning Pillar Electron",
+      "GetDescription": "Enemies: Lightning Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "5",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4021,
+          "y": 3105,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4021,
+          "y": 3105,
+          "z": 2
+        },
+        "x": 4021,
+        "y": 3105,
+        "z": 2,
+        "X": 4021,
+        "Y": 3105,
+        "Z": 2
+      },
+      "Guid": "d120e8d2-d84f-4773-a1cf-508f73aa27fc",
+      "GetTitle": "POI: Gloomy Grove",
+      "GetDescription": "Enemies: Troll Sages and Forest Spirits",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "6",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4872,
+          "y": 3552,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4872,
+          "y": 3552,
+          "z": 2
+        },
+        "x": 4872,
+        "y": 3552,
+        "z": 2,
+        "X": 4872,
+        "Y": 3552,
+        "Z": 2
+      },
+      "Guid": "18584993-17a2-48f7-9bb3-c79d1c5b333e",
+      "GetTitle": "POI: Pit of Hell",
+      "GetDescription": "Enemies: Superior Fire Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "7",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3798,
+          "y": 2529,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3798,
+          "y": 2529,
+          "z": 1
+        },
+        "x": 3798,
+        "y": 2529,
+        "z": 1,
+        "X": 3798,
+        "Y": 2529,
+        "Z": 1
+      },
+      "Guid": "8ade36bb-d7da-466b-b819-1947a98e9e04",
+      "GetTitle": "POI: Shadow Hole",
+      "GetDescription": "Enemies: Shadow Manifestations",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "8",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1559,
+          "y": 2690,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1559,
+          "y": 2690,
+          "z": 1
+        },
+        "x": 1559,
+        "y": 2690,
+        "z": 1,
+        "X": 1559,
+        "Y": 2690,
+        "Z": 1
+      },
+      "Guid": "8bfd0f58-3849-400a-9ca6-301b0fdb502b",
+      "GetTitle": "POI: Candle Lit Cave",
+      "GetDescription": "Enemies: Wicksters",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "9",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4867,
+          "y": 3355,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4867,
+          "y": 3355,
+          "z": 1
+        },
+        "x": 4867,
+        "y": 3355,
+        "z": 1,
+        "X": 4867,
+        "Y": 3355,
+        "Z": 1
+      },
+      "Guid": "8c76de40-8cb4-43bf-a5bf-b0e54e0cb2f1",
+      "GetTitle": "Dungeon: Shrine of Melrenor",
+      "GetDescription": "Lvl 20-24",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "10",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3258,
+          "y": 1998,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3258,
+          "y": 1998,
+          "z": 1
+        },
+        "x": 3258,
+        "y": 1998,
+        "z": 1,
+        "X": 3258,
+        "Y": 1998,
+        "Z": 1
+      },
+      "Guid": "ba707e7f-8e78-4ed0-8ecd-1a360381b964",
+      "GetTitle": "POI: Lightning Pillar Volt",
+      "GetDescription": "Enemies: Lightning Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "11",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4952,
+          "y": 3774,
+          "z": 3
+        },
+        "ToVector": {
+          "x": 4952,
+          "y": 3774,
+          "z": 3
+        },
+        "x": 4952,
+        "y": 3774,
+        "z": 3,
+        "X": 4952,
+        "Y": 3774,
+        "Z": 3
+      },
+      "Guid": "1bcddb2f-bb7f-41ec-b1f9-9b1202792015",
+      "GetTitle": "POI: Lightning Pillar Shock",
+      "GetDescription": "Enemies: Greater Lightning Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "12",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1014,
+          "y": 3623,
+          "z": 5
+        },
+        "ToVector": {
+          "x": 1014,
+          "y": 3623,
+          "z": 5
+        },
+        "x": 1014,
+        "y": 3623,
+        "z": 5,
+        "X": 1014,
+        "Y": 3623,
+        "Z": 5
+      },
+      "Guid": "fffd5bb6-b5ee-432a-94c1-9455c127e694",
+      "GetTitle": "POI: Frozen Demon Cave",
+      "GetDescription": "Enemies: Frost Harbingers, Frost Imps and Rager Imps",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "13",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3703,
+          "y": 3638,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3703,
+          "y": 3638,
+          "z": 2
+        },
+        "x": 3703,
+        "y": 3638,
+        "z": 2,
+        "X": 3703,
+        "Y": 3638,
+        "Z": 2
+      },
+      "Guid": "0051706f-5617-4379-a038-3582274eae8a",
+      "GetTitle": "POI: Frozen Cliffside",
+      "GetDescription": "Enemies: Black Drakes and Hatchlings",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "14",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4817,
+          "y": 4092,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4817,
+          "y": 4092,
+          "z": 1
+        },
+        "x": 4817,
+        "y": 4092,
+        "z": 1,
+        "X": 4817,
+        "Y": 4092,
+        "Z": 1
+      },
+      "Guid": "da2d3d47-1f85-4001-ab5b-9bc269a3b443",
+      "GetTitle": "Bank: Silverlake",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "15",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3947,
+          "y": 2241,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3947,
+          "y": 2241,
+          "z": 1
+        },
+        "x": 3947,
+        "y": 2241,
+        "z": 1,
+        "X": 3947,
+        "Y": 2241,
+        "Z": 1
+      },
+      "Guid": "ef9e1229-8adf-45e8-989e-be0e73e7423e",
+      "GetTitle": "POI: Mudhole",
+      "GetDescription": "Enemies: Mudlurker\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "16",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1643,
+          "y": 2592,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1643,
+          "y": 2592,
+          "z": 2
+        },
+        "x": 1643,
+        "y": 2592,
+        "z": 2,
+        "X": 1643,
+        "Y": 2592,
+        "Z": 2
+      },
+      "Guid": "210de0ee-7147-4f6e-b1c1-6969c1caaff9",
+      "GetTitle": "Bank: Blackwood",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "17",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3312,
+          "y": 2450,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3312,
+          "y": 2450,
+          "z": 1
+        },
+        "x": 3312,
+        "y": 2450,
+        "z": 1,
+        "X": 3312,
+        "Y": 2450,
+        "Z": 1
+      },
+      "Guid": "c342d824-0e08-4b04-a121-c473ba6a64da",
+      "GetTitle": "POI: Brute Ravine",
+      "GetDescription": "Enemies: Trolls",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "18",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3713,
+          "y": 2082,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3713,
+          "y": 2082,
+          "z": 1
+        },
+        "x": 3713,
+        "y": 2082,
+        "z": 1,
+        "X": 3713,
+        "Y": 2082,
+        "Z": 1
+      },
+      "Guid": "4d4c6d96-4c1e-400f-bfd1-35d5806f852d",
+      "GetTitle": "POI: Vampire Castle",
+      "GetDescription": "Enemies: Vampires",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "19",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3542,
+          "y": 3407,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3542,
+          "y": 3407,
+          "z": 1
+        },
+        "x": 3542,
+        "y": 3407,
+        "z": 1,
+        "X": 3542,
+        "Y": 3407,
+        "Z": 1
+      },
+      "Guid": "edf13fdb-1211-4398-b179-43a06c795c83",
+      "GetTitle": "POI: Mountain Top Rocks",
+      "GetDescription": "Enemies: Greater Earth Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "20",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3814,
+          "y": 2067,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3814,
+          "y": 2067,
+          "z": 1
+        },
+        "x": 3814,
+        "y": 2067,
+        "z": 1,
+        "X": 3814,
+        "Y": 2067,
+        "Z": 1
+      },
+      "Guid": "baf44c1a-c44b-49e9-bf3c-2bf2d82f577f",
+      "GetTitle": "POI: Treehound Cliffs",
+      "GetDescription": "Enemies: Treehounds\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "21",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4260,
+          "y": 3065,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4260,
+          "y": 3065,
+          "z": 2
+        },
+        "x": 4260,
+        "y": 3065,
+        "z": 2,
+        "X": 4260,
+        "Y": 3065,
+        "Z": 2
+      },
+      "Guid": "fc302525-2952-40a5-bae8-a95905ad5f79",
+      "GetTitle": "POI: Windy Sand Spiral",
+      "GetDescription": "Enemies: Greater Air Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "22",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2210,
+          "y": 2132,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2210,
+          "y": 2132,
+          "z": 2
+        },
+        "x": 2210,
+        "y": 2132,
+        "z": 2,
+        "X": 2210,
+        "Y": 2132,
+        "Z": 2
+      },
+      "Guid": "0d43b38f-9383-4d66-89ca-185614ac8829",
+      "GetTitle": "Town: Daymoor",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "23",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4252,
+          "y": 2009,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4252,
+          "y": 2009,
+          "z": 1
+        },
+        "x": 4252,
+        "y": 2009,
+        "z": 1,
+        "X": 4252,
+        "Y": 2009,
+        "Z": 1
+      },
+      "Guid": "d494b401-f437-421f-9a45-ed36fce04491",
+      "GetTitle": "Town: Edrivine",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "24",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1451,
+          "y": 3508,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1451,
+          "y": 3508,
+          "z": 2
+        },
+        "x": 1451,
+        "y": 3508,
+        "z": 2,
+        "X": 1451,
+        "Y": 3508,
+        "Z": 2
+      },
+      "Guid": "9455cd29-83fe-453a-94a6-742449baa1d7",
+      "GetTitle": "POI: Icey Air Spiral",
+      "GetDescription": "Enemies: Lesser/Normal Air Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "25",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4002,
+          "y": 2121,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4002,
+          "y": 2121,
+          "z": 1
+        },
+        "x": 4002,
+        "y": 2121,
+        "z": 1,
+        "X": 4002,
+        "Y": 2121,
+        "Z": 1
+      },
+      "Guid": "f97db6ff-fe43-4073-b359-31674cc0603a",
+      "GetTitle": "Teleport: Boar Dock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "26",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4299,
+          "y": 1913,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4299,
+          "y": 1913,
+          "z": 2
+        },
+        "x": 4299,
+        "y": 1913,
+        "z": 2,
+        "X": 4299,
+        "Y": 1913,
+        "Z": 2
+      },
+      "Guid": "8ea54c97-e146-4516-a584-807509631629",
+      "GetTitle": "Daily Quest: Woodcutting",
+      "GetDescription": "NPC: Keni Babule",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "27",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3498,
+          "y": 1939,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3498,
+          "y": 1939,
+          "z": 1
+        },
+        "x": 3498,
+        "y": 1939,
+        "z": 1,
+        "X": 3498,
+        "Y": 1939,
+        "Z": 1
+      },
+      "Guid": "573b9dd1-7f04-4fba-b922-585865673ac6",
+      "GetTitle": "POI: Arcane Pit",
+      "GetDescription": "Enemies: Arcanic Essences",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "28",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4249,
+          "y": 3821,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4249,
+          "y": 3821,
+          "z": 2
+        },
+        "x": 4249,
+        "y": 3821,
+        "z": 2,
+        "X": 4249,
+        "Y": 3821,
+        "Z": 2
+      },
+      "Guid": "9e2b8771-ecbe-4393-af7d-b9cf7afbb472",
+      "GetTitle": "Raid: Vekiun Raider Camp",
+      "GetDescription": "Lvl 30\u002B",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "29",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4501,
+          "y": 3722,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4501,
+          "y": 3722,
+          "z": 2
+        },
+        "x": 4501,
+        "y": 3722,
+        "z": 2,
+        "X": 4501,
+        "Y": 3722,
+        "Z": 2
+      },
+      "Guid": "776ea52e-4a30-45e9-956d-e8eb13bf6dc9",
+      "GetTitle": "Bank: Ironsheen",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "30",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3226,
+          "y": 2294,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3226,
+          "y": 2294,
+          "z": 2
+        },
+        "x": 3226,
+        "y": 2294,
+        "z": 2,
+        "X": 3226,
+        "Y": 2294,
+        "Z": 2
+      },
+      "Guid": "b2e0b35e-6b5f-4d8d-9067-0e856d34caf8",
+      "GetTitle": "Daily Quest: Harvesting",
+      "GetDescription": "NPC: Mr. Friend",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "31",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1587,
+          "y": 3387,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1587,
+          "y": 3387,
+          "z": 2
+        },
+        "x": 1587,
+        "y": 3387,
+        "z": 2,
+        "X": 1587,
+        "Y": 3387,
+        "Z": 2
+      },
+      "Guid": "244e43e5-821c-4507-9096-a61e1e23822e",
+      "GetTitle": "POI: Bigger Icey Wind Spiral",
+      "GetDescription": "Enemies: Air Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "32",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3958,
+          "y": 3738,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3958,
+          "y": 3738,
+          "z": 1
+        },
+        "x": 3958,
+        "y": 3738,
+        "z": 1,
+        "X": 3958,
+        "Y": 3738,
+        "Z": 1
+      },
+      "Guid": "9987b1d1-71e9-4b66-b8ff-d228c974622b",
+      "GetTitle": "POI: Corrupted Grounds",
+      "GetDescription": "Enemies: Corrupted Animals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "33",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1642,
+          "y": 2649,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1642,
+          "y": 2649,
+          "z": 1
+        },
+        "x": 1642,
+        "y": 2649,
+        "z": 1,
+        "X": 1642,
+        "Y": 2649,
+        "Z": 1
+      },
+      "Guid": "0412620f-f4bb-4b1f-87bf-1a4d878be66a",
+      "GetTitle": "POI: Pumpkin Patch",
+      "GetDescription": "Enemies: Harvest Reapers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "34",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2696,
+          "y": 2747,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2696,
+          "y": 2747,
+          "z": 2
+        },
+        "x": 2696,
+        "y": 2747,
+        "z": 2,
+        "X": 2696,
+        "Y": 2747,
+        "Z": 2
+      },
+      "Guid": "8af4d1a7-196c-4a5a-b77d-21140bf9cef2",
+      "GetTitle": "POI: Slime Pit",
+      "GetDescription": "Enemies: Slimespawns",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "35",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4071,
+          "y": 3556,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4071,
+          "y": 3556,
+          "z": 2
+        },
+        "x": 4071,
+        "y": 3556,
+        "z": 2,
+        "X": 4071,
+        "Y": 3556,
+        "Z": 2
+      },
+      "Guid": "394b9432-d92c-4931-9b24-00d8537febbe",
+      "GetTitle": "POI: Troglodyte Camp Idiot",
+      "GetDescription": "Enemies: Trolls, Goblins and Orks",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "36",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3528,
+          "y": 2686,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3528,
+          "y": 2686,
+          "z": 1
+        },
+        "x": 3528,
+        "y": 2686,
+        "z": 1,
+        "X": 3528,
+        "Y": 2686,
+        "Z": 1
+      },
+      "Guid": "3746c3a4-2103-41cf-9222-d7ed96484957",
+      "GetTitle": "Bank: Gilded Wall",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "37",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1654,
+          "y": 2626,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1654,
+          "y": 2626,
+          "z": 1
+        },
+        "x": 1654,
+        "y": 2626,
+        "z": 1,
+        "X": 1654,
+        "Y": 2626,
+        "Z": 1
+      },
+      "Guid": "55b86374-34ef-4d07-8182-3f3132d6900f",
+      "GetTitle": "POI: Candy Stash Cave",
+      "GetDescription": "Enemies: Pumpking and Goblins",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "38",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3930,
+          "y": 2451,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3930,
+          "y": 2451,
+          "z": 2
+        },
+        "x": 3930,
+        "y": 2451,
+        "z": 2,
+        "X": 3930,
+        "Y": 2451,
+        "Z": 2
+      },
+      "Guid": "fb896f4d-1809-478b-a4c6-dec449c9aa86",
+      "GetTitle": "POI: Burned Fortification",
+      "GetDescription": "Enemies: Goblins",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "39",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1016,
+          "y": 4096,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1016,
+          "y": 4096,
+          "z": 2
+        },
+        "x": 1016,
+        "y": 4096,
+        "z": 2,
+        "X": 1016,
+        "Y": 4096,
+        "Z": 2
+      },
+      "Guid": "69474efb-a6ec-4357-af6d-5ad97d1aa255",
+      "GetTitle": "World Boss: Tundrath",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "40",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4036,
+          "y": 1961,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4036,
+          "y": 1961,
+          "z": 1
+        },
+        "x": 4036,
+        "y": 1961,
+        "z": 1,
+        "X": 4036,
+        "Y": 1961,
+        "Z": 1
+      },
+      "Guid": "d8e27c3a-3a38-42eb-8bbc-4825e55e7ec7",
+      "GetTitle": "POI: Kobold Hideout",
+      "GetDescription": "Enemies: Kobolds",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "41",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4898,
+          "y": 3333,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4898,
+          "y": 3333,
+          "z": 1
+        },
+        "x": 4898,
+        "y": 3333,
+        "z": 1,
+        "X": 4898,
+        "Y": 3333,
+        "Z": 1
+      },
+      "Guid": "08a6018d-d92e-4147-a915-8c59a9cbb94b",
+      "GetTitle": "POI: Spider Den",
+      "GetDescription": "Enemies: Shadow Widows",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "42",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4069,
+          "y": 2825,
+          "z": 4
+        },
+        "ToVector": {
+          "x": 4069,
+          "y": 2825,
+          "z": 4
+        },
+        "x": 4069,
+        "y": 2825,
+        "z": 4,
+        "X": 4069,
+        "Y": 2825,
+        "Z": 4
+      },
+      "Guid": "3e7d1d1a-4c08-4421-be27-d411924efbf4",
+      "GetTitle": "POI: Lightning Pillar Amp",
+      "GetDescription": "Enemies: Greater/Magical Lightning Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "43",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4072,
+          "y": 2423,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4072,
+          "y": 2423,
+          "z": 2
+        },
+        "x": 4072,
+        "y": 2423,
+        "z": 2,
+        "X": 4072,
+        "Y": 2423,
+        "Z": 2
+      },
+      "Guid": "561ac833-c88f-46ff-9a56-34d3d0301e92",
+      "GetTitle": "POI: Fire Pit",
+      "GetDescription": "Enemies: Greater Fire Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "44",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3757,
+          "y": 2252,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3757,
+          "y": 2252,
+          "z": 1
+        },
+        "x": 3757,
+        "y": 2252,
+        "z": 1,
+        "X": 3757,
+        "Y": 2252,
+        "Z": 1
+      },
+      "Guid": "302400e7-4143-4135-a739-49732bfe4d77",
+      "GetTitle": "Bank: Narrowbane",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "45",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4705,
+          "y": 4314,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4705,
+          "y": 4314,
+          "z": 2
+        },
+        "x": 4705,
+        "y": 4314,
+        "z": 2,
+        "X": 4705,
+        "Y": 4314,
+        "Z": 2
+      },
+      "Guid": "6a064699-8480-45cd-bf1f-7518e2410f6c",
+      "GetTitle": "Town: Wintervale",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "46",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1076,
+          "y": 2411,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1076,
+          "y": 2411,
+          "z": 1
+        },
+        "x": 1076,
+        "y": 2411,
+        "z": 1,
+        "X": 1076,
+        "Y": 2411,
+        "Z": 1
+      },
+      "Guid": "3d085985-5652-44aa-8db9-1e1994fb0032",
+      "GetTitle": "Bank: Rime",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "47",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3201,
+          "y": 2271,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3201,
+          "y": 2271,
+          "z": 2
+        },
+        "x": 3201,
+        "y": 2271,
+        "z": 2,
+        "X": 3201,
+        "Y": 2271,
+        "Z": 2
+      },
+      "Guid": "eb025d15-81e1-4696-8078-811431f0531b",
+      "GetTitle": "POI: Riverside Bushlands",
+      "GetDescription": "Enemies: Magical Water Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "48",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3384,
+          "y": 2378,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3384,
+          "y": 2378,
+          "z": 1
+        },
+        "x": 3384,
+        "y": 2378,
+        "z": 1,
+        "X": 3384,
+        "Y": 2378,
+        "Z": 1
+      },
+      "Guid": "b8d4e517-b260-48ac-a169-f784382221b5",
+      "GetTitle": "POI: Damp Cave",
+      "GetDescription": "Enemies: Shadow Manifestations",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "49",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4155,
+          "y": 2023,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4155,
+          "y": 2023,
+          "z": 1
+        },
+        "x": 4155,
+        "y": 2023,
+        "z": 1,
+        "X": 4155,
+        "Y": 2023,
+        "Z": 1
+      },
+      "Guid": "b12c3d7b-2f83-4571-b2b3-5e3cfc40db11",
+      "GetTitle": "Teleport: Leyline",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "50",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 959,
+          "y": 2805,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 959,
+          "y": 2805,
+          "z": 1
+        },
+        "x": 959,
+        "y": 2805,
+        "z": 1,
+        "X": 959,
+        "Y": 2805,
+        "Z": 1
+      },
+      "Guid": "6340393f-e30f-4e34-b9a6-53562db40585",
+      "GetTitle": "POI: Demonic Pillars",
+      "GetDescription": "Enemies: Satyrs",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "51",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3443,
+          "y": 2095,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3443,
+          "y": 2095,
+          "z": 1
+        },
+        "x": 3443,
+        "y": 2095,
+        "z": 1,
+        "X": 3443,
+        "Y": 2095,
+        "Z": 1
+      },
+      "Guid": "9bbde76f-0b74-4586-a812-e93b0e0fd645",
+      "GetTitle": "POI: Scalely Grove",
+      "GetDescription": "Enemies: Mairiscales and Mairihounds",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "52",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 916,
+          "y": 3144,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 916,
+          "y": 3144,
+          "z": 1
+        },
+        "x": 916,
+        "y": 3144,
+        "z": 1,
+        "X": 916,
+        "Y": 3144,
+        "Z": 1
+      },
+      "Guid": "4ff172b8-a40a-41b3-a215-058e9888a4fb",
+      "GetTitle": "POI: Icey Snek",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "53",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4353,
+          "y": 4137,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4353,
+          "y": 4137,
+          "z": 2
+        },
+        "x": 4353,
+        "y": 4137,
+        "z": 2,
+        "X": 4353,
+        "Y": 4137,
+        "Z": 2
+      },
+      "Guid": "bef58bd5-fd76-4c16-a080-b31cdfba4ab1",
+      "GetTitle": "POI: Ice Patch",
+      "GetDescription": "Enemies: Black Drakes, Draklings and Hatchlings",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "54",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 900,
+          "y": 3861,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 900,
+          "y": 3861,
+          "z": 2
+        },
+        "x": 900,
+        "y": 3861,
+        "z": 2,
+        "X": 900,
+        "Y": 3861,
+        "Z": 2
+      },
+      "Guid": "8ec8acb3-cb3c-4f8a-a32e-c99eaf5ccd61",
+      "GetTitle": "POI: Ice Spike Cave",
+      "GetDescription": "Enemies: Ice Goblinoids",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "55",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4307,
+          "y": 1864,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4307,
+          "y": 1864,
+          "z": 1
+        },
+        "x": 4307,
+        "y": 1864,
+        "z": 1,
+        "X": 4307,
+        "Y": 1864,
+        "Z": 1
+      },
+      "Guid": "aa9d7aa8-e9bc-4d0a-a3bf-43f0e7090c29",
+      "GetTitle": "POI: Wasp Nest",
+      "GetDescription": "Enemies: Wasps\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "56",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4116,
+          "y": 2339,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4116,
+          "y": 2339,
+          "z": 2
+        },
+        "x": 4116,
+        "y": 2339,
+        "z": 2,
+        "X": 4116,
+        "Y": 2339,
+        "Z": 2
+      },
+      "Guid": "51785645-c04d-404e-a5f7-c7d19625b99b",
+      "GetTitle": "POI: Mountain Side Streams",
+      "GetDescription": "Enemies: Water Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "57",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3535,
+          "y": 2068,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3535,
+          "y": 2068,
+          "z": 1
+        },
+        "x": 3535,
+        "y": 2068,
+        "z": 1,
+        "X": 3535,
+        "Y": 2068,
+        "Z": 1
+      },
+      "Guid": "eda543cc-9f8c-4291-84b9-d81cda283e69",
+      "GetTitle": "Town: Finville",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "58",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4208,
+          "y": 2284,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4208,
+          "y": 2284,
+          "z": 2
+        },
+        "x": 4208,
+        "y": 2284,
+        "z": 2,
+        "X": 4208,
+        "Y": 2284,
+        "Z": 2
+      },
+      "Guid": "2622a89a-2979-4918-95cc-13d01e5c7ae8",
+      "GetTitle": "POI: Steal Lair",
+      "GetDescription": "Enemies: Smugglers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "59",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2828,
+          "y": 2141,
+          "z": 4
+        },
+        "ToVector": {
+          "x": 2828,
+          "y": 2141,
+          "z": 4
+        },
+        "x": 2828,
+        "y": 2141,
+        "z": 4,
+        "X": 2828,
+        "Y": 2141,
+        "Z": 4
+      },
+      "Guid": "cdd1c8c5-37df-4029-aea0-48a537682f17",
+      "GetTitle": "Dungeon: Lair of the Exiles",
+      "GetDescription": "Lvl 30-34",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "60",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3834,
+          "y": 1965,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3834,
+          "y": 1965,
+          "z": 1
+        },
+        "x": 3834,
+        "y": 1965,
+        "z": 1,
+        "X": 3834,
+        "Y": 1965,
+        "Z": 1
+      },
+      "Guid": "9e5091c4-064c-4c6a-936b-f3c61fe671f2",
+      "GetTitle": "Bank: Thistlebrook",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "61",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3220,
+          "y": 2266,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3220,
+          "y": 2266,
+          "z": 1
+        },
+        "x": 3220,
+        "y": 2266,
+        "z": 1,
+        "X": 3220,
+        "Y": 2266,
+        "Z": 1
+      },
+      "Guid": "53407bb3-fcfa-4d40-8dca-2a85c52d8372",
+      "GetTitle": "Teleport: Boat Dock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "62",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 5003,
+          "y": 4097,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 5003,
+          "y": 4097,
+          "z": 1
+        },
+        "x": 5003,
+        "y": 4097,
+        "z": 1,
+        "X": 5003,
+        "Y": 4097,
+        "Z": 1
+      },
+      "Guid": "97ea14a6-9273-4f2d-8dca-3518bc5b64e8",
+      "GetTitle": "POI: Great Arcanic Anomaly",
+      "GetDescription": "Enemies: Greater Arcanic Essences",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "63",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1262,
+          "y": 4024,
+          "z": 0
+        },
+        "ToVector": {
+          "x": 1262,
+          "y": 4024,
+          "z": 0
+        },
+        "x": 1262,
+        "y": 4024,
+        "z": 0,
+        "X": 1262,
+        "Y": 4024,
+        "Z": 0
+      },
+      "Guid": "f462b9cd-8b4a-46ed-b645-a7a10d74cfb6",
+      "GetTitle": "Teleport: Leyline",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "64",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4038,
+          "y": 2313,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4038,
+          "y": 2313,
+          "z": 2
+        },
+        "x": 4038,
+        "y": 2313,
+        "z": 2,
+        "X": 4038,
+        "Y": 2313,
+        "Z": 2
+      },
+      "Guid": "0dd66ed8-38af-49d3-8980-29b34ed07ac9",
+      "GetTitle": "POI: Mountain Rockslide",
+      "GetDescription": "Enemies: Lesser Earth Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "65",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2808,
+          "y": 2655,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2808,
+          "y": 2655,
+          "z": 2
+        },
+        "x": 2808,
+        "y": 2655,
+        "z": 2,
+        "X": 2808,
+        "Y": 2655,
+        "Z": 2
+      },
+      "Guid": "6bb517ad-1808-41fb-808b-859ad226fb34",
+      "GetTitle": "POI: Dark and Light Tower",
+      "GetDescription": "Enemies: Shadow/Light Manifestations, Dusk/Dawn Hounds, Shadow Knights and Paragons",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "66",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3824,
+          "y": 1950,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3824,
+          "y": 1950,
+          "z": 1
+        },
+        "x": 3824,
+        "y": 1950,
+        "z": 1,
+        "X": 3824,
+        "Y": 1950,
+        "Z": 1
+      },
+      "Guid": "d1a202f2-e5bc-43a8-892d-2d1858cb92e1",
+      "GetTitle": "Town: Thistlebrook",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "67",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3511,
+          "y": 2220,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3511,
+          "y": 2220,
+          "z": 1
+        },
+        "x": 3511,
+        "y": 2220,
+        "z": 1,
+        "X": 3511,
+        "Y": 2220,
+        "Z": 1
+      },
+      "Guid": "50f06ab5-f90e-4c6d-94e4-fa25ed440cd9",
+      "GetTitle": "POI: Wolf Den",
+      "GetDescription": "Enemies: Wolfs",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "68",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3529,
+          "y": 2081,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3529,
+          "y": 2081,
+          "z": 1
+        },
+        "x": 3529,
+        "y": 2081,
+        "z": 1,
+        "X": 3529,
+        "Y": 2081,
+        "Z": 1
+      },
+      "Guid": "29dc172f-e531-4581-8ac0-e1b91fd56ed8",
+      "GetTitle": "Bank: Finville",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "69",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 701,
+          "y": 3931,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 701,
+          "y": 3931,
+          "z": 1
+        },
+        "x": 701,
+        "y": 3931,
+        "z": 1,
+        "X": 701,
+        "Y": 3931,
+        "Z": 1
+      },
+      "Guid": "3441607b-f1e7-4d83-984b-0992e781193c",
+      "GetTitle": "POI: Mammoth Ice Plains",
+      "GetDescription": "Enemies: Tundra Mammoths\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "70",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1511,
+          "y": 2337,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1511,
+          "y": 2337,
+          "z": 1
+        },
+        "x": 1511,
+        "y": 2337,
+        "z": 1,
+        "X": 1511,
+        "Y": 2337,
+        "Z": 1
+      },
+      "Guid": "4570b66f-32a0-4614-ab85-c6f637344ec8",
+      "GetTitle": "POI: Dense Marshes",
+      "GetDescription": "Enemies: Mairiscales and Mairihounds",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "71",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1663,
+          "y": 2579,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1663,
+          "y": 2579,
+          "z": 2
+        },
+        "x": 1663,
+        "y": 2579,
+        "z": 2,
+        "X": 1663,
+        "Y": 2579,
+        "Z": 2
+      },
+      "Guid": "854238a8-7d42-4551-8023-0bf0561285fa",
+      "GetTitle": "Teleport: Wagon",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "72",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4041,
+          "y": 3262,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4041,
+          "y": 3262,
+          "z": 2
+        },
+        "x": 4041,
+        "y": 3262,
+        "z": 2,
+        "X": 4041,
+        "Y": 3262,
+        "Z": 2
+      },
+      "Guid": "895094f5-2139-4721-8307-2e015f032204",
+      "GetTitle": "Bank: Marshdale",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "73",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3189,
+          "y": 2457,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3189,
+          "y": 2457,
+          "z": 1
+        },
+        "x": 3189,
+        "y": 2457,
+        "z": 1,
+        "X": 3189,
+        "Y": 2457,
+        "Z": 1
+      },
+      "Guid": "4fed0e0a-c159-4508-8cdd-10349b4f2c94",
+      "GetTitle": "POI: Deeper and Darker Cave",
+      "GetDescription": "Enemies: Soulreapers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "74",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4219,
+          "y": 1857,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4219,
+          "y": 1857,
+          "z": 1
+        },
+        "x": 4219,
+        "y": 1857,
+        "z": 1,
+        "X": 4219,
+        "Y": 1857,
+        "Z": 1
+      },
+      "Guid": "a46e9ecf-9277-4e73-9aad-114a2fab0726",
+      "GetTitle": "POI: Highwayman Base Camp",
+      "GetDescription": "Enemies: Highwaymen",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "75",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2533,
+          "y": 2142,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2533,
+          "y": 2142,
+          "z": 1
+        },
+        "x": 2533,
+        "y": 2142,
+        "z": 1,
+        "X": 2533,
+        "Y": 2142,
+        "Z": 1
+      },
+      "Guid": "37080d3d-00d3-4d84-9e3f-96b276681599",
+      "GetTitle": "Raid: Dolenar Castle",
+      "GetDescription": "Lvl 35\u002B",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "76",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3768,
+          "y": 3424,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3768,
+          "y": 3424,
+          "z": 2
+        },
+        "x": 3768,
+        "y": 3424,
+        "z": 2,
+        "X": 3768,
+        "Y": 3424,
+        "Z": 2
+      },
+      "Guid": "567b0837-1b44-4f0d-aa5b-afaf77a01e37",
+      "GetTitle": "POI: Hot Soil",
+      "GetDescription": "Enemies: Fire Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "77",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4781,
+          "y": 3558,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4781,
+          "y": 3558,
+          "z": 2
+        },
+        "x": 4781,
+        "y": 3558,
+        "z": 2,
+        "X": 4781,
+        "Y": 3558,
+        "Z": 2
+      },
+      "Guid": "a52e62e5-7fc4-464e-bab5-25eef91d0d7d",
+      "GetTitle": "POI: Ancient Pillars",
+      "GetDescription": "Enemies: Cyclops",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "78",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1649,
+          "y": 2592,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1649,
+          "y": 2592,
+          "z": 2
+        },
+        "x": 1649,
+        "y": 2592,
+        "z": 2,
+        "X": 1649,
+        "Y": 2592,
+        "Z": 2
+      },
+      "Guid": "d6a4c5a8-927a-4153-9d00-51c266500652",
+      "GetTitle": "Town: Blackwood",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "79",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4329,
+          "y": 1811,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4329,
+          "y": 1811,
+          "z": 2
+        },
+        "x": 4329,
+        "y": 1811,
+        "z": 2,
+        "X": 4329,
+        "Y": 1811,
+        "Z": 2
+      },
+      "Guid": "2579a047-f974-480d-b921-bc742d87b9b6",
+      "GetTitle": "POI: Shady Camp",
+      "GetDescription": "Enemies: Outlaw Arcanists",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "80",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2278,
+          "y": 2155,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2278,
+          "y": 2155,
+          "z": 2
+        },
+        "x": 2278,
+        "y": 2155,
+        "z": 2,
+        "X": 2278,
+        "Y": 2155,
+        "Z": 2
+      },
+      "Guid": "bc35389e-f00a-4412-ba47-ad5cfe7785c5",
+      "GetTitle": "Teleport: Leyline",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "81",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3777,
+          "y": 2264,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3777,
+          "y": 2264,
+          "z": 1
+        },
+        "x": 3777,
+        "y": 2264,
+        "z": 1,
+        "X": 3777,
+        "Y": 2264,
+        "Z": 1
+      },
+      "Guid": "0f46cc40-3222-401c-8239-bab7aa0c6753",
+      "GetTitle": "Town: Narrowbane",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "82",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1183,
+          "y": 3587,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1183,
+          "y": 3587,
+          "z": 2
+        },
+        "x": 1183,
+        "y": 3587,
+        "z": 2,
+        "X": 1183,
+        "Y": 3587,
+        "Z": 2
+      },
+      "Guid": "256c2e47-a70a-45e6-8ca7-875d3739b41f",
+      "GetTitle": "Bank: Spearholm",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "83",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1697,
+          "y": 3868,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1697,
+          "y": 3868,
+          "z": 1
+        },
+        "x": 1697,
+        "y": 3868,
+        "z": 1,
+        "X": 1697,
+        "Y": 3868,
+        "Z": 1
+      },
+      "Guid": "c1a385cd-0c8d-4843-83c0-04ae72288e34",
+      "GetTitle": "POI: Lava Pools",
+      "GetDescription": "Enemies: Lesser Living Lava",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "84",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1231,
+          "y": 4040,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1231,
+          "y": 4040,
+          "z": 1
+        },
+        "x": 1231,
+        "y": 4040,
+        "z": 1,
+        "X": 1231,
+        "Y": 4040,
+        "Z": 1
+      },
+      "Guid": "28e71692-9b95-46a4-bf76-ef8572ccf476",
+      "GetTitle": "Teleport: Wagon",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "85",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3162,
+          "y": 2132,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3162,
+          "y": 2132,
+          "z": 1
+        },
+        "x": 3162,
+        "y": 2132,
+        "z": 1,
+        "X": 3162,
+        "Y": 2132,
+        "Z": 1
+      },
+      "Guid": "8768e61b-44cb-45e5-ba5c-080ca1dece2b",
+      "GetTitle": "Town: Dawnrock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "86",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4593,
+          "y": 3551,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4593,
+          "y": 3551,
+          "z": 2
+        },
+        "x": 4593,
+        "y": 3551,
+        "z": 2,
+        "X": 4593,
+        "Y": 3551,
+        "Z": 2
+      },
+      "Guid": "9d3a4641-7e5e-4cd7-b8b4-174066ca4bda",
+      "GetTitle": "POI:  Mossy Log Streams",
+      "GetDescription": "Enemies: Stumps and Treants\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "87",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 883,
+          "y": 3898,
+          "z": 8
+        },
+        "ToVector": {
+          "x": 883,
+          "y": 3898,
+          "z": 8
+        },
+        "x": 883,
+        "y": 3898,
+        "z": 8,
+        "X": 883,
+        "Y": 3898,
+        "Z": 8
+      },
+      "Guid": "4fa1816f-5e7e-4597-a935-9840903d8d1c",
+      "GetTitle": "Dungeon: Seething Brood",
+      "GetDescription": "Lvl 28-30",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "88",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1991,
+          "y": 2568,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1991,
+          "y": 2568,
+          "z": 1
+        },
+        "x": 1991,
+        "y": 2568,
+        "z": 1,
+        "X": 1991,
+        "Y": 2568,
+        "Z": 1
+      },
+      "Guid": "6a6689ee-46a0-4356-a383-483b38b6ddc2",
+      "GetTitle": "POI: Shroomed Soil",
+      "GetDescription": "Enemies: Mycoli",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "89",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4018,
+          "y": 2113,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4018,
+          "y": 2113,
+          "z": 2
+        },
+        "x": 4018,
+        "y": 2113,
+        "z": 2,
+        "X": 4018,
+        "Y": 2113,
+        "Z": 2
+      },
+      "Guid": "419cec7a-4e02-491e-b4f3-8137847f474a",
+      "GetTitle": "POI: Turtle Sand Runoff",
+      "GetDescription": "Enemies: Turtles",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "90",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4579,
+          "y": 3218,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4579,
+          "y": 3218,
+          "z": 2
+        },
+        "x": 4579,
+        "y": 3218,
+        "z": 2,
+        "X": 4579,
+        "Y": 3218,
+        "Z": 2
+      },
+      "Guid": "682ac9da-6f57-4cd2-aec6-aaaebef7b216",
+      "GetTitle": "POI: Serpent Island",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "91",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3446,
+          "y": 2751,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3446,
+          "y": 2751,
+          "z": 2
+        },
+        "x": 3446,
+        "y": 2751,
+        "z": 2,
+        "X": 3446,
+        "Y": 2751,
+        "Z": 2
+      },
+      "Guid": "6f465711-2b11-44d3-9e2a-1e450f338298",
+      "GetTitle": "POI: Steam Geysers",
+      "GetDescription": "Enemies: Air Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "92",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1323,
+          "y": 2304,
+          "z": 3
+        },
+        "ToVector": {
+          "x": 1323,
+          "y": 2304,
+          "z": 3
+        },
+        "x": 1323,
+        "y": 2304,
+        "z": 3,
+        "X": 1323,
+        "Y": 2304,
+        "Z": 3
+      },
+      "Guid": "d7dc89fc-d113-4322-affa-6f75bc4b43a6",
+      "GetTitle": "POI: Bloody Massacre",
+      "GetDescription": "Enemies: Demon Tyrant",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "93",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3897,
+          "y": 2323,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3897,
+          "y": 2323,
+          "z": 2
+        },
+        "x": 3897,
+        "y": 2323,
+        "z": 2,
+        "X": 3897,
+        "Y": 2323,
+        "Z": 2
+      },
+      "Guid": "2c1a8135-d7cb-49e8-8d2a-ec2a3917b136",
+      "GetTitle": "POI: Elemental Cave",
+      "GetDescription": "Enemies: Lesser Elementals [All]",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "94",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3239,
+          "y": 2540,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3239,
+          "y": 2540,
+          "z": 1
+        },
+        "x": 3239,
+        "y": 2540,
+        "z": 1,
+        "X": 3239,
+        "Y": 2540,
+        "Z": 1
+      },
+      "Guid": "aa79b9f9-65a8-4d89-a790-1e3c08e7c55a",
+      "GetTitle": "Raid: Deadlands",
+      "GetDescription": "Lvl 30\u002B",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "95",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2609,
+          "y": 2279,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2609,
+          "y": 2279,
+          "z": 1
+        },
+        "x": 2609,
+        "y": 2279,
+        "z": 1,
+        "X": 2609,
+        "Y": 2279,
+        "Z": 1
+      },
+      "Guid": "456d7316-2346-4a85-8708-5c251e17490e",
+      "GetTitle": "POI: Crocodiles Den",
+      "GetDescription": "Enemies: Crocodiles\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "96",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4290,
+          "y": 3644,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4290,
+          "y": 3644,
+          "z": 2
+        },
+        "x": 4290,
+        "y": 3644,
+        "z": 2,
+        "X": 4290,
+        "Y": 3644,
+        "Z": 2
+      },
+      "Guid": "deff795a-42ab-43ea-a1c6-1dac9af12577",
+      "GetTitle": "POI: Sacred Moon Soil",
+      "GetDescription": "Enemies: Moonspawn\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "97",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4272,
+          "y": 2198,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4272,
+          "y": 2198,
+          "z": 1
+        },
+        "x": 4272,
+        "y": 2198,
+        "z": 1,
+        "X": 4272,
+        "Y": 2198,
+        "Z": 1
+      },
+      "Guid": "76810d07-fe28-49d8-898f-cea81ef92ee3",
+      "GetTitle": "Dungeon: Warrens of Thought",
+      "GetDescription": "Lvl 10-12",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "98",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1617,
+          "y": 2619,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1617,
+          "y": 2619,
+          "z": 1
+        },
+        "x": 1617,
+        "y": 2619,
+        "z": 1,
+        "X": 1617,
+        "Y": 2619,
+        "Z": 1
+      },
+      "Guid": "fb2c657b-d671-4862-a5ee-90b6bfc37bbe",
+      "GetTitle": "POI: Sweet Slime",
+      "GetDescription": "Enemies: Hallowed Slimes",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "99",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3468,
+          "y": 1836,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3468,
+          "y": 1836,
+          "z": 1
+        },
+        "x": 3468,
+        "y": 1836,
+        "z": 1,
+        "X": 3468,
+        "Y": 1836,
+        "Z": 1
+      },
+      "Guid": "e8658aa6-6795-42f9-a516-1675520f6b07",
+      "GetTitle": "POI: Corrupted Grounds",
+      "GetDescription": "Enemies: Corrupted Animals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "100",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3640,
+          "y": 2412,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3640,
+          "y": 2412,
+          "z": 1
+        },
+        "x": 3640,
+        "y": 2412,
+        "z": 1,
+        "X": 3640,
+        "Y": 2412,
+        "Z": 1
+      },
+      "Guid": "1934f70f-14b7-4644-a153-f0d953827075",
+      "GetTitle": "World Boss: Ragnvald",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "101",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 835,
+          "y": 3422,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 835,
+          "y": 3422,
+          "z": 1
+        },
+        "x": 835,
+        "y": 3422,
+        "z": 1,
+        "X": 835,
+        "Y": 3422,
+        "Z": 1
+      },
+      "Guid": "7810e806-ca47-4dd0-81ea-ca6ca1a84aaf",
+      "GetTitle": "POI: Frost Covered Trails",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "102",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4752,
+          "y": 3987,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4752,
+          "y": 3987,
+          "z": 1
+        },
+        "x": 4752,
+        "y": 3987,
+        "z": 1,
+        "X": 4752,
+        "Y": 3987,
+        "Z": 1
+      },
+      "Guid": "12044150-76b0-4120-a725-460468c0b0b2",
+      "GetTitle": "Teleport: Wagon",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "103",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3780,
+          "y": 2062,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3780,
+          "y": 2062,
+          "z": 1
+        },
+        "x": 3780,
+        "y": 2062,
+        "z": 1,
+        "X": 3780,
+        "Y": 2062,
+        "Z": 1
+      },
+      "Guid": "ddcefb9e-e9e6-48ce-a860-792a7bfedc61",
+      "GetTitle": "POI: Demonic Den",
+      "GetDescription": "Enemies: Demonic Acolyte/Knight",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "104",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4567,
+          "y": 3855,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4567,
+          "y": 3855,
+          "z": 1
+        },
+        "x": 4567,
+        "y": 3855,
+        "z": 1,
+        "X": 4567,
+        "Y": 3855,
+        "Z": 1
+      },
+      "Guid": "dd820605-ff05-4dbb-bee5-20c6a0a3ad71",
+      "GetTitle": "POI: Demonic Granite Mine",
+      "GetDescription": "Enemies: Grimbears",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "105",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3248,
+          "y": 2450,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3248,
+          "y": 2450,
+          "z": 1
+        },
+        "x": 3248,
+        "y": 2450,
+        "z": 1,
+        "X": 3248,
+        "Y": 2450,
+        "Z": 1
+      },
+      "Guid": "bb9ac56a-d8d3-4f6e-b998-b05713bf1765",
+      "GetTitle": "POI: Damp Caves",
+      "GetDescription": "Enemies: Ebonshades",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "106",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 984,
+          "y": 3788,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 984,
+          "y": 3788,
+          "z": 2
+        },
+        "x": 984,
+        "y": 3788,
+        "z": 2,
+        "X": 984,
+        "Y": 3788,
+        "Z": 2
+      },
+      "Guid": "d97376b5-5195-4f18-82fe-f4e6a0195f69",
+      "GetTitle": "POI: Frost Troll Lair",
+      "GetDescription": "Enemies: Trolls",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "107",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2080,
+          "y": 3148,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2080,
+          "y": 3148,
+          "z": 2
+        },
+        "x": 2080,
+        "y": 3148,
+        "z": 2,
+        "X": 2080,
+        "Y": 3148,
+        "Z": 2
+      },
+      "Guid": "f7507cd2-65b7-4195-8a91-a03331a31965",
+      "GetTitle": "Town: Shieldholm",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "108",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3983,
+          "y": 2686,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3983,
+          "y": 2686,
+          "z": 1
+        },
+        "x": 3983,
+        "y": 2686,
+        "z": 1,
+        "X": 3983,
+        "Y": 2686,
+        "Z": 1
+      },
+      "Guid": "b564139d-014a-44a3-aaba-bcfaadd6d4a1",
+      "GetTitle": "POI: Corrupted Grounds",
+      "GetDescription": "Enemies: Corrupted Animals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "109",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3705,
+          "y": 1995,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3705,
+          "y": 1995,
+          "z": 1
+        },
+        "x": 3705,
+        "y": 1995,
+        "z": 1,
+        "X": 3705,
+        "Y": 1995,
+        "Z": 1
+      },
+      "Guid": "b3d18e7c-a5a8-49c7-9082-9b3be254b080",
+      "GetTitle": "POI: Birchwood Grove",
+      "GetDescription": "Enemies: Wisps",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "110",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3833,
+          "y": 2113,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3833,
+          "y": 2113,
+          "z": 1
+        },
+        "x": 3833,
+        "y": 2113,
+        "z": 1,
+        "X": 3833,
+        "Y": 2113,
+        "Z": 1
+      },
+      "Guid": "6811bcdd-eeca-4c0b-ac08-dc86f90cff91",
+      "GetTitle": "POI: Trappers Base Camp",
+      "GetDescription": "Enemies: Trappers and Caged Bears",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "111",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4317,
+          "y": 1979,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4317,
+          "y": 1979,
+          "z": 1
+        },
+        "x": 4317,
+        "y": 1979,
+        "z": 1,
+        "X": 4317,
+        "Y": 1979,
+        "Z": 1
+      },
+      "Guid": "7fd7ffe5-bcb7-4870-8e5e-a8218925b381",
+      "GetTitle": "Bank: Edrivine",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "112",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3766,
+          "y": 3058,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3766,
+          "y": 3058,
+          "z": 2
+        },
+        "x": 3766,
+        "y": 3058,
+        "z": 2,
+        "X": 3766,
+        "Y": 3058,
+        "Z": 2
+      },
+      "Guid": "633823ca-b413-43c2-af91-0d73752aec63",
+      "GetTitle": "POI: Ravaged Camp",
+      "GetDescription": "Enemies: Goblins and Orks",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "113",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4718,
+          "y": 3963,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4718,
+          "y": 3963,
+          "z": 1
+        },
+        "x": 4718,
+        "y": 3963,
+        "z": 1,
+        "X": 4718,
+        "Y": 3963,
+        "Z": 1
+      },
+      "Guid": "0fa36321-80b1-4250-8777-94ce52c5476a",
+      "GetTitle": "Teleport: Leyline",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "114",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2641,
+          "y": 2218,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2641,
+          "y": 2218,
+          "z": 1
+        },
+        "x": 2641,
+        "y": 2218,
+        "z": 1,
+        "X": 2641,
+        "Y": 2218,
+        "Z": 1
+      },
+      "Guid": "ea325758-391b-4d23-b6e2-c014561a0b9b",
+      "GetTitle": "POI: Egg Holed Mud Side",
+      "GetDescription": "Enemies: Turtles",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "115",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3256,
+          "y": 1969,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3256,
+          "y": 1969,
+          "z": 1
+        },
+        "x": 3256,
+        "y": 1969,
+        "z": 1,
+        "X": 3256,
+        "Y": 1969,
+        "Z": 1
+      },
+      "Guid": "bf821715-cc6b-44d4-a4fe-cdf622c2b66c",
+      "GetTitle": "POI: Hatchling Valley",
+      "GetDescription": "Enemies: Hatchlings",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "116",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1800,
+          "y": 2303,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1800,
+          "y": 2303,
+          "z": 1
+        },
+        "x": 1800,
+        "y": 2303,
+        "z": 1,
+        "X": 1800,
+        "Y": 2303,
+        "Z": 1
+      },
+      "Guid": "60455b51-729f-4b12-b1de-bf3e182b8891",
+      "GetTitle": "POI: Serpent Marshes",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "117",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3896,
+          "y": 2255,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3896,
+          "y": 2255,
+          "z": 1
+        },
+        "x": 3896,
+        "y": 2255,
+        "z": 1,
+        "X": 3896,
+        "Y": 2255,
+        "Z": 1
+      },
+      "Guid": "40f1063a-e0d7-4e92-b2e7-61c718b6e4af",
+      "GetTitle": "POI: Crystal Pit",
+      "GetDescription": "Enemies: Skeletal Warrior/Archmage",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "118",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3030,
+          "y": 2002,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3030,
+          "y": 2002,
+          "z": 1
+        },
+        "x": 3030,
+        "y": 2002,
+        "z": 1,
+        "X": 3030,
+        "Y": 2002,
+        "Z": 1
+      },
+      "Guid": "08192a19-5ea0-487c-9676-68db67385590",
+      "GetTitle": "POI: Corrupted Grounds",
+      "GetDescription": "Enemies: Corrupted Animals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "119",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2025,
+          "y": 2404,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2025,
+          "y": 2404,
+          "z": 1
+        },
+        "x": 2025,
+        "y": 2404,
+        "z": 1,
+        "X": 2025,
+        "Y": 2404,
+        "Z": 1
+      },
+      "Guid": "900e7a68-3b90-45e3-bf34-1c391f3048a6",
+      "GetTitle": "Town: Pelry",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "120",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1044,
+          "y": 2546,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1044,
+          "y": 2546,
+          "z": 1
+        },
+        "x": 1044,
+        "y": 2546,
+        "z": 1,
+        "X": 1044,
+        "Y": 2546,
+        "Z": 1
+      },
+      "Guid": "e9ee724e-9856-49bd-a2c6-21740a9608fc",
+      "GetTitle": "POI: Hell Crater",
+      "GetDescription": "Enemies: Hellhounds",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "121",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4674,
+          "y": 3626,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4674,
+          "y": 3626,
+          "z": 2
+        },
+        "x": 4674,
+        "y": 3626,
+        "z": 2,
+        "X": 4674,
+        "Y": 3626,
+        "Z": 2
+      },
+      "Guid": "b885b185-8ec4-4cde-8bf5-318f07c92e47",
+      "GetTitle": "POI: Shadow Ravine",
+      "GetDescription": "Enemies: Shadow Manifestations",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "122",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3592,
+          "y": 3415,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3592,
+          "y": 3415,
+          "z": 2
+        },
+        "x": 3592,
+        "y": 3415,
+        "z": 2,
+        "X": 3592,
+        "Y": 3415,
+        "Z": 2
+      },
+      "Guid": "32260ad1-23a4-49c6-9360-7e37ee779573",
+      "GetTitle": "POI: Scary Cave",
+      "GetDescription": "Enemies: Shadow Harbingers, Shadow Imps and Rager Imps",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "123",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1252,
+          "y": 2185,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1252,
+          "y": 2185,
+          "z": 1
+        },
+        "x": 1252,
+        "y": 2185,
+        "z": 1,
+        "X": 1252,
+        "Y": 2185,
+        "Z": 1
+      },
+      "Guid": "ea2eaf94-d468-4cf6-8671-1ed745520982",
+      "GetTitle": "POI: Mass Grave",
+      "GetDescription": "Enemies: Lesser Fiends",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "124",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1182,
+          "y": 3588,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1182,
+          "y": 3588,
+          "z": 2
+        },
+        "x": 1182,
+        "y": 3588,
+        "z": 2,
+        "X": 1182,
+        "Y": 3588,
+        "Z": 2
+      },
+      "Guid": "d8d9d850-7095-4161-af74-89df62fcd740",
+      "GetTitle": "Town: Spearholm",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "125",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3995,
+          "y": 2284,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3995,
+          "y": 2284,
+          "z": 2
+        },
+        "x": 3995,
+        "y": 2284,
+        "z": 2,
+        "X": 3995,
+        "Y": 2284,
+        "Z": 2
+      },
+      "Guid": "38008a9a-7b5f-4731-a786-129d41e87717",
+      "GetTitle": "POI: Mountain Side Runoff",
+      "GetDescription": "Enemies: Magical Water Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "126",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1073,
+          "y": 3812,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1073,
+          "y": 3812,
+          "z": 1
+        },
+        "x": 1073,
+        "y": 3812,
+        "z": 1,
+        "X": 1073,
+        "Y": 3812,
+        "Z": 1
+      },
+      "Guid": "1a47d4a6-5ba9-4b6f-a6ff-b819616735c3",
+      "GetTitle": "POI: Lightning Pillar Zap",
+      "GetDescription": "Enemies: Lightning Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "127",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3744,
+          "y": 2475,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3744,
+          "y": 2475,
+          "z": 1
+        },
+        "x": 3744,
+        "y": 2475,
+        "z": 1,
+        "X": 3744,
+        "Y": 2475,
+        "Z": 1
+      },
+      "Guid": "c69a7c5f-1393-42f0-8a1b-8694c884b1cd",
+      "GetTitle": "POI: Crater",
+      "GetDescription": "Enemies: Earth Elementals\u002BSuperiors",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "128",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2956,
+          "y": 2126,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2956,
+          "y": 2126,
+          "z": 2
+        },
+        "x": 2956,
+        "y": 2126,
+        "z": 2,
+        "X": 2956,
+        "Y": 2126,
+        "Z": 2
+      },
+      "Guid": "a68ecf37-e050-4544-a176-bb95f8ae8206",
+      "GetTitle": "POI: Grimbear Cave",
+      "GetDescription": "Enemies: Grimbears",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "129",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2040,
+          "y": 2393,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 2040,
+          "y": 2393,
+          "z": 1
+        },
+        "x": 2040,
+        "y": 2393,
+        "z": 1,
+        "X": 2040,
+        "Y": 2393,
+        "Z": 1
+      },
+      "Guid": "5c4a6f01-a894-4ee9-be40-ad4a2da548c4",
+      "GetTitle": "Bank: Pelry",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "130",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3864,
+          "y": 2694,
+          "z": 4
+        },
+        "ToVector": {
+          "x": 3864,
+          "y": 2694,
+          "z": 4
+        },
+        "x": 3864,
+        "y": 2694,
+        "z": 4,
+        "X": 3864,
+        "Y": 2694,
+        "Z": 4
+      },
+      "Guid": "f9300d8a-2eb6-4c46-8733-b549be97beec",
+      "GetTitle": "Dungeon: Corrupted Grove",
+      "GetDescription": "Lvl 14-16",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "131",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1081,
+          "y": 2398,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1081,
+          "y": 2398,
+          "z": 1
+        },
+        "x": 1081,
+        "y": 2398,
+        "z": 1,
+        "X": 1081,
+        "Y": 2398,
+        "Z": 1
+      },
+      "Guid": "87cf5b05-021b-43a0-9ca2-adf81f3852de",
+      "GetTitle": "Town: Rime",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "132",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4171,
+          "y": 2055,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4171,
+          "y": 2055,
+          "z": 1
+        },
+        "x": 4171,
+        "y": 2055,
+        "z": 1,
+        "X": 4171,
+        "Y": 2055,
+        "Z": 1
+      },
+      "Guid": "c5a06b5a-cb28-494e-b2fa-8042b01d67d6",
+      "GetTitle": "Teleport: Boat Dock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "133",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1143,
+          "y": 3086,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1143,
+          "y": 3086,
+          "z": 1
+        },
+        "x": 1143,
+        "y": 3086,
+        "z": 1,
+        "X": 1143,
+        "Y": 3086,
+        "Z": 1
+      },
+      "Guid": "05e615e3-0e76-4ad1-ac80-f515b90becc9",
+      "GetTitle": "POI: Corrupted Grounds",
+      "GetDescription": "Enemies: Corrupted Animals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "134",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4139,
+          "y": 1812,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4139,
+          "y": 1812,
+          "z": 1
+        },
+        "x": 4139,
+        "y": 1812,
+        "z": 1,
+        "X": 4139,
+        "Y": 1812,
+        "Z": 1
+      },
+      "Guid": "bf564145-c68f-4e11-acc8-7530877ea510",
+      "GetTitle": "POI: Sand Battlefield",
+      "GetDescription": "Enemies: Kobolds",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "135",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4037,
+          "y": 2134,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4037,
+          "y": 2134,
+          "z": 2
+        },
+        "x": 4037,
+        "y": 2134,
+        "z": 2,
+        "X": 4037,
+        "Y": 2134,
+        "Z": 2
+      },
+      "Guid": "a4c0c0f3-60c7-4099-a407-1ce4c1f25d78",
+      "GetTitle": "POI: Bandits Foward Camp",
+      "GetDescription": "Enemies: Bandits",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "136",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4494,
+          "y": 3827,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4494,
+          "y": 3827,
+          "z": 1
+        },
+        "x": 4494,
+        "y": 3827,
+        "z": 1,
+        "X": 4494,
+        "Y": 3827,
+        "Z": 1
+      },
+      "Guid": "8ffa4c6f-e64b-4d6c-9c49-20c0fffdcf6a",
+      "GetTitle": "POI: Pit of Doom",
+      "GetDescription": "Enemies: Flame Revenants",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "137",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4401,
+          "y": 3445,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4401,
+          "y": 3445,
+          "z": 2
+        },
+        "x": 4401,
+        "y": 3445,
+        "z": 2,
+        "X": 4401,
+        "Y": 3445,
+        "Z": 2
+      },
+      "Guid": "079fefd2-a793-4c0e-8ef2-c8275bd66863",
+      "GetTitle": "POI: Mushroom Turf",
+      "GetDescription": "Enemies: Mycoli and Campestris",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "138",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 550,
+          "y": 4051,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 550,
+          "y": 4051,
+          "z": 1
+        },
+        "x": 550,
+        "y": 4051,
+        "z": 1,
+        "X": 550,
+        "Y": 4051,
+        "Z": 1
+      },
+      "Guid": "7027282a-6854-4707-86d9-b14a332e087f",
+      "GetTitle": "POI: Frosty Scales",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "139",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3934,
+          "y": 2131,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3934,
+          "y": 2131,
+          "z": 2
+        },
+        "x": 3934,
+        "y": 2131,
+        "z": 2,
+        "X": 3934,
+        "Y": 2131,
+        "Z": 2
+      },
+      "Guid": "1162207f-d568-4a07-b854-b5b3c8a0eef4",
+      "GetTitle": "POI: Turtle Beach",
+      "GetDescription": "Enemies: Turtles\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "140",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2579,
+          "y": 2679,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2579,
+          "y": 2679,
+          "z": 2
+        },
+        "x": 2579,
+        "y": 2679,
+        "z": 2,
+        "X": 2579,
+        "Y": 2679,
+        "Z": 2
+      },
+      "Guid": "164fd01a-9f58-43a3-97a7-5e1a359fbef2",
+      "GetTitle": "POI: Yellow Stone",
+      "GetDescription": "Enemies: Greater Water Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "141",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1028,
+          "y": 3450,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1028,
+          "y": 3450,
+          "z": 1
+        },
+        "x": 1028,
+        "y": 3450,
+        "z": 1,
+        "X": 1028,
+        "Y": 3450,
+        "Z": 1
+      },
+      "Guid": "651c81bd-35f1-4197-8786-9a645b071213",
+      "GetTitle": "POI: Frosted Rocks",
+      "GetDescription": "Enemies: Stoneshard Elemental",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "142",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1914,
+          "y": 2555,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1914,
+          "y": 2555,
+          "z": 1
+        },
+        "x": 1914,
+        "y": 2555,
+        "z": 1,
+        "X": 1914,
+        "Y": 2555,
+        "Z": 1
+      },
+      "Guid": "f4b576ea-6e7a-4658-8c9d-f99eed0bded1",
+      "GetTitle": "POI: Lightning Pillar Bolt",
+      "GetDescription": "Enemies: Superior Lightning Elemental",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "143",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 5427,
+          "y": 4023,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 5427,
+          "y": 4023,
+          "z": 2
+        },
+        "x": 5427,
+        "y": 4023,
+        "z": 2,
+        "X": 5427,
+        "Y": 4023,
+        "Z": 2
+      },
+      "Guid": "06417015-f624-4c10-ad58-393203c92b9d",
+      "GetTitle": "World Boss: Aynreth ",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "144",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3672,
+          "y": 3249,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3672,
+          "y": 3249,
+          "z": 2
+        },
+        "x": 3672,
+        "y": 3249,
+        "z": 2,
+        "X": 3672,
+        "Y": 3249,
+        "Z": 2
+      },
+      "Guid": "ff481b52-6330-4aef-ab97-5ce9db8b2207",
+      "GetTitle": "POI: Goblin Ravagers Base",
+      "GetDescription": "Enemies: Shadow Goblins",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "145",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4200,
+          "y": 3349,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4200,
+          "y": 3349,
+          "z": 2
+        },
+        "x": 4200,
+        "y": 3349,
+        "z": 2,
+        "X": 4200,
+        "Y": 3349,
+        "Z": 2
+      },
+      "Guid": "0973eb87-9dcb-44c9-9323-a21604f1810a",
+      "GetTitle": "POI: Marshdale Retention Pond",
+      "GetDescription": "Enemies: Superior Water Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "146",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4376,
+          "y": 1877,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4376,
+          "y": 1877,
+          "z": 2
+        },
+        "x": 4376,
+        "y": 1877,
+        "z": 2,
+        "X": 4376,
+        "Y": 1877,
+        "Z": 2
+      },
+      "Guid": "d6814713-453b-4247-8d76-7b9bf1d1d1fa",
+      "GetTitle": "POI: Crocodile Infested Waters",
+      "GetDescription": "Enemies: Crocodiles\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "147",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3677,
+          "y": 1885,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3677,
+          "y": 1885,
+          "z": 1
+        },
+        "x": 3677,
+        "y": 1885,
+        "z": 1,
+        "X": 3677,
+        "Y": 1885,
+        "Z": 1
+      },
+      "Guid": "00e23202-ab6f-4241-941d-da141e601cb3",
+      "GetTitle": "POI: Magical Bear Den",
+      "GetDescription": "Enemies: Manafused Bear",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "148",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2358,
+          "y": 2122,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2358,
+          "y": 2122,
+          "z": 2
+        },
+        "x": 2358,
+        "y": 2122,
+        "z": 2,
+        "X": 2358,
+        "Y": 2122,
+        "Z": 2
+      },
+      "Guid": "4b3968d6-9a55-48e2-bc28-8f3654e55574",
+      "GetTitle": "POI: Arcanic Anomaly",
+      "GetDescription": "Enemies: Arcanic Essences",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "149",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3002,
+          "y": 2057,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3002,
+          "y": 2057,
+          "z": 2
+        },
+        "x": 3002,
+        "y": 2057,
+        "z": 2,
+        "X": 3002,
+        "Y": 2057,
+        "Z": 2
+      },
+      "Guid": "f85f2096-f0a5-491e-8541-1dd04e96a38b",
+      "GetTitle": "POI: Mining Grinders",
+      "GetDescription": "Enemies: Grimbears",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "150",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3528,
+          "y": 2697,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3528,
+          "y": 2697,
+          "z": 2
+        },
+        "x": 3528,
+        "y": 2697,
+        "z": 2,
+        "X": 3528,
+        "Y": 2697,
+        "Z": 2
+      },
+      "Guid": "ef141558-cc22-44c0-aea2-a4641002e5a0",
+      "GetTitle": "Town: Gilded Wall",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "151",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4057,
+          "y": 2382,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4057,
+          "y": 2382,
+          "z": 2
+        },
+        "x": 4057,
+        "y": 2382,
+        "z": 2,
+        "X": 4057,
+        "Y": 2382,
+        "Z": 2
+      },
+      "Guid": "41d15a30-6e13-49c2-9fe1-2d8585cf294e",
+      "GetTitle": "POI: Zealot Castle",
+      "GetDescription": "Enemies: Zealot Battlemages/Firecallers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "152",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3817,
+          "y": 2027,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3817,
+          "y": 2027,
+          "z": 1
+        },
+        "x": 3817,
+        "y": 2027,
+        "z": 1,
+        "X": 3817,
+        "Y": 2027,
+        "Z": 1
+      },
+      "Guid": "c8082997-5970-468f-8279-26d11542f26f",
+      "GetTitle": "POI: Wolf Forest",
+      "GetDescription": "Enemies: Wolfs\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "153",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3918,
+          "y": 2378,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3918,
+          "y": 2378,
+          "z": 2
+        },
+        "x": 3918,
+        "y": 2378,
+        "z": 2,
+        "X": 3918,
+        "Y": 2378,
+        "Z": 2
+      },
+      "Guid": "9ea75bd1-bea8-4710-ae1e-4be4ef686470",
+      "GetTitle": "POI: Lava Pit",
+      "GetDescription": "Enemies: Fire Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "154",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3757,
+          "y": 1896,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3757,
+          "y": 1896,
+          "z": 1
+        },
+        "x": 3757,
+        "y": 1896,
+        "z": 1,
+        "X": 3757,
+        "Y": 1896,
+        "Z": 1
+      },
+      "Guid": "aec8eac5-b739-4d62-996c-69ee4d910bed",
+      "GetTitle": "Daily Quest: Mining",
+      "GetDescription": "NPC: Simon Horvath",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "155",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3603,
+          "y": 2350,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3603,
+          "y": 2350,
+          "z": 1
+        },
+        "x": 3603,
+        "y": 2350,
+        "z": 1,
+        "X": 3603,
+        "Y": 2350,
+        "Z": 1
+      },
+      "Guid": "7915b12e-8d97-4b2d-8c5e-93ecfc68234e",
+      "GetTitle": "POI: Bandit Base Camp",
+      "GetDescription": "Enemies: Bandit Outlaws/Thugs",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "156",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3325,
+          "y": 2261,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3325,
+          "y": 2261,
+          "z": 1
+        },
+        "x": 3325,
+        "y": 2261,
+        "z": 1,
+        "X": 3325,
+        "Y": 2261,
+        "Z": 1
+      },
+      "Guid": "d7935029-1872-48bd-847a-cdbce75ca6ee",
+      "GetTitle": "POI: Slime Pit",
+      "GetDescription": "Enemies: Slimespawns",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "157",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3623,
+          "y": 2175,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3623,
+          "y": 2175,
+          "z": 1
+        },
+        "x": 3623,
+        "y": 2175,
+        "z": 1,
+        "X": 3623,
+        "Y": 2175,
+        "Z": 1
+      },
+      "Guid": "5d6b6e3a-b21d-43ef-968b-25ff06dfd14f",
+      "GetTitle": "Teleport: Boat Dock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "158",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4402,
+          "y": 4143,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4402,
+          "y": 4143,
+          "z": 2
+        },
+        "x": 4402,
+        "y": 4143,
+        "z": 2,
+        "X": 4402,
+        "Y": 4143,
+        "Z": 2
+      },
+      "Guid": "7f437c42-7f26-4079-af5a-f74acaec25f9",
+      "GetTitle": "World Boss: Drathal",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "159",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3570,
+          "y": 1931,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3570,
+          "y": 1931,
+          "z": 1
+        },
+        "x": 3570,
+        "y": 1931,
+        "z": 1,
+        "X": 3570,
+        "Y": 1931,
+        "Z": 1
+      },
+      "Guid": "5c182d00-53f5-4949-b243-909f2d697d98",
+      "GetTitle": "POI: Drakling Forest",
+      "GetDescription": "Enemies: Forest Drakes\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "160",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4291,
+          "y": 3829,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4291,
+          "y": 3829,
+          "z": 2
+        },
+        "x": 4291,
+        "y": 3829,
+        "z": 2,
+        "X": 4291,
+        "Y": 3829,
+        "Z": 2
+      },
+      "Guid": "42954b0d-b6bb-4ed1-8d53-248a6cd3b6c1",
+      "GetTitle": "POI: Depths",
+      "GetDescription": "Enemies: Cave Crashers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "161",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3835,
+          "y": 3337,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3835,
+          "y": 3337,
+          "z": 2
+        },
+        "x": 3835,
+        "y": 3337,
+        "z": 2,
+        "X": 3835,
+        "Y": 3337,
+        "Z": 2
+      },
+      "Guid": "ef9060b3-0485-4c53-95e1-598e702b2914",
+      "GetTitle": "POI: Demonic Grasslands",
+      "GetDescription": "Enemies: Demon Watchers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "162",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4581,
+          "y": 3005,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4581,
+          "y": 3005,
+          "z": 2
+        },
+        "x": 4581,
+        "y": 3005,
+        "z": 2,
+        "X": 4581,
+        "Y": 3005,
+        "Z": 2
+      },
+      "Guid": "6e23babf-c209-4ef2-8e8c-be85d8d93ff8",
+      "GetTitle": "POI: Abolished Camp",
+      "GetDescription": "Enemies: Shadow Goblins",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "163",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4366,
+          "y": 4239,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4366,
+          "y": 4239,
+          "z": 2
+        },
+        "x": 4366,
+        "y": 4239,
+        "z": 2,
+        "X": 4366,
+        "Y": 4239,
+        "Z": 2
+      },
+      "Guid": "93aec68d-665e-4173-918e-d4e24f3be3d8",
+      "GetTitle": "POI: Icewind Spiral",
+      "GetDescription": "Enemies: Lesser/Magical/Normal Air Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "164",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4780,
+          "y": 4073,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4780,
+          "y": 4073,
+          "z": 1
+        },
+        "x": 4780,
+        "y": 4073,
+        "z": 1,
+        "X": 4780,
+        "Y": 4073,
+        "Z": 1
+      },
+      "Guid": "b945c20f-b6fd-44a9-aa21-e6949547ca53",
+      "GetTitle": "Town: Silverlake",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "165",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3953,
+          "y": 2031,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3953,
+          "y": 2031,
+          "z": 1
+        },
+        "x": 3953,
+        "y": 2031,
+        "z": 1,
+        "X": 3953,
+        "Y": 2031,
+        "Z": 1
+      },
+      "Guid": "e398be43-4a00-4720-b811-ac71429d9536",
+      "GetTitle": "POI: Enchanted Forest",
+      "GetDescription": "Enemies: Forest Spirits",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "166",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2734,
+          "y": 2899,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2734,
+          "y": 2899,
+          "z": 2
+        },
+        "x": 2734,
+        "y": 2899,
+        "z": 2,
+        "X": 2734,
+        "Y": 2899,
+        "Z": 2
+      },
+      "Guid": "d0f11d4d-b646-42aa-a322-70b1d012aa97",
+      "GetTitle": "Town: Coinfield",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "167",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 650,
+          "y": 4083,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 650,
+          "y": 4083,
+          "z": 1
+        },
+        "x": 650,
+        "y": 4083,
+        "z": 1,
+        "X": 650,
+        "Y": 4083,
+        "Z": 1
+      },
+      "Guid": "6872598a-5229-4687-8c2a-fcb7a7d59ce1",
+      "GetTitle": "POI: Spooky Cave",
+      "GetDescription": "Enemies: Frost Harbingers, Frost Imps and Rager Imps",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "168",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 2891,
+          "y": 2151,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 2891,
+          "y": 2151,
+          "z": 2
+        },
+        "x": 2891,
+        "y": 2151,
+        "z": 2,
+        "X": 2891,
+        "Y": 2151,
+        "Z": 2
+      },
+      "Guid": "a772dedf-dd4e-433d-a376-2034c3be1c6b",
+      "GetTitle": "POI: Serpent Oasis",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "169",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4591,
+          "y": 3732,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4591,
+          "y": 3732,
+          "z": 2
+        },
+        "x": 4591,
+        "y": 3732,
+        "z": 2,
+        "X": 4591,
+        "Y": 3732,
+        "Z": 2
+      },
+      "Guid": "695b8e61-3e5d-48d2-b34e-50dd9f297f2a",
+      "GetTitle": "POI: Burnt Remains",
+      "GetDescription": "Enemies: Tricksters",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "170",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3466,
+          "y": 1983,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3466,
+          "y": 1983,
+          "z": 1
+        },
+        "x": 3466,
+        "y": 1983,
+        "z": 1,
+        "X": 3466,
+        "Y": 1983,
+        "Z": 1
+      },
+      "Guid": "73c84792-0aef-4c8d-b9eb-9177eb03f555",
+      "GetTitle": "POI: Abandoned Shack",
+      "GetDescription": "Enemies: Possessed Boars",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "171",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4870,
+          "y": 3592,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4870,
+          "y": 3592,
+          "z": 2
+        },
+        "x": 4870,
+        "y": 3592,
+        "z": 2,
+        "X": 4870,
+        "Y": 3592,
+        "Z": 2
+      },
+      "Guid": "cae4d4f4-c84c-4bc6-a3ce-ca08106ed52d",
+      "GetTitle": "POI: Troglodyte Camp Doofus",
+      "GetDescription": "Enemies: Trolls, Goblins and Orks",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "172",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3140,
+          "y": 2113,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3140,
+          "y": 2113,
+          "z": 1
+        },
+        "x": 3140,
+        "y": 2113,
+        "z": 1,
+        "X": 3140,
+        "Y": 2113,
+        "Z": 1
+      },
+      "Guid": "e5c42b74-c5ef-4da3-9155-a86fc93387a3",
+      "GetTitle": "Bank: Dawnrock",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "173",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3349,
+          "y": 2193,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3349,
+          "y": 2193,
+          "z": 1
+        },
+        "x": 3349,
+        "y": 2193,
+        "z": 1,
+        "X": 3349,
+        "Y": 2193,
+        "Z": 1
+      },
+      "Guid": "17aac2fb-bccb-44b6-af94-4978a3eda85f",
+      "GetTitle": "POI: Sacred Moon Dirt",
+      "GetDescription": "Enemies: Moonspawns\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "174",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4497,
+          "y": 3730,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4497,
+          "y": 3730,
+          "z": 2
+        },
+        "x": 4497,
+        "y": 3730,
+        "z": 2,
+        "X": 4497,
+        "Y": 3730,
+        "Z": 2
+      },
+      "Guid": "a3234620-c91e-4ff8-8e65-4f676841edf9",
+      "GetTitle": "Town: Ironsheen",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "175",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4012,
+          "y": 3400,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4012,
+          "y": 3400,
+          "z": 2
+        },
+        "x": 4012,
+        "y": 3400,
+        "z": 2,
+        "X": 4012,
+        "Y": 3400,
+        "Z": 2
+      },
+      "Guid": "dbc8d56a-02ac-4475-900e-fc37789d207a",
+      "GetTitle": "Raid: Sporehaven Depths",
+      "GetDescription": "Lvl 20-35",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "176",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1603,
+          "y": 3553,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 1603,
+          "y": 3553,
+          "z": 2
+        },
+        "x": 1603,
+        "y": 3553,
+        "z": 2,
+        "X": 1603,
+        "Y": 3553,
+        "Z": 2
+      },
+      "Guid": "81ab5968-8e69-4825-915f-aad37863946e",
+      "GetTitle": "POI: Snow Covered Rocks",
+      "GetDescription": "Enemies: Earth Elementals",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "177",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4368,
+          "y": 3008,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4368,
+          "y": 3008,
+          "z": 2
+        },
+        "x": 4368,
+        "y": 3008,
+        "z": 2,
+        "X": 4368,
+        "Y": 3008,
+        "Z": 2
+      },
+      "Guid": "d9a13585-4dd0-4202-ae49-0a3563a05583",
+      "GetTitle": "POI: The Swamps",
+      "GetDescription": "Enemies: Mudlurker\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "178",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3638,
+          "y": 1945,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 3638,
+          "y": 1945,
+          "z": 1
+        },
+        "x": 3638,
+        "y": 1945,
+        "z": 1,
+        "X": 3638,
+        "Y": 1945,
+        "Z": 1
+      },
+      "Guid": "9236455c-30cc-4ba6-9220-fa70eff5b3b6",
+      "GetTitle": "POI: Destroyed Village",
+      "GetDescription": "Enemies: Trolls",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "179",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 679,
+          "y": 3774,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 679,
+          "y": 3774,
+          "z": 2
+        },
+        "x": 679,
+        "y": 3774,
+        "z": 2,
+        "X": 679,
+        "Y": 3774,
+        "Z": 2
+      },
+      "Guid": "f6e903b3-74c4-4ad5-82c2-485a503ae2e7",
+      "GetTitle": "POI: Slithery Snow",
+      "GetDescription": "Enemies: Echidnas, Vipers and Adders",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "180",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4013,
+          "y": 1814,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4013,
+          "y": 1814,
+          "z": 1
+        },
+        "x": 4013,
+        "y": 1814,
+        "z": 1,
+        "X": 4013,
+        "Y": 1814,
+        "Z": 1
+      },
+      "Guid": "dbb868d9-d176-4fda-a4bd-3f8a80a71c7b",
+      "GetTitle": "Dungeon: Temple of Ethersalos",
+      "GetDescription": "Lvl 25-26",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "181",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4102,
+          "y": 1987,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 4102,
+          "y": 1987,
+          "z": 1
+        },
+        "x": 4102,
+        "y": 1987,
+        "z": 1,
+        "X": 4102,
+        "Y": 1987,
+        "Z": 1
+      },
+      "Guid": "8c522133-6313-4342-bce7-b109fd0c26cb",
+      "GetTitle": "Teleport: Wagon",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "182",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 3913,
+          "y": 2194,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 3913,
+          "y": 2194,
+          "z": 2
+        },
+        "x": 3913,
+        "y": 2194,
+        "z": 2,
+        "X": 3913,
+        "Y": 2194,
+        "Z": 2
+      },
+      "Guid": "dd416abf-32be-4c6e-8b89-d043789cc7c3",
+      "GetTitle": "POI: Mushroom Mud Pit",
+      "GetDescription": "Enemies: Campestris\u002BPrim",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "183",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4676,
+          "y": 3430,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4676,
+          "y": 3430,
+          "z": 2
+        },
+        "x": 4676,
+        "y": 3430,
+        "z": 2,
+        "X": 4676,
+        "Y": 3430,
+        "Z": 2
+      },
+      "Guid": "c3cf5ddd-6a62-4561-b045-e23a586f9411",
+      "GetTitle": "POI: Troglodyte Camp Moron",
+      "GetDescription": "Enemies: Trolls, Goblins and Orks",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "184",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4431,
+          "y": 3883,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4431,
+          "y": 3883,
+          "z": 2
+        },
+        "x": 4431,
+        "y": 3883,
+        "z": 2,
+        "X": 4431,
+        "Y": 3883,
+        "Z": 2
+      },
+      "Guid": "408966f5-97d9-45ea-abbf-dc6a2fbacc2f",
+      "GetTitle": "POI: Rotting Corpse Cave",
+      "GetDescription": "Enemies: Cave Crashers",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "185",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 4062,
+          "y": 3274,
+          "z": 2
+        },
+        "ToVector": {
+          "x": 4062,
+          "y": 3274,
+          "z": 2
+        },
+        "x": 4062,
+        "y": 3274,
+        "z": 2,
+        "X": 4062,
+        "Y": 3274,
+        "Z": 2
+      },
+      "Guid": "e962850b-2ac2-43a8-9cdc-a2938dcf6271",
+      "GetTitle": "Town: Marshdale",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    {
+      "$id": "186",
+      "MapName": null,
+      "Position": {
+        "WorldPosition": {
+          "x": 1241,
+          "y": 4046,
+          "z": 1
+        },
+        "ToVector": {
+          "x": 1241,
+          "y": 4046,
+          "z": 1
+        },
+        "x": 1241,
+        "y": 4046,
+        "z": 1,
+        "X": 1241,
+        "Y": 4046,
+        "Z": 1
+      },
+      "Guid": "4647455a-9bda-46e0-8e66-fc5b0535f02b",
+      "GetTitle": "Bank: Ardholm",
+      "GetDescription": "",
+      "IsPersistant": true,
+      "GetIcon": null,
+      "GetBackgroundColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    }
+  ]
+}
