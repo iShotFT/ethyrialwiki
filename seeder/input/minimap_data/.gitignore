@@ -1,2 +1,5 @@
 *
 !.gitignore
+!*.minimap
+!entities.minimapdata
+!markers.minimapdata

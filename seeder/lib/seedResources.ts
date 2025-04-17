@@ -15,6 +15,16 @@ import { generateSlug, formatTitle, generateId, INPUT_DIR } from "./utils";
 import { sequelize } from "@server/storage/database";
 import { seederLogger } from "./seederLogger";
 
+// JSON INFORMATION
+// Missing?
+// Fibres: Shadowbud
+
+// Unsure?
+// Fibres or Herbs: Mysticbloom
+// Fibres or Herbs: Duskthorn
+
+
+
 // Type alias for the mapping structure
 type ResourceIconMap = Record<string, { icon: string; category: string }>;
 
@@ -40,7 +50,7 @@ export async function seedResources(
   parentTransaction: Transaction | null = null,
   batchSize: number = 100
 ): Promise<void> {
-  Logger.info("utils", "Seeding game resources...");
+  Logger.info("utils", "Seeding game resources (excluding trees)...");
   Logger.info("utils", `Using batch size of ${batchSize}`);
   
   // If we weren't provided a transaction, we'll create our own for each step
@@ -101,13 +111,17 @@ export async function seedResources(
 
   // ----- STEP 1: Prepare & Seed Categories (small operation, uses parent transaction) -----
   
-  // Collect category data
+  // Collect category data - excluding Trees
   const categoryData = new Map<
     string,
     { name: string; slug: string; iconFilename: string | null }
   >();
   for (const key in resourceIconMapping) {
     const mapping = resourceIconMapping[key];
+    // Skip tree categories
+    if (mapping.category === "Trees") {
+      continue;
+    }
     if (!categoryData.has(mapping.category)) {
       categoryData.set(mapping.category, {
         name: mapping.category,
@@ -189,7 +203,7 @@ export async function seedResources(
     
     Logger.info(
       "utils",
-      `Upserted ${categoriesToSeed.length} GameItemCategories for resources.`
+      `Upserted ${categoriesToSeed.length} GameItemCategories for resources (excluding trees).`
     );
     
     seederLogger.recordCounts("Resource Categories", categoriesToSeed.length, 0);
@@ -231,6 +245,7 @@ export async function seedResources(
   let totalProcessed = 0;
   let totalResources = 0;
   let totalLinks = 0;
+  let skippedTrees = 0;
   
   // Create batches of keys
   const keyBatches: string[][] = [];
@@ -267,6 +282,12 @@ export async function seedResources(
         const searchPattern = resource.search_pattern;
         const mapping = resourceIconMapping[searchPattern];
         if (!mapping || !mapping.icon) {
+          continue;
+        }
+        
+        // Skip tree resources
+        if (mapping.category === "Trees") {
+          skippedTrees++;
           continue;
         }
 
@@ -317,7 +338,7 @@ export async function seedResources(
             title: itemTitle,
             iconId: icon.id, // Use found/created icon ID
             public: true, // Set resource items as public so they appear in the frontend
-            description: `${itemTitle} resource item.`,
+            description: `${itemTitle} Resource Node`,
             dropable: true,
             rarityId: null,
             tier: 0,
@@ -411,10 +432,11 @@ export async function seedResources(
 
   Logger.info(
     "utils",
-    `Resource seeding complete. Processed ${totalProcessed} resources, created ${totalResources} resource nodes and ${totalLinks} item-category links.`
+    `Resource seeding complete. Processed ${totalProcessed} resources, created ${totalResources} resource nodes and ${totalLinks} item-category links. Skipped ${skippedTrees} tree resources.`
   );
   
   // Add seederLogger.recordCounts
   seederLogger.recordCounts("Resources Total", totalResources, 0);
   seederLogger.recordCounts("Resource Items", totalLinks, 0);
+  seederLogger.recordCounts("Skipped Trees", skippedTrees, 0);
 }

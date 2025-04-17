@@ -206,12 +206,13 @@ router.get("/items/by-category/:categorySlug", pagination(), async (ctx) => {
       {
         model: GameItemRarity, // Include rarity for color hex
         as: "rarity",
-        attributes: ["colorHex"], // Only need the color
+        attributes: ["colorHex", "itemBackgroundColorHex", "sortOrder"], // Include sortOrder too
       },
     ],
     order: [
-      [sort as string, direction as string], // Apply sorting
-      ["title", "ASC"], // Secondary sort by title
+      ['tier', 'ASC'], // First sort by tier ascending
+      ['rarity', 'sortOrder', 'ASC'], // Then by rarity.sortOrder ascending
+      ['title', 'ASC'], // Finally by title ascending
     ],
     offset: ctx.state.pagination.offset,
     limit: ctx.state.pagination.limit,

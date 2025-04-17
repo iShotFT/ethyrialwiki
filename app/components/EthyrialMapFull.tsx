@@ -343,11 +343,24 @@ const EthyrialMapFull: React.FC<Props> = ({
         source: heatmapSourceRef.current,
         blur: initialHeatmapParams.blur,
         radius: initialHeatmapParams.radius,
-        weight: (feature) => feature.get("weight") || 1,
+        weight: (feature) => {
+          // Get weight from feature, defaulting to 1 if not set
+          const weight = feature.get("weight");
+          return typeof weight === 'number' ? weight : 1;
+        },
         opacity: initialHeatmapParams.opacity,
         zIndex: 1,
-        // Add custom gradient for better visibility
-        gradient: ['#0000ff', '#00ffff', '#00ff00', '#ffff00', '#ff0000'],
+        // Add enhanced gradient for better visibility with more steps
+        gradient: [
+          'rgba(0,0,255,0.6)', // Blue with transparency
+          'rgba(0,255,255,0.7)', 
+          'rgba(0,255,0,0.7)', 
+          'rgba(255,255,0,0.8)', 
+          'rgba(255,128,0,0.9)', 
+          'rgba(255,0,0,1.0)' // Red fully opaque
+        ],
+        // Explicitly set visible to ensure it's shown
+        visible: true
       });
       heatmapLayerRef.current = heatmapLayer;
       Logger.debug("misc", `[HeatmapDebug] Heatmap layer created: ${!!heatmapLayerRef.current}`);
@@ -672,6 +685,14 @@ const EthyrialMapFull: React.FC<Props> = ({
     // Skip empty updates
     if (!heatmapData || heatmapData.points.length === 0) {
       Logger.debug("misc", `[HeatmapDebug] Skipping empty heatmap update`);
+      
+      // If we have a heatmap layer but no data, clear it
+      if (heatmapLayerRef.current && heatmapSourceRef.current) {
+        heatmapSourceRef.current.clear();
+        heatmapSourceRef.current.changed();
+        heatmapLayerRef.current.changed();
+      }
+      
       return;
     }
     
@@ -685,9 +706,28 @@ const EthyrialMapFull: React.FC<Props> = ({
     if (mapInitialized) {
       Logger.debug("misc", `[HeatmapDebug] Proceeding with immediate heatmap update`);
       
+      // Force the heatmap layer to be visible
+      if (heatmapLayerRef.current) {
+        heatmapLayerRef.current.setVisible(true);
+      }
+      
       // Use requestAnimationFrame to ensure we're not disrupting any current renders
       requestAnimationFrame(() => {
+        // Update heatmap with data
         handleHeatmapUpdate(heatmapData);
+        
+        // Force a map render - this helps ensure the heatmap displays
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.renderSync();
+          
+          // Also render again after a brief delay (helps with OpenLayers rendering)
+          setTimeout(() => {
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.renderSync();
+              Logger.debug("misc", `[HeatmapDebug] Triggered additional render for heatmap visibility`);
+            }
+          }, 100);
+        }
       });
     } else {
       Logger.debug("misc", `[HeatmapDebug] Map not initialized, update will be triggered after initialization`);

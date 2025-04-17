@@ -68,14 +68,36 @@ export const updateHeatmap = (
       
       const features: Feature[] = [];
       let errorCount = 0;
+      let minWeight = Infinity;
+      let maxWeight = 0;
       
-      // Create features
+      // First pass to find weight range
+      for (const point of data.points) {
+        const weight = point.weight || 1;
+        minWeight = Math.min(minWeight, weight);
+        maxWeight = Math.max(maxWeight, weight);
+      }
+      
+      Logger.debug("misc", `[HeatmapDebug] Weight range: min=${minWeight}, max=${maxWeight}`);
+      
+      // Create features with enhanced weights to improve visibility
       for (const point of data.points) {
         try {
+          // Apply a minimum weight and normalize to make heatmap more visible
+          // Boost lower values to ensure they're visible
+          let weight = point.weight || 1;
+          
+          // Normalize weight for better heatmap visualization
+          // Ensure weight is at least 0.3 for visibility
+          const normalizedWeight = Math.max(0.3, weight > minWeight 
+            ? 0.3 + 0.7 * ((weight - minWeight) / (maxWeight - minWeight || 1))
+            : 0.3);
+          
           features.push(
             new Feature({
               geometry: new Point([point.x, point.y]),
-              weight: point.weight || 1,
+              weight: normalizedWeight,
+              originalWeight: weight // Keep original for reference
             })
           );
         } catch (error) {
@@ -91,8 +113,22 @@ export const updateHeatmap = (
         Logger.debug("misc", `[HeatmapDebug] Adding ${features.length} features to heatmap source`);
         source.addFeatures(features);
         
-        // Notify source of changes - simple changed() is enough
-        source.changed();
+        // Force the layer to refresh properly
+        layer.setVisible(false);
+        
+        // Use a small timeout to ensure DOM updates
+        setTimeout(() => {
+          // Make the layer visible again
+          layer.setVisible(true);
+          
+          // Force source changed signal
+          source.changed();
+          
+          // Force a layer redraw
+          layer.changed();
+          
+          Logger.debug("misc", `[HeatmapDebug] Forced heatmap layer visibility toggle to refresh rendering`);
+        }, 50);
       } else {
         Logger.debug("misc", `[HeatmapDebug] No valid features to add`);
       }
@@ -120,23 +156,23 @@ export const getHeatmapParams = (zoom: number) => {
   if (zoom <= 4) {
     // Very zoomed out - make the heatmap spread out more
     return {
-      radius: 24,
-      blur: 18,
-      opacity: 0.90,
+      radius: 30, // Increased from 24
+      blur: 20,   // Increased from 18
+      opacity: 0.95, // Increased from 0.90
     };
   } else if (zoom === 5) {
     // Medium zoom - slightly less spread
     return {
-      radius: 20,
-      blur: 15,
-      opacity: 0.85,
+      radius: 25,  // Increased from 20
+      blur: 18,    // Increased from 15
+      opacity: 0.90, // Increased from 0.85
     };
   } else {
     // Zoomed in - focused heatmap
     return {
-      radius: 14,
-      blur: 12,
-      opacity: 0.80,
+      radius: 18,  // Increased from 14
+      blur: 15,    // Increased from 12
+      opacity: 0.85, // Increased from 0.80
     };
   }
 }; 

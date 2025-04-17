@@ -26,6 +26,15 @@ class GameItemRarity extends Model<InferAttributes<GameItemRarity>, InferCreatio
   @Column(DataType.STRING) // Assuming hex color
   colorHex: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING) // Nullable background color hex
+  itemBackgroundColorHex: string | null;
+
+  @AllowNull(false)
+  @Default(0)
+  @Column(DataType.INTEGER)
+  sortOrder: number;
+
   // Associations
   @HasMany(() => GameItem, 'rarityId')
   items: GameItem[];

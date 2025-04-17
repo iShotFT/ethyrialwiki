@@ -18,6 +18,7 @@ export function presentGameItem(item: GameItem) {
     tier: item.getDataValue("tier"),
     weight: item.getDataValue("weight"),
     rarityColorHex: item.rarity?.getDataValue("colorHex") || null,
+    rarityItemBackgroundColorHex: item.rarity?.getDataValue("itemBackgroundColorHex") || null,
     requiresSkillId: item.getDataValue("requiresSkillId"),
     requiresSkillLevel: item.getDataValue("requiresSkillLevel"),
     // Add other fields as needed by the frontend

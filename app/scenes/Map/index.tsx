@@ -369,17 +369,16 @@ function MapScene() {
 
   // Update heatmap item click handler
   const handleHeatmapItemClick = (itemId: string) => {
-    Logger.info("misc", `Heatmap item clicked: ${itemId}`);
+    Logger.info("misc", `Heatmap item clicked: ${itemId || 'none'} (current: ${currentHeatmapItemId || 'none'})`);
     
-    // If it's the same item, clean and re-fetch to ensure refresh
-    if (currentHeatmapItemId === itemId) {
+    // Toggle behavior: if clicking the same item or sending empty string, clear the selection
+    if (currentHeatmapItemId === itemId || itemId === "") {
+      // Clear selection
       setHeatmapData(null);
-      // Small delay to ensure clear happens first
-      setTimeout(() => {
-        void fetchHeatmapData(itemId);
-      }, 50);
+      setCurrentHeatmapItemId(null);
+      Logger.debug("misc", "Clearing heatmap selection");
     } else {
-      // Fetch data using the new function
+      // New selection - fetch data
       void fetchHeatmapData(itemId);
     }
   };
@@ -419,7 +418,8 @@ function MapScene() {
         activeCategorySlug={activeHeatmapCategorySlug}
         isLoadingItems={isLoadingHeatmapItems}
         onCategoryClick={handleHeatmapCategoryClick}
-        onItemClick={handleHeatmapItemClick} // Use updated handler
+        onItemClick={handleHeatmapItemClick}
+        selectedItemId={currentHeatmapItemId}
       />
     </MapSceneContainer>
   );

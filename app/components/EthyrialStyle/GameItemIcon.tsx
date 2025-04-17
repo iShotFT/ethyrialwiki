@@ -37,18 +37,24 @@ interface GameItemIconProps {
   iconId: string | null;
   // rarityId?: string | null; // Remove rarityId prop
   rarityColorHex?: string | null; // Add rarityColorHex prop
+  rarityItemBackgroundColorHex?: string | null; // Add new prop for background color
   altText?: string;
   size?: 'sm' | 'md' | 'lg'; // Example sizes
+  sizeMultiplier?: number; // Scale factor for icon size
   className?: string;
+  isSelected?: boolean; // Add new prop to show selected state
 }
 
 const GameItemIcon: React.FC<GameItemIconProps> = ({
   iconId,
   // rarityId, // Remove rarityId
   rarityColorHex, // Add rarityColorHex
+  rarityItemBackgroundColorHex, // New prop
   altText = "Game Item",
   size = 'md',
+  sizeMultiplier = 1, // Default to no scaling
   className,
+  isSelected = false, // Default to not selected
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -82,33 +88,52 @@ const GameItemIcon: React.FC<GameItemIconProps> = ({
   };
 
   // Determine background style based on hex color
+  // Use itemBackgroundColorHex with fallback to colorHex
   const backgroundStyle: React.CSSProperties = {};
-  if (rarityColorHex) {
-    const darkerColor = darkenHexColor(rarityColorHex, 15); // Darken by 15%
+  const backgroundColorHex = rarityItemBackgroundColorHex || rarityColorHex;
+  console.log("backgroundColorHex", backgroundColorHex);
+  
+  if (backgroundColorHex) {
+    const darkerColor = darkenHexColor(backgroundColorHex, 53); // Darken by 53%
     // Vertical gradient: lighter top, darker bottom
-    backgroundStyle.background = `linear-gradient(to bottom, ${rarityColorHex} 0%, ${darkerColor} 100%)`;
+    backgroundStyle.background = `linear-gradient(to bottom, ${backgroundColorHex} 0%, ${darkerColor} 100%)`;
   } else {
     backgroundStyle.backgroundColor = '#717171'; // Default gray background
   }
 
-  // Size classes
+  // Size classes - base sizes
   const sizeClasses = {
-    sm: 'w-8 h-8 p-0.5', // ~32px
-    md: 'w-10 h-10 p-1', // ~40px
-    lg: 'w-12 h-12 p-1', // ~48px
+    sm: { width: 32, height: 32, padding: 2 }, // ~32px
+    md: { width: 40, height: 40, padding: 4 }, // ~40px
+    lg: { width: 48, height: 48, padding: 4 }, // ~48px
   };
-  const currentSizeClass = sizeClasses[size] || sizeClasses['md'];
+  
+  // Get base size and apply multiplier
+  const baseSize = sizeClasses[size] || sizeClasses['md'];
+  const scaledSize = {
+    width: baseSize.width * sizeMultiplier,
+    height: baseSize.height * sizeMultiplier,
+    padding: baseSize.padding * sizeMultiplier,
+  };
+  
+  // Create inline style for size
+  const sizeStyle: React.CSSProperties = {
+    width: `${scaledSize.width}px`,
+    height: `${scaledSize.height}px`,
+    padding: `${scaledSize.padding}px`,
+  };
 
   return (
     // Outermost container with border
     <div
       className={cn(
-        "relative flex items-center justify-center border border-[#1A1A1A] rounded-sm overflow-hidden",
-        // backgroundClass, // Remove Tailwind background class
-        currentSizeClass, // Apply size
-        className        // Allow overrides
+        "relative flex items-center justify-center border rounded-sm overflow-hidden",
+        isSelected 
+          ? "border-[#ffd5ae] border-2 ring-2 ring-[#ffd5ae]/30"
+          : "border-[#1A1A1A]",
+        className // Allow overrides
       )}
-      style={backgroundStyle} // Apply dynamic background style
+      style={{ ...backgroundStyle, ...sizeStyle }} // Apply background and size styles
     >
       {/* Inner slightly darker border effect (using inset shadow) */}
       <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.4)] rounded-sm pointer-events-none" />

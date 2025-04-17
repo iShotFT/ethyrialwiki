@@ -1,8 +1,8 @@
 import env from "@server/env";
-import { Map, MapIcon, MarkerCategory } from "@server/models";
+import { GameMap, MapIcon, MarkerCategory } from "@server/models";
 
 // Basic presenter stub for Map
-export function presentMap(map: Map) {
+export function presentMap(map: GameMap) {
   return {
     id: map.getDataValue("id"),
     title: map.getDataValue("title"),
@@ -23,7 +23,6 @@ interface PresentedCategory {
   public: boolean;
   parentId: string | null;
   children: PresentedCategory[];
-  displayGroup: string | null;
   isLabel: boolean | null;
 }
 
@@ -43,8 +42,6 @@ export function presentMarkerCategory(
     iconUrl: iconPath ? `${env.CDN_URL || ""}/${iconPath}` : null,
     public: category.getDataValue("public"),
     parentId: category.getDataValue("parentId"),
-    // Add displayGroup here if needed by frontend for filtering Marker categories
-    displayGroup: category.getDataValue("displayGroup"),
     isLabel: category.getDataValue("isLabel"),
     children: childrenData
       ? childrenData.map(presentMarkerCategory) // Map over the retrieved children data

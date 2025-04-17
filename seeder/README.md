@@ -36,6 +36,27 @@ Run the unified seeder using the following yarn command:
 yarn seed:all [options]
 ```
 
+### GitHub Actions Workflow
+
+For production and staging environments, you can use the GitHub Actions workflow to perform seeding remotely:
+
+1. Go to the GitHub repository
+2. Navigate to the "Actions" tab
+3. Select the "Seed Database" workflow
+4. Click "Run workflow"
+5. Select the target environment (staging or production)
+6. Configure seeder options as needed
+7. Click "Run workflow" to start the seeding process
+
+The workflow:
+- Connects to the Kubernetes cluster
+- Extracts environment variables from the running environment
+- Builds and runs the seeder in a dedicated Kubernetes job
+- Streams logs back to the GitHub Actions console
+- Automatically cleans up after completion
+
+This is the recommended approach for seeding environments as it ensures all environment variables are properly configured and the seeder runs in the same context as the application.
+
 ### Workflow Steps
 
 When `yarn seed:all` is executed, it performs the following steps:

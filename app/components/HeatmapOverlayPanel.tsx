@@ -33,6 +33,7 @@ interface HeatmapItem {
   iconUrl: string | null;
   tier: number;
   rarityColorHex?: string | null;
+  rarityItemBackgroundColorHex?: string | null;
 }
 
 type Props = {
@@ -42,6 +43,7 @@ type Props = {
   isLoadingItems: boolean; // Loading state for items
   onCategoryClick: (categorySlug: string) => void; // Callback when category is clicked
   onItemClick: (itemId: string) => void; // Callback when an item is clicked
+  selectedItemId: string | null; // Currently selected item ID
 };
 
 // --- DND Setup --- //
@@ -78,37 +80,47 @@ const CollapseButton = styled.button`
 `;
 
 const CategoryBar = styled(Flex)`
-  // No longer needs position relative for chevron
+  border-bottom: 1px solid #4e443a;
+  margin-bottom: 12px;
+  padding-bottom: 2px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 213, 174, 0.3);
+    border-radius: 4px;
+  }
 `;
 
 // Revert CategoryButton to standard styled button
 const CategoryButton = styled.button<{$isActive: boolean}>`
   background: none;
   border: none;
-  padding: 4px;
-  margin: 0 2px; // Adjust spacing
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  padding: 6px 12px;
+  margin: 0 1px;
+  margin-bottom: -1px; /* Overlap the border */
   cursor: pointer;
-  opacity: ${props => props.$isActive ? 1 : 0.6};
-  transition: opacity 150ms ease-in-out;
-  border-radius: 4px; // Add rounding
-  position: relative; // For optional ::after pseudo-element highlight
-  border: 1px solid transparent; // Add transparent border for layout consistency
-
+  color: ${props => props.$isActive ? '#ffd5ae' : '#ccc'};
+  font-weight: ${props => props.$isActive ? 600 : 400};
+  font-size: 14px;
+  transition: all 150ms ease-in-out;
+  position: relative;
+  white-space: nowrap;
+  
   ${props => props.$isActive && `
-    background: rgba(255, 255, 255, 0.15); // Highlight background
-    border-color: #ffd5ae; // Highlight border
-    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4e443a;
+    border-bottom: 1px solid #38322c; /* Match panel background */
   `}
 
   &:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  img {
-    width: 24px;
-    height: 24px;
-    display: block;
+    color: #ffd5ae;
+    background: ${props => props.$isActive ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)'};
   }
 `;
 
@@ -119,35 +131,67 @@ const ForwardedCategoryButton = forwardRef<HTMLButtonElement, React.ComponentPro
 
 // Horizontal ItemList - Remove direct overflow styling
 const ItemListContainer = styled.div`
-  padding-top: 8px;
-  margin-top: 8px;
-  border-top: 1px solid #4e443a; // Separator line
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 6px 6px 6px;
+  position: relative; /* Add position relative for absolute positioned scrollbar */
+  width: 100%; /* Ensure full width */
 `;
 
 const ItemList = styled.div`
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  width: max-content; /* Allow content to determine width */
 `;
 
-const ItemButton = styled.button`
+const ItemButton = styled.button<{ $isSelected?: boolean }>`
   // Use Ingame style? For now, simpler button
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 4px;
+  background: ${props => props.$isSelected 
+    ? 'rgba(255, 213, 174, 0.15)' 
+    : 'rgba(255, 255, 255, 0.05)'
+  };
+  border: 1px solid ${props => props.$isSelected 
+    ? 'rgba(255, 213, 174, 0.4)' 
+    : 'rgba(255, 255, 255, 0.1)'
+  };
+  border-radius: 6px; // Increased from 4px
+  padding: 6px; // Increased from 4px
   cursor: pointer;
-  transition: background-color 150ms ease-in-out;
+  transition: all 150ms ease-in-out;
   flex-shrink: 0; // Prevent buttons from shrinking
+  position: relative; // For the tier badge positioning
+  outline: ${props => props.$isSelected ? '2px solid rgba(255, 213, 174, 0.3)' : 'none'};
+  outline-offset: 2px;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: ${props => props.$isSelected 
+      ? 'rgba(255, 213, 174, 0.2)' 
+      : 'rgba(255, 255, 255, 0.1)'
+    };
   }
 
   img {
-    width: 32px;
-    height: 32px;
+    width: 45px; // Adjusted to account for sizeMultiplier of 1.4 (32px * 1.4 ≈ 45px)
+    height: 45px; // Adjusted to account for sizeMultiplier of 1.4
     display: block;
   }
+`;
+
+// Styled component for the tier badge
+const TierBadge = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffd5ae;
+  font-size: 12px; // Increased from 9px
+  font-weight: bold;
+  padding: 0 4px; // Increased from 3px
+  border-bottom-left-radius: 5px; // Increased from 4px
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  border-left: 1px solid rgba(255, 213, 174, 0.3);
+  border-bottom: 1px solid rgba(255, 213, 174, 0.3);
 `;
 
 // --- Custom Drag Layer (Copied and adapted) --- //
@@ -214,6 +258,33 @@ const CustomDragLayer: React.FC = () => {
 };
 // --- End Custom Drag Layer --- //
 
+// Custom tooltip component for items with tier display
+interface ItemTooltipProps {
+  children: JSX.Element;
+  title: string;
+  tier: number;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
+}
+
+const ItemTooltip: React.FC<ItemTooltipProps> = ({ children, title, tier, placement = 'top' }) => {
+  const content = (
+    <div className="flex items-center">
+      <span className="inline-block px-2 py-0.5 mr-2 text-[10px] font-bold bg-black/40 rounded border border-[#ffd5ae]/40 text-[#ffd5ae]">
+        T{tier}
+      </span>
+      <span className="text-sm">
+        {title}
+      </span>
+    </div>
+  );
+  
+  return (
+    <IngameTooltip content={content} placement={placement} className="text-base">
+      {children}
+    </IngameTooltip>
+  );
+};
+
 const HeatmapOverlayPanel: React.FC<Props> = ({
   categories,
   itemsByCategory,
@@ -221,9 +292,11 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
   isLoadingItems,
   onCategoryClick,
   onItemClick,
+  selectedItemId,
 }) => {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   // Use renamed type for state
   const [position, setPosition] = useState<PositionState>({ x: window.innerWidth - 450, y: 16 });
   const [activeButtonLeft, setActiveButtonLeft] = useState<number | null>(null);
@@ -247,6 +320,15 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(position));
   }, [position]);
+
+  // Handle mouse wheel horizontal scrolling
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    if (scrollContainerRef.current) {
+      event.preventDefault();
+      // Adjust scroll speed as needed
+      scrollContainerRef.current.scrollLeft += event.deltaY;
+    }
+  };
 
   // Drag Hook
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -275,15 +357,26 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
     onCategoryClick(slug);
   };
 
+  // Handle item click with toggle functionality
+  const handleItemClick = (itemId: string) => {
+    // If item is already selected, toggle it off by passing null
+    if (selectedItemId === itemId) {
+      onItemClick(""); // Pass empty string to deselect
+    } else {
+      // Otherwise, select the item
+      onItemClick(itemId);
+    }
+  };
+
   const handleToggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   // Get items for the *currently active* category from props
   const activeItems = activeCategorySlug ? itemsByCategory[activeCategorySlug] || [] : [];
 
-  // Sort items by tier (only if activeItems is populated)
-  if (activeItems.length > 0) {
-      activeItems.sort((a, b) => a.tier - b.tier);
-  }
+  // No need to sort items - they're already sorted by the backend
+  // if (activeItems.length > 0) {
+  //     activeItems.sort((a, b) => a.tier - b.tier);
+  // }
 
   return (
     // Remove outer wrapper, position applied directly to IngameBorderedDiv
@@ -313,45 +406,51 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
         <>
           <CategoryBar justify="flex-start" className="mb-0 pb-1">
              {categories.map(cat => (
-                <IngameTooltip key={cat.id} content={cat.title} placement="bottom">
-                  <ForwardedCategoryButton
-                    ref={el => { categoryButtonRefs.current[cat.slug] = el; }}
-                    $isActive={activeCategorySlug === cat.slug}
-                    onClick={() => handleCategoryClick(cat.slug)}
-                  >
-                    <GameItemIcon
-                      iconId={cat.iconUrl?.split('/').pop() || null}
-                      altText={cat.title}
-                      size="md"
-                    />
-                  </ForwardedCategoryButton>
-                </IngameTooltip>
+                <ForwardedCategoryButton
+                  key={cat.id}
+                  ref={el => { categoryButtonRefs.current[cat.slug] = el; }}
+                  $isActive={activeCategorySlug === cat.slug}
+                  onClick={() => handleCategoryClick(cat.slug)}
+                >
+                  {cat.title}
+                </ForwardedCategoryButton>
              ))}
           </CategoryBar>
 
           {activeCategorySlug && (
             <ItemListContainer>
-              <IngameScrollableContainer direction="horizontal" className="h-auto pb-4">
-                 <ItemList>
-                     {isLoadingItems ? (
-                       <div className="text-center w-full p-4 text-xs text-gray-400">Loading...</div>
-                     ) : activeItems.length > 0 ? (
-                       activeItems.map(item => (
-                         <IngameTooltip key={item.id} content={item.title} placement="top">
-                           <ItemButton onClick={() => onItemClick(item.id)}>
-                             <GameItemIcon
-                               iconId={item.iconUrl?.split('/').pop() || null}
-                               altText={item.title}
-                               rarityColorHex={item.rarityColorHex}
-                               size="md"
-                             />
-                           </ItemButton>
-                         </IngameTooltip>
-                       ))
-                     ) : (
-                        <div className="text-center w-full p-4 text-xs text-gray-400">No items found.</div>
-                     )}
-                 </ItemList>
+              <IngameScrollableContainer 
+                direction="horizontal" 
+                className="h-auto pb-4 w-full"
+                ref={scrollContainerRef}
+              >
+                <ItemList>
+                  {isLoadingItems ? (
+                    <div className="text-center w-full p-4 text-xs text-gray-400">Loading...</div>
+                  ) : activeItems.length > 0 ? (
+                    activeItems.map(item => (
+                      <ItemTooltip key={item.id} title={item.title} tier={item.tier}>
+                        <ItemButton
+                          $isSelected={selectedItemId === item.id}
+                          onClick={() => handleItemClick(item.id)}
+                        >
+                          <GameItemIcon
+                            iconId={item.iconUrl?.split('/').pop() || null}
+                            altText={item.title}
+                            rarityColorHex={item.rarityColorHex}
+                            rarityItemBackgroundColorHex={item.rarityItemBackgroundColorHex}
+                            size="md"
+                            sizeMultiplier={1.4}
+                            isSelected={selectedItemId === item.id}
+                          />
+                          <TierBadge>T{item.tier}</TierBadge>
+                        </ItemButton>
+                      </ItemTooltip>
+                    ))
+                  ) : (
+                    <div className="text-center w-full p-4 text-xs text-gray-400">No items found.</div>
+                  )}
+                </ItemList>
               </IngameScrollableContainer>
             </ItemListContainer>
           )}
