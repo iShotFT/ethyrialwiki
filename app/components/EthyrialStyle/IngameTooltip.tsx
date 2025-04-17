@@ -15,7 +15,6 @@ import {
   arrow,
   FloatingArrow // Optional arrow component
 } from '@floating-ui/react';
-import { motion, AnimatePresence } from 'framer-motion'; // For animation
 import { cn } from '~/utils/twMerge';
 
 interface IngameTooltipProps {
@@ -71,40 +70,38 @@ const IngameTooltip: React.FC<IngameTooltipProps> = ({
 
       {/* Render tooltip in a portal */}
       <FloatingPortal>
-        <AnimatePresence>
-          {isOpen && (
-            <div
-              ref={refs.setFloating}
-              style={floatingStyles}
-              className={cn(
-                "z-50", // Ensure high z-index
-                // Style using Tailwind classes for consistency
-                "border border-[#1A1A1A] rounded-sm",
-                "p-1.5 bg-[#38322c]", // Inner background (like IngameBorderedDiv)
-                className
-                )}
-              {...getFloatingProps()}
-            >
-              {/* Innermost content area */}
-              <div className="bg-[#151515] text-white text-xs px-2 py-1 rounded-sm border-t border-l border-[#4e443a] border-b border-r border-[#2c2824]">
-                 {content}
-              </div>
-
-              {/* Optional Arrow */}
-              {showArrow && (
-                <FloatingArrow
-                    ref={arrowRef}
-                    context={context}
-                    fill="#38322c" // Match inner background
-                    stroke="#1A1A1A" // Match outer border
-                    strokeWidth={1}
-                    height={5}
-                    width={10}
-                />
-              )}
+        {isOpen && (
+          <div
+            ref={refs.setFloating}
+            style={floatingStyles}
+            className={cn(
+              "z-50", // Ensure high z-index
+              // Style using Tailwind classes for consistency
+              "border border-[#1A1A1A] rounded-sm",
+              "p-1.5 bg-[#38322c]", // Inner background (like IngameBorderedDiv)
+              className
+            )}
+            {...getFloatingProps()}
+          >
+            {/* Innermost content area */}
+            <div className="bg-[#151515] text-white text-xs px-2 py-1 rounded-sm border-t border-l border-[#4e443a] border-b border-r border-[#2c2824]">
+               {content}
             </div>
-          )}
-        </AnimatePresence>
+
+            {/* Optional Arrow */}
+            {showArrow && (
+              <FloatingArrow
+                ref={arrowRef}
+                context={context}
+                fill="#38322c" // Match inner background
+                stroke="#1A1A1A" // Match outer border
+                strokeWidth={1}
+                height={5}
+                width={10}
+              />
+            )}
+          </div>
+        )}
       </FloatingPortal>
     </>
   );

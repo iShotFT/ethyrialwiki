@@ -2,6 +2,10 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import VectorSource from "ol/source/Vector";
 import HeatmapLayer from "ol/layer/Heatmap";
+import VectorLayer from "ol/layer/Vector";
+import { Map as OLMap } from "ol";
+import { Geometry } from "ol/geom";
+import BaseLayer from "ol/layer/Base";
 import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import Logger from "./Logger";
 
@@ -21,6 +25,12 @@ export const updateHeatmap = (
   source: VectorSource,
   layer: HeatmapLayer
 ): boolean => {
+  // CRITICAL EXECUTION PATH LOGGING
+  Logger.info(
+    "misc",
+    `===== CRITICAL EXECUTION PATH: updateHeatmap called with ${data?.points?.length || 0} points =====`
+  );
+  
   if (!data) {
     Logger.debug("misc", `[HeatmapDebug] No heatmap data provided, skipping update`);
     return false;
@@ -46,6 +56,12 @@ export const updateHeatmap = (
   }
   
   try {
+    // EXECUTION PATH TRACKING
+    Logger.info(
+      "misc",
+      `===== CRITICAL PATH: Getting ready to update heatmap with: source=${!!source}, layer=${!!layer} =====`
+    );
+    
     // Clear existing features and log result
     const prevFeatureCount = source.getFeatures().length;
     
@@ -111,24 +127,134 @@ export const updateHeatmap = (
       // Add features in batch
       if (features.length > 0) {
         Logger.debug("misc", `[HeatmapDebug] Adding ${features.length} features to heatmap source`);
-        source.addFeatures(features);
         
-        // Force the layer to refresh properly
-        layer.setVisible(false);
+        // Get the map from the layer
+        const map = layer.get('map') as OLMap | undefined;
         
-        // Use a small timeout to ensure DOM updates
-        setTimeout(() => {
-          // Make the layer visible again
+        if (map) {
+          // CRITICAL: Log layers BEFORE any manipulation
+          Logger.info(
+            "misc",
+            `===== CRITICAL PATH: Found map reference. Layer count: ${map.getLayers().getArray().length} =====`
+          );
+          
+          // Log all layers and their visibility state before changes
+          const allLayers = map.getLayers().getArray();
+          allLayers.forEach((l, index) => {
+            const id = l.get('id') || `unknown-${index}`;
+            const type = l.get('layerType') || 'unknown';
+            const visible = l.getVisible();
+            Logger.info("misc", `LAYER ${index}: id=${id}, type=${type}, visible=${visible}`);
+          });
+          
+          // Store all vector (marker) layers and their current visibility BEFORE making changes
+          const vectorLayerStates = new Map<string, { layer: BaseLayer, visible: boolean, zIndex: number }>();
+          
+          // First identify and store layer states
+          allLayers.forEach((l: BaseLayer) => {
+            // We only want to store vector layers, and don't want to include our heatmap
+            // Compare IDs instead of layer instances to avoid type mismatches
+            if (l instanceof VectorLayer && l.get('id') !== layer.get('id')) {
+              // Store a unique identifier for the layer and its visibility state
+              const layerId = l.get('id') || Math.random().toString(36).substring(2, 9);
+              vectorLayerStates.set(layerId, {
+                layer: l,
+                visible: l.getVisible(),
+                zIndex: l.getZIndex() || 10
+              });
+              Logger.info("misc", `===== CRITICAL: Found vector layer '${layerId}', visible: ${l.getVisible()} =====`);
+            }
+          });
+          
+          // Now add features to the heatmap
+          source.addFeatures(features);
+          
+          // Update heatmap layer properties
+          layer.setZIndex(5); // Ensure heatmap is below marker layers
           layer.setVisible(true);
-          
-          // Force source changed signal
           source.changed();
-          
-          // Force a layer redraw
           layer.changed();
           
-          Logger.debug("misc", `[HeatmapDebug] Forced heatmap layer visibility toggle to refresh rendering`);
-        }, 50);
+          // IMPORTANT: Restore visibility for all vector layers we found
+          vectorLayerStates.forEach((state, id) => {
+            if (state.layer && typeof state.layer.setVisible === 'function') {
+              // CRITICAL: Log before and after visibility states
+              const beforeVisible = state.layer.getVisible();
+              
+              // CRITICAL FIX: FORCE VECTOR LAYERS TO BE VISIBLE
+              state.layer.setVisible(true);
+              
+              if (typeof state.layer.setZIndex === 'function') {
+                state.layer.setZIndex(Math.max(state.zIndex, 10)); // Ensure vector layers stay on top
+              }
+              
+              Logger.info("misc", `===== CRITICAL: Vector layer '${id}' visibility: ${beforeVisible} -> ${state.layer.getVisible()} =====`);
+            }
+          });
+          
+          // Force map to re-render to apply all changes
+          map.render();
+          
+          // Add extra delay and forcibly ensure all vector layers are visible
+          setTimeout(() => {
+            Logger.info("misc", `===== DELAYED CHECK: Ensuring vector layers remain visible =====`);
+            
+            const delayLayers = map.getLayers().getArray();
+            delayLayers.forEach((l, index) => {
+              // Check if it's a vector layer but not our heatmap layer using properties instead of type comparison
+              const isVectorLayer = l instanceof VectorLayer;
+              const layerId = l.get('id') || `unknown-${index}`;
+              const isHeatmapLayer = l.get('id') === layer.get('id');
+              
+              if (isVectorLayer && !isHeatmapLayer) {
+                const wasVisible = l.getVisible();
+                
+                // Forcibly set to visible
+                l.setVisible(true);
+                l.setZIndex(10);
+                
+                Logger.info("misc", `DELAYED FIX: Vector layer ${layerId} visibility: ${wasVisible} -> ${l.getVisible()}`);
+              }
+            });
+            
+            // Use a second additional timeout for delayed rendering
+            // This helps OpenLayers properly sequence the layer rendering
+            setTimeout(() => {
+              Logger.info("misc", `===== SUPER DELAYED FINAL CHECK - Forcing render sequence =====`);
+              // Force render again after a delay
+              map.render();
+              
+              // Ensure vector layers are still visible and have highest z-index
+              const finalLayers = map.getLayers().getArray();
+              finalLayers.forEach((l, index) => {
+                // Check layer type using properties instead of instance comparison
+                const isVectorLayer = l instanceof VectorLayer;
+                const layerId = l.get('id') || `unknown-${index}`;
+                const isHeatmapLayer = l.get('id') === layer.get('id');
+                
+                if (isVectorLayer && !isHeatmapLayer) {
+                  l.setVisible(true);
+                  l.setZIndex(20); // Set even higher z-index to ensure it's on top
+                  Logger.info("misc", `SUPER DELAYED FIX: Vector layer ${layerId} final visibility update`);
+                }
+              });
+              
+              // Final render attempt
+              map.render();
+            }, 150);
+            
+            // Force render again
+            map.render();
+          }, 200);
+          
+          Logger.debug("misc", `[HeatmapDebug] Heatmap updated with preserved marker layers (${vectorLayerStates.size} layers)`);
+        } else {
+          // Fallback if no map context available
+          source.addFeatures(features);
+          source.changed();
+          layer.changed();
+          Logger.debug("misc", `[HeatmapDebug] Heatmap layer refreshed without map context`);
+        }
       } else {
         Logger.debug("misc", `[HeatmapDebug] No valid features to add`);
       }
@@ -141,7 +267,9 @@ export const updateHeatmap = (
     return true;
     
   } catch (e) {
+    // Log the full error with stack trace
     Logger.error("misc", new Error(`[HeatmapDebug] Critical error during heatmap update: ${e}`));
+    console.error("CRITICAL HEATMAP ERROR:", e);
     return false;
   }
 };
@@ -153,8 +281,15 @@ export const updateHeatmap = (
  */
 export const getHeatmapParams = (zoom: number) => {
   // Establish different size parameters for different zoom ranges
-  if (zoom <= 4) {
-    // Very zoomed out - make the heatmap spread out more
+  if (zoom <= 2) {
+    // Very zoomed out - make the heatmap spread out significantly more
+    return {
+      radius: 40,
+      blur: 25,
+      opacity: 0.98,
+    };
+  } else if (zoom <= 4) {
+    // Moderately zoomed out - make the heatmap spread out more
     return {
       radius: 30, // Increased from 24
       blur: 20,   // Increased from 18

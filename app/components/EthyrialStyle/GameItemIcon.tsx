@@ -91,7 +91,6 @@ const GameItemIcon: React.FC<GameItemIconProps> = ({
   // Use itemBackgroundColorHex with fallback to colorHex
   const backgroundStyle: React.CSSProperties = {};
   const backgroundColorHex = rarityItemBackgroundColorHex || rarityColorHex;
-  console.log("backgroundColorHex", backgroundColorHex);
   
   if (backgroundColorHex) {
     const darkerColor = darkenHexColor(backgroundColorHex, 53); // Darken by 53%

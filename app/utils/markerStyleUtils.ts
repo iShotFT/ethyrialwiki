@@ -56,18 +56,48 @@ export const createMarkerStyleFunction = (
 ) => {
   return (feature: FeatureLike, labelCategoryIds: Set<string>): Style => {
     const categoryId = feature.get("categoryId") as string;
-  
+    
+    // Get the current map view to adjust styles based on zoom
+    // We can access it through feature.getGeometry()?.getMap()?.getView() but that requires
+    // a more complex feature type. Instead, we'll pass zoom as parameter later if needed.
+    
+    // Use resolution or zoom from feature if available (not standard but can be added)
+    const zoom = feature.get("_mapZoom") as number | undefined;
+    
     // Check if the marker's category ID is in the set of label category IDs
     if (labelCategoryIds.has(categoryId)) {
       // Clone base style to avoid modifying it for all labels
       const style = labelStyleBase.clone();
+      
       // Set the text for the label style dynamically
-      style.getText()?.setText(feature.get("title") || "");
+      const titleText = feature.get("title") || "";
+      style.getText()?.setText(titleText);
+      
+      // Adjust text size based on zoom if available
+      if (zoom !== undefined) {
+        let fontSize = 18; // Default font size
+        let strokeWidth = 2; // Default stroke width
+        
+        // Make text larger when zoomed out
+        if (zoom <= 2) {
+          fontSize = 24; // Much bigger for very zoomed out
+          strokeWidth = 3;
+        } else if (zoom <= 3) {
+          fontSize = 21; // Slightly bigger for moderately zoomed out
+          strokeWidth = 2.5;
+        }
+        
+        // Update text style with adjusted size
+        style.getText()?.setFont(`bold ${fontSize}px Asul, sans-serif`);
+        style.getText()?.getStroke()?.setWidth(strokeWidth);
+      }
+      
       return style;
     }
   
-    // Existing Icon logic
-    const cacheKey = categoryId || "default";
+    // For regular markers, add zoom to cache key if available
+    const zoomSuffix = zoom !== undefined ? `-z${zoom}` : '';
+    const cacheKey = `${categoryId || "default"}${zoomSuffix}`;
   
     if (!iconStyleCache[cacheKey]) {
       const iconDefinition = categoryIconMap[categoryId]; // Direct lookup
@@ -84,13 +114,23 @@ export const createMarkerStyleFunction = (
         iconDefinition || faQuestionCircle,
         "#D92A2A"
       );
+      
+      // Calculate scale based on zoom if available
+      let scale = 1.0; // Default scale
+      
+      if (zoom !== undefined) {
+        if (zoom <= 2) {
+          scale = 1.5; // Much larger when very zoomed out
+        } else if (zoom <= 3) {
+          scale = 1.25; // Larger when moderately zoomed out
+        }
+      }
   
       iconStyleCache[cacheKey] = new Style({
         image: new Icon({
           anchor: [0.5, 0.9], // Adjust anchor if needed for new icons
           src: iconDataUri,
-          // Optional: scale the icon
-          // scale: 0.8,
+          scale: scale, // Apply calculated scale
         }),
       });
     }

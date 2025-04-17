@@ -94,27 +94,41 @@ export const parseMapHash = (hash: string) => {
   
   if (isNaN(zoom) || isNaN(x) || isNaN(y)) return null;
   
+  // Parse Z-layer if present (new in format)
+  let zLayer = 1; // Default Z-layer if not specified
+  let resourceIdIndex = 3; // Default position of resource ID
+  
+  if (parts.length >= 4) {
+    const parsedZ = parseInt(parts[3], 10);
+    if (!isNaN(parsedZ)) {
+      zLayer = parsedZ;
+      resourceIdIndex = 4; // Resource ID is now at position 4
+    }
+  }
+  
   let resourceId = null;
-  if (parts.length >= 4 && parts[3]) {
-    resourceId = decodeResource(parts[3]);
+  if (parts.length > resourceIdIndex && parts[resourceIdIndex]) {
+    resourceId = decodeResource(parts[resourceIdIndex]);
   }
   
   return {
     zoom,
     center: [x, y],
+    zLayer,
     resourceId
   };
 };
 
 /**
- * Updates the URL hash with map position and selected resource
+ * Updates the URL hash with map position, Z-layer, and selected resource
  * @param zoom Current zoom level
  * @param center Current center coordinates [x, y]
+ * @param zLayer Current Z-layer (height)
  * @param resourceId Optional resource ID to encode in URL
  */
-export const updateMapHash = (zoom: number, center: [number, number], resourceId?: string) => {
-  // Build the base hash with position
-  let newHash = `#map=${Math.round(zoom)}/${Math.round(center[0])}/${Math.round(center[1])}`;
+export const updateMapHashWithZ = (zoom: number, center: [number, number], zLayer: number, resourceId?: string) => {
+  // Build the base hash with position and Z-layer
+  let newHash = `#map=${Math.round(zoom)}/${Math.round(center[0])}/${Math.round(center[1])}/${zLayer}`;
   
   // Add resource info if available
   if (resourceId) {
@@ -127,4 +141,14 @@ export const updateMapHash = (zoom: number, center: [number, number], resourceId
   
   // Update URL without triggering a navigation
   window.history.replaceState(null, "", newHash);
+  Logger.debug("misc", `[MapDebug] Updated URL hash with Z-layer: ${newHash}`);
+};
+
+/**
+ * Backward compatibility function for updating URL hash without Z-layer
+ * @deprecated Use updateMapHashWithZ instead
+ */
+export const updateMapHash = (zoom: number, center: [number, number], resourceId?: string) => {
+  // Default to Z-layer 1 for backward compatibility
+  updateMapHashWithZ(zoom, center, 1, resourceId);
 }; 
