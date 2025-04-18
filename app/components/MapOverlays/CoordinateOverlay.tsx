@@ -156,10 +156,11 @@ const CoordinateOverlay: React.FC<CoordinateOverlayProps> = ({ mapInstance }) =>
       defaultPosition={{ position: 'bottom-right' }}
       zIndex={10}
       dragType={DRAG_TYPE}
-      className="max-w-[200px] w-auto"
+      className="min-w-[140px] w-auto"
       showHeader={false}
       noPadding={true}
       noBorder={true}
+      id="coordinate-overlay"
     >
       <CoordinateContainer>
         <CoordinateItem>

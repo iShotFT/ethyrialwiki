@@ -13,9 +13,10 @@ const MAX_Z_LAYER = 40;
 // Constants
 const STORAGE_POSITION_KEY = 'z-layer-overlay-position';
 const DRAG_TYPE = 'z-layer-overlay';
+const DEFAULT_Z_LAYER = 2;
 
 interface ZLayerOverlayProps {
-  currentZLayer: number;
+  currentZLayer?: number;
   onChange: (zLayer: number) => void;
 }
 
@@ -79,8 +80,11 @@ const ZValueDisplay = styled.div`
  * ZLayerOverlay component that displays a vertical slider to control the Z-layer of the map
  */
 const ZLayerOverlay: React.FC<ZLayerOverlayProps> = ({ currentZLayer, onChange }) => {
+  // Use default value if currentZLayer is undefined
+  const effectiveZLayer = currentZLayer ?? DEFAULT_Z_LAYER;
+  
   // Guard against invalid values
-  const safeZLayer = Math.min(Math.max(currentZLayer, MIN_Z_LAYER), MAX_Z_LAYER);
+  const safeZLayer = Math.min(Math.max(effectiveZLayer, MIN_Z_LAYER), MAX_Z_LAYER);
   
   const handleIncrement = useCallback(() => {
     if (safeZLayer < MAX_Z_LAYER) {
@@ -104,17 +108,24 @@ const ZLayerOverlay: React.FC<ZLayerOverlayProps> = ({ currentZLayer, onChange }
       }
 
       if (e.key === 'PageUp') {
-        const newLayer = Math.min(currentZLayer + 1, MAX_Z_LAYER);
+        const newLayer = Math.min(safeZLayer + 1, MAX_Z_LAYER);
         onChange(newLayer);
       } else if (e.key === 'PageDown') {
-        const newLayer = Math.max(currentZLayer - 1, MIN_Z_LAYER);
+        const newLayer = Math.max(safeZLayer - 1, MIN_Z_LAYER);
         onChange(newLayer);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentZLayer, onChange]);
+  }, [safeZLayer, onChange]);
+
+  // On first mount, set the default z-layer if none is specified
+  React.useEffect(() => {
+    if (currentZLayer === undefined) {
+      onChange(DEFAULT_Z_LAYER);
+    }
+  }, []);
 
   return (
     <BaseOverlay
@@ -127,6 +138,8 @@ const ZLayerOverlay: React.FC<ZLayerOverlayProps> = ({ currentZLayer, onChange }
       className="w-[44px] min-w-[44px]"
       showHeader={false}
       noPadding={true}
+      noBorder={true}
+      id="z-layer-overlay"
     >
       <IngameBorderedDiv noPadding={true} style={{ overflow: 'hidden', width: '100%' }}>
         <ZControlInner>

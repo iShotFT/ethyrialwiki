@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { forwardRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import Flex from '~/components/Flex';
 import { cn } from '~/utils/twMerge';
 import GameItemIcon from '~/components/EthyrialStyle/GameItemIcon';
@@ -37,10 +38,59 @@ type Props = {
   itemsByCategory: Record<string, HeatmapItem[]>; // { categorySlug: [item1, item2, ...] }
   activeCategorySlug: string | null; // Slug of the currently selected category
   isLoadingItems: boolean; // Loading state for items
+  isLoadingHeatmap?: boolean; // Loading state for heatmap data
   onCategoryClick: (categorySlug: string) => void; // Callback when category is clicked
   onItemClick: (itemId: string) => void; // Callback when an item is clicked
   selectedItemId: string | null; // Currently selected item ID
 };
+
+// Animation for the spinner
+const spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+// Animation for the progress loading bar
+const progressAnimation = keyframes`
+  0% {
+    left: -100%;
+    width: 100%;
+  }
+  50% {
+    left: 0;
+    width: 60%;
+  }
+  70% {
+    left: 40%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 100%;
+  }
+`;
+
+// Progress bar container with zero height to avoid affecting layout
+const ProgressBarContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+`;
+
+// The actual animated progress bar
+const ProgressBar = styled.div`
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 213, 174, 0.7), #ffd5ae);
+  box-shadow: 0 0 8px rgba(255, 213, 174, 0.7);
+  animation: ${progressAnimation} 1.8s infinite ease-in-out;
+`;
 
 // --- Styled Components ---
 
@@ -59,6 +109,29 @@ const CategoryBar = styled(Flex)`
     background-color: rgba(255, 213, 174, 0.3);
     border-radius: 4px;
   }
+`;
+
+// Heatmap loading indicator
+const HeatmapLoadingIndicator = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 213, 174, 0.3);
+  color: #ffd5ae;
+  font-size: 12px;
+  z-index: 5;
+  opacity: 0.8;
+`;
+
+const SpinnerIcon = styled(FontAwesomeIcon)`
+  margin-right: 6px;
+  animation: ${spin} 1.2s linear infinite;
+  font-size: 10px;
 `;
 
 // Revert CategoryButton to standard styled button
@@ -193,6 +266,7 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
   itemsByCategory,
   activeCategorySlug,
   isLoadingItems,
+  isLoadingHeatmap = false,
   onCategoryClick,
   onItemClick,
   selectedItemId,
@@ -228,8 +302,18 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
       defaultPosition={{ position: 'top-right' }}
       zIndex={10}
       dragType={DRAG_TYPE}
-      className="max-w-[450px] min-w-[300px]"
+      className="max-w-[450px] min-w-[450px]"
+      noPadding={false}
+      noBorder={false}
+      id="heatmap-overlay"
     >
+      {/* Show loading progress bar at the top when any loading state is active */}
+      {(isLoadingItems || isLoadingHeatmap) && (
+        <ProgressBarContainer>
+          <ProgressBar />
+        </ProgressBarContainer>
+      )}
+      
       <CategoryBar justify="flex-start" className="mb-0 pb-1">
         {categories.map(cat => (
           <ForwardedCategoryButton
@@ -245,6 +329,14 @@ const HeatmapOverlayPanel: React.FC<Props> = ({
 
       {activeCategorySlug && (
         <ItemListContainer>
+          {/* Show loading indicator when heatmap data is loading and we have a selected item */}
+          {isLoadingHeatmap && selectedItemId && (
+            <HeatmapLoadingIndicator>
+              <SpinnerIcon icon={faCircleNotch} />
+              <span>Updating...</span>
+            </HeatmapLoadingIndicator>
+          )}
+          
           <IngameScrollableContainer 
             direction="horizontal" 
             className="h-auto pb-4 w-full"

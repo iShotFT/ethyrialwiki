@@ -1,0 +1,1032 @@
+{
+  "rarities": [
+    {
+      "slug": "none",
+      "title": "None",
+      "colorHex": "#ffffff",
+      "colorName": "White"
+    },
+    {
+      "slug": "common",
+      "title": "Common",
+      "colorHex": "#9A9A9A",
+      "colorName": "Gray"
+    },
+    {
+      "slug": "uncommon",
+      "title": "Uncommon",
+      "colorHex": "#15ff00",
+      "colorName": "Green"
+    },
+    {
+      "slug": "rare",
+      "title": "Rare",
+      "colorHex": "#2396ff",
+      "colorName": "Blue"
+    },
+    {
+      "slug": "epic",
+      "title": "Epic",
+      "colorHex": "#a335ee",
+      "colorName": "Purple"
+    },
+    {
+      "slug": "legendary",
+      "title": "Legendary",
+      "colorHex": "#ff8100",
+      "colorName": "Orange"
+    },
+    {
+      "slug": "relic",
+      "title": "Relic",
+      "colorHex": "#F44336",
+      "colorName": "Red"
+    },
+    {
+      "slug": "quest-item",
+      "title": "Quest Item",
+      "colorHex": "#fff400",
+      "colorName": "Yellow"
+    }
+  ],
+  "categories": [
+    {
+      "category": {
+        "slug": "bars",
+        "title": "Bars",
+        "public": true,
+        "displayGroup": null,
+        "iconSlug": "copper-bar"
+      },
+      "items": [
+        {
+          "slug": "steel-bar",
+          "title": "Steel Bar",
+          "description": "Steel Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "steel-bar",
+          "raritySlug": null
+        },
+        {
+          "slug": "bronze-bar",
+          "title": "Bronze Bar",
+          "description": "Bronze Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "bronze-bar",
+          "raritySlug": null
+        },
+        {
+          "slug": "gold-bar",
+          "title": "Gold Bar",
+          "description": "Gold Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "gold-bar",
+          "raritySlug": "uncommon"
+        },
+        {
+          "slug": "tin-bar",
+          "title": "Tin Bar",
+          "description": "Tin Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "tin-bar",
+          "raritySlug": null
+        },
+        {
+          "slug": "copper-bar",
+          "title": "Copper Bar",
+          "description": "Copper Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "copper-bar",
+          "raritySlug": "common"
+        },
+        {
+          "slug": "iron-bar",
+          "title": "Iron Bar",
+          "description": "Iron Bar item.",
+          "tier": 0,
+          "weight": 0.8,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "iron-bar",
+          "raritySlug": "common"
+        }
+      ],
+      "totalItems": 6,
+      "totalResources": 0
+    },
+    {
+      "category": {
+        "slug": "fibers",
+        "title": "Fibers",
+        "public": true,
+        "displayGroup": "HEATMAP",
+        "iconSlug": "arcanebloomicon"
+      },
+      "items": [
+        {
+          "slug": "arcanebloom",
+          "title": "Arcanebloom",
+          "description": "Arcanebloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 61,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "arcanebloomicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "hemp",
+          "title": "Hemp",
+          "description": "Hemp Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 20,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "hempfibreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "duskthorn",
+          "title": "Duskthorn",
+          "description": "Duskthorn Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 24,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "duskthornfibreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "faeplant-plant",
+          "title": "Faeplant Plant",
+          "description": "Faeplant Plant Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 32,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "faeplanticon",
+          "raritySlug": null
+        },
+        {
+          "slug": "slitherstrand",
+          "title": "Slitherstrand",
+          "description": "Slitherstrand Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 112,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "slitherstrandsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "starstem",
+          "title": "Starstem",
+          "description": "Starstem Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 36,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "starstemicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "mysticbloom",
+          "title": "Mysticbloom",
+          "description": "Mysticbloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 23,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "mysticbloomfibreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "blightstem",
+          "title": "Blightstem",
+          "description": "Blightstem Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 136,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "blightspunclothicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "flax-flower-petals",
+          "title": "Flax Flower Petals",
+          "description": "Flax Flower Petals Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 5,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "flaxstrawicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "flax-flower",
+          "title": "Flax Flower",
+          "description": "Flax Flower Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 8,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "flaxstrawicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "elvenbloom",
+          "title": "Elvenbloom",
+          "description": "Elvenbloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 38,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "elvenbloomicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "dragonflower-flower",
+          "title": "Dragonflower Flower",
+          "description": "Dragonflower Flower Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 56,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "darkdragonleavesicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "cotton-plant",
+          "title": "Cotton Plant",
+          "description": "Cotton Plant Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 20,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "cottonicon",
+          "raritySlug": null
+        }
+      ],
+      "totalItems": 13,
+      "totalResources": 571
+    },
+    {
+      "category": {
+        "slug": "herbs",
+        "title": "Herbs",
+        "public": true,
+        "displayGroup": "HEATMAP",
+        "iconSlug": "aetherthistleicon"
+      },
+      "items": [
+        {
+          "slug": "minweed",
+          "title": "Minweed",
+          "description": "Minweed Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 588,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "minweedicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "spirit-wreath",
+          "title": "Spirit Wreath",
+          "description": "Spirit Wreath Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 216,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "spiritwreathicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "ginshade",
+          "title": "Ginshade",
+          "description": "Ginshade Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 600,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "ginshadepetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "wispbloom",
+          "title": "Wispbloom",
+          "description": "Wispbloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 139,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "wispbloomicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "aetherthistle",
+          "title": "Aetherthistle",
+          "description": "Aetherthistle Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 16345,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "aetherthistleicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "frost-flower",
+          "title": "Frost Flower",
+          "description": "Frost Flower Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 7409,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "frostflowerpetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "saffron-flower",
+          "title": "Saffron Flower",
+          "description": "Saffron Flower Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 10,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "saffronicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "oxbloom",
+          "title": "Oxbloom",
+          "description": "Oxbloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 6653,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "oxbloompetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "rinthistle",
+          "title": "Rinthistle",
+          "description": "Rinthistle Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 20761,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "rinthistleicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "cleansing-wisteria",
+          "title": "Cleansing Wisteria",
+          "description": "Cleansing Wisteria Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 4390,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "wisteriaflowerpetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "sunthistle",
+          "title": "Sunthistle",
+          "description": "Sunthistle Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 2520,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "sunthistlepetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "redban-flower",
+          "title": "Redban Flower",
+          "description": "Redban Flower Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 4012,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "redbanpetalsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "wheat",
+          "title": "Wheat",
+          "description": "Wheat Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 201,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "hempfibreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "shadowgrowth",
+          "title": "Shadowgrowth",
+          "description": "Shadowgrowth Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 54,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "shadowbudicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "forest-canna",
+          "title": "Forest Canna",
+          "description": "Forest Canna Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 1135,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "forestcannapetalsicon",
+          "raritySlug": null
+        }
+      ],
+      "totalItems": 15,
+      "totalResources": 65033
+    },
+    {
+      "category": {
+        "slug": "ores",
+        "title": "Ores",
+        "public": true,
+        "displayGroup": "HEATMAP",
+        "iconSlug": "azuriumoreicon"
+      },
+      "items": [
+        {
+          "slug": "drakonium-ore",
+          "title": "Drakonium Ore",
+          "description": "Drakonium Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 20,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "drakoniumoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "iron-ore",
+          "title": "Iron Ore",
+          "description": "Iron Ore item.",
+          "tier": 2,
+          "weight": 1,
+          "resourceCount": 19,
+          "dropable": true,
+          "requiresSkillLevel": 5,
+          "iconSlug": "ironoreicon",
+          "raritySlug": "common"
+        },
+        {
+          "slug": "gold-ore",
+          "title": "Gold Ore",
+          "description": "Gold Ore item.",
+          "tier": 3,
+          "weight": 1,
+          "resourceCount": 21,
+          "dropable": true,
+          "requiresSkillLevel": 10,
+          "iconSlug": "goldoreicon",
+          "raritySlug": "uncommon"
+        },
+        {
+          "slug": "copper-ore",
+          "title": "Copper Ore",
+          "description": "Copper Ore item.",
+          "tier": 1,
+          "weight": 1,
+          "resourceCount": 15,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "copperoreicon",
+          "raritySlug": "common"
+        },
+        {
+          "slug": "coal-ore",
+          "title": "Coal Ore",
+          "description": "Coal Ore item.",
+          "tier": 3,
+          "weight": 1,
+          "resourceCount": 64,
+          "dropable": true,
+          "requiresSkillLevel": 10,
+          "iconSlug": "coaloreicon",
+          "raritySlug": "common"
+        },
+        {
+          "slug": "azurium-ore",
+          "title": "Azurium Ore",
+          "description": "Azurium Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 169,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "azuriumoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "mystril-ore",
+          "title": "Mystril Ore",
+          "description": "Mystril Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 86,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "mystriloreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "ethyrite-ore",
+          "title": "Ethyrite Ore",
+          "description": "Ethyrite Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 148,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "ethyriteoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "crimsonite-ore",
+          "title": "Crimsonite Ore",
+          "description": "Crimsonite Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 76,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "crimsoniteoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "celestium-ore",
+          "title": "Celestium Ore",
+          "description": "Celestium Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 22,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "celestiumoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "feygold-ore",
+          "title": "Feygold Ore",
+          "description": "Feygold Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 23,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "feygoldoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "red-clay",
+          "title": "Red Clay",
+          "description": "Red Clay Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 186,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "clayredicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "platinum-ore",
+          "title": "Platinum Ore",
+          "description": "Platinum Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 36,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "platinumoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "palladium-ore",
+          "title": "Palladium Ore",
+          "description": "Palladium Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 42,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "palladiumoreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "tin-ore",
+          "title": "Tin Ore",
+          "description": "Tin Ore item.",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 0,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "tin-ore",
+          "raritySlug": null
+        },
+        {
+          "slug": "leysilver-ore",
+          "title": "Leysilver Ore",
+          "description": "Leysilver Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 26,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "leysilveroreicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "silver-ore",
+          "title": "Silver Ore",
+          "description": "Silver Ore Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 16,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "silveroreicon",
+          "raritySlug": null
+        }
+      ],
+      "totalItems": 17,
+      "totalResources": 969
+    },
+    {
+      "category": {
+        "slug": "plants",
+        "title": "Plants",
+        "public": true,
+        "displayGroup": "HEATMAP",
+        "iconSlug": "appleicon"
+      },
+      "items": [
+        {
+          "slug": "glowshroom",
+          "title": "Glowshroom",
+          "description": "Glowshroom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 30,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "glowshroomicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "duskroot-plant",
+          "title": "Duskroot Plant",
+          "description": "Duskroot Plant Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 15,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "duskrooticon",
+          "raritySlug": null
+        },
+        {
+          "slug": "champignon",
+          "title": "Champignon",
+          "description": "Champignon Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 330,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "champignonicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "wildberry",
+          "title": "Wildberry",
+          "description": "Wildberry Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 41,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "wildberryicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "apple",
+          "title": "Apple",
+          "description": "Apple Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 143,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "appleicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "magic-mushroom",
+          "title": "Magic Mushroom",
+          "description": "Magic Mushroom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 43,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "magicmushroompasteicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "glimmerwings",
+          "title": "Glimmerwings",
+          "description": "Glimmerwings Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 31,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "glimmerwingicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "nepbloom",
+          "title": "Nepbloom",
+          "description": "Nepbloom Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 575,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "nepbloomfruiticon",
+          "raritySlug": null
+        }
+      ],
+      "totalItems": 8,
+      "totalResources": 1208
+    },
+    {
+      "category": {
+        "slug": "trees",
+        "title": "Trees",
+        "public": true,
+        "displayGroup": "HEATMAP",
+        "iconSlug": "acacialogsicon"
+      },
+      "items": [
+        {
+          "slug": "elystram",
+          "title": "Elystram",
+          "description": "Elystram Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 26,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "elystramlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "moonwillow",
+          "title": "Moonwillow",
+          "description": "Moonwillow Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 42,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "moonwillowlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "aetherbark",
+          "title": "Aetherbark",
+          "description": "Aetherbark Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 119,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "aetherbarklogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "staroak",
+          "title": "Staroak",
+          "description": "Staroak Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 137,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "staroaklogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "oak",
+          "title": "Oak",
+          "description": "Oak Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 1641,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "oaklogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "birch",
+          "title": "Birch",
+          "description": "Birch Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 32386,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "birchlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "shadewood",
+          "title": "Shadewood",
+          "description": "Shadewood Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 16,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "shadewoodlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "pine",
+          "title": "Pine",
+          "description": "Pine Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 8952,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "pinelogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "mana-ash",
+          "title": "Mana Ash",
+          "description": "Mana Ash Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 37,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "manaashlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "fir",
+          "title": "Fir",
+          "description": "Fir Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 5274,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "firlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "acacia",
+          "title": "Acacia",
+          "description": "Acacia Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 4610,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "acacialogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "primordial",
+          "title": "Primordial",
+          "description": "Primordial Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 27,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "primordiallogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "wispwood",
+          "title": "Wispwood",
+          "description": "Wispwood Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 210,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "wispwoodlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "spiritwood",
+          "title": "Spiritwood",
+          "description": "Spiritwood Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 100,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "spiritwoodlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "corrupted-birch",
+          "title": "Corrupted Birch",
+          "description": "Corrupted Birch Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 127,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "birchlogsicon",
+          "raritySlug": null
+        },
+        {
+          "slug": "duskroot",
+          "title": "Duskroot",
+          "description": "Duskroot Resource Node",
+          "tier": 0,
+          "weight": 1,
+          "resourceCount": 25,
+          "dropable": true,
+          "requiresSkillLevel": 0,
+          "iconSlug": "duskrootlogsicon",
+          "raritySlug": null
+        }
+      ],
+      "totalItems": 16,
+      "totalResources": 53729
+    }
+  ]
+}

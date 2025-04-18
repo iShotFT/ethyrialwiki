@@ -12,6 +12,7 @@ import { seedItemsAndIcons } from "../lib/seedItemsAndIcons";
 import { seedMapData } from "../lib/seedMapData";
 import { seedMapTiles } from "../lib/seedMapTiles";
 import { seedResources } from "../lib/seedResources";
+import { seedDoodadResources } from "../lib/seedDoodadResources";
 import { seedCustomDomains } from "../lib/seedCustomDomains";
 import { flushRedisCache } from "../lib/flushRedisCache";
 import { seederLogger } from "../lib/seederLogger";
@@ -36,6 +37,15 @@ program
     "Skip resource seeding (useful for testing and development)"
   )
   .option(
+    "--skip-doodad-resources",
+    "Skip doodad resource seeding (trees and other doodads)"
+  )
+  .option(
+    "--resources-mode <mode>",
+    "Run mode for resources: 'all' (both standard and doodad), 'standard' (only standard), or 'doodad' (only doodad)",
+    "all"
+  )
+  .option(
     "--skip-custom-domains",
     "Skip custom domain seeding"
   )
@@ -57,6 +67,13 @@ program
   .parse(process.argv);
 
 const options = program.opts();
+
+// Validate resources-mode option
+if (options.resourcesMode && !['all', 'standard', 'doodad'].includes(options.resourcesMode)) {
+  console.error(`Error: Invalid resources-mode value: ${options.resourcesMode}`);
+  console.error("Valid options are: 'all', 'standard', or 'doodad'");
+  process.exit(1);
+}
 
 // Define paths based on utils and options
 const csharpProjectDir = path.resolve(process.cwd(), "tools", "csharp", "markers");
@@ -410,20 +427,45 @@ async function runSeeder() {
       return 1;
     }
     
-    // --- Step 2b: Resource Seeding (with independent transactions) ---
-    if (options.skipResources) {
-      seederLogger.info("Skipping resource seeding (--skip-resources flag is set)");
+    // --- Step 2b: Standard Resource Seeding (with independent transactions) ---
+    // Determine if we should run standard resources based on flags and mode
+    const runStandardResources = !options.skipResources && 
+                                (options.resourcesMode === 'all' || options.resourcesMode === 'standard');
+    
+    if (!runStandardResources) {
+      seederLogger.info("Skipping standard resource seeding (based on options)");
     } else {
-      seederLogger.startStep("Resource Seeding");
+      seederLogger.startStep("Standard Resource Seeding");
       seederLogger.info(`Using batch size of ${options.batchSize} for database operations`);
       
       try {
-        // Use null to let seedResources create its own transactions
+        // Note: seedResources will skip tree resources (handled by seedDoodadResources)
         await seedResources(options.mapTitle, null, options.batchSize);
-        seederLogger.completeStep("Resource Seeding");
+        seederLogger.completeStep("Standard Resource Seeding");
       } catch (error) {
-        seederLogger.error("Resource seeding failed", error);
+        seederLogger.error("Standard resource seeding failed", error);
         // Continue despite resource seeding failure
+      }
+    }
+
+    // --- Step 2c: Doodad Resource Seeding (with independent transactions) ---
+    // Determine if we should run doodad resources based on flags and mode
+    const runDoodadResources = !options.skipDoodadResources && 
+                              (options.resourcesMode === 'all' || options.resourcesMode === 'doodad');
+    
+    if (!runDoodadResources) {
+      seederLogger.info("Skipping doodad resource seeding (based on options)");
+    } else {
+      seederLogger.startStep("Doodad Resource Seeding");
+      seederLogger.info(`Using batch size of ${options.batchSize} for database operations`);
+      
+      try {
+        // seedDoodadResources focuses on tree resources and other doodads
+        await seedDoodadResources(options.mapTitle, null, options.batchSize);
+        seederLogger.completeStep("Doodad Resource Seeding");
+      } catch (error) {
+        seederLogger.error("Doodad resource seeding failed", error);
+        // Continue despite doodad resource seeding failure
       }
     }
 

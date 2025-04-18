@@ -220,7 +220,7 @@
     "react-merge-refs": "^2.1.1",
     "react-portal": "^4.2.2",
     "react-router-dom": "^5.3.4",
-    "react-toastify": "^11.0.5",
+    "react-toastify": "9.1.3",
     "react-virtualized-auto-sizer": "^1.0.21",
     "react-waypoint": "^10.3.0",
     "react-window": "^1.8.11",

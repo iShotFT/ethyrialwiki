@@ -21,6 +21,7 @@ import {
   PointAggregator,
 } from "@server/utils/PointAggregator"; // Added AggregatedPoint type
 import pagination from "./middlewares/pagination";
+import { Sequelize } from "sequelize";
 
 const router = new Router();
 
@@ -245,13 +246,20 @@ router.get("/heatmap/:mapId/:itemId/:zoom", async (ctx) => {
     throw ValidationError("Invalid zoom level provided.");
   }
 
-  // Parse and validate bounding box coordinates
+  // Parse and validate bounding box coordinates - with extra sanitization
   let bbox = null;
   if (minXStr && minYStr && maxXStr && maxYStr) {
-    const minX = parseFloat(minXStr as string);
-    const minY = parseFloat(minYStr as string);
-    const maxX = parseFloat(maxXStr as string);
-    const maxY = parseFloat(maxYStr as string);
+    // Handle potential query parameter format issues by sanitizing each value
+    const sanitize = (val: string | string[]) => {
+      // Handle cases where the parameter value might be an array or have extra question marks
+      const strVal = Array.isArray(val) ? val[0] : String(val);
+      return strVal.replace(/\?+$/, ''); // Remove any trailing question marks
+    };
+
+    const minX = parseFloat(sanitize(minXStr));
+    const minY = parseFloat(sanitize(minYStr));
+    const maxX = parseFloat(sanitize(maxXStr));
+    const maxY = parseFloat(sanitize(maxYStr));
 
     if (!isNaN(minX) && !isNaN(minY) && !isNaN(maxX) && !isNaN(maxY)) {
       bbox = { minX, minY, maxX, maxY };
@@ -261,8 +269,15 @@ router.get("/heatmap/:mapId/:itemId/:zoom", async (ctx) => {
       );
     } else {
       Logger.warn("[API /heatmap] Received invalid bbox query parameters.");
-      // Don't throw, just ignore invalid bbox
+      ctx.status = 400;
+      ctx.body = { error: "Invalid bounding box parameters" };
+      return;
     }
+  } else {
+    Logger.warn("[API /heatmap] Missing required bbox query parameters.");
+    ctx.status = 400;
+    ctx.body = { error: "Missing bounding box parameters (minX, minY, maxX, maxY)" };
+    return;
   }
 
   Logger.debug(
@@ -279,20 +294,21 @@ router.get("/heatmap/:mapId/:itemId/:zoom", async (ctx) => {
 
   // Add bounding box filter if valid bbox provided
   if (bbox) {
-    // Assuming 'coordinates' is JSONB {x, y, z}
-    // We need to query within the JSONB structure.
-    // This requires specific database syntax (e.g., for PostgreSQL)
-    // Using raw `where` with JSON operators might be necessary if Sequelize doesn't support this directly.
-    // For simplicity here, let's assume a direct query works, but this might need adjustment.
-    // WARNING: Performance of JSONB queries depends heavily on indexing.
-    // Consider creating a GIN index on the `coordinates` column if performance is an issue.
-    whereClause["coordinates.x"] = { [Op.between]: [bbox.minX, bbox.maxX] };
-    whereClause["coordinates.y"] = { [Op.between]: [bbox.minY, bbox.maxY] };
-    // NOTE: The above syntax for querying nested JSON properties might not work directly
-    // depending on Sequelize version and DB adapter. A raw query or different structure
-    // might be needed for optimal JSONB querying.
-    // Example PostgreSQL JSONB query condition:
-    // where: sequelize.literal(`(coordinates->>'x')::float BETWEEN ${bbox.minX} AND ${bbox.maxX} AND (coordinates->>'y')::float BETWEEN ${bbox.minY} AND ${bbox.maxY}`)
+    // For JSONB queries, we need to use raw SQL condition
+    // Using a simpler approach that doesn't rely on accessing undefined properties
+    Logger.debug("http", `[API /heatmap] Applying bbox filter: ${JSON.stringify(bbox)}`);
+    
+    // Instead of complex literal queries, use the raw WHERE clause for the coordinates JSON fields
+    whereClause[Op.and] = [
+      Sequelize.where(
+        Sequelize.cast(Sequelize.json("coordinates.x"), "float"),
+        { [Op.between]: [bbox.minX, bbox.maxX] }
+      ),
+      Sequelize.where(
+        Sequelize.cast(Sequelize.json("coordinates.y"), "float"),
+        { [Op.between]: [bbox.minY, bbox.maxY] }
+      )
+    ];
   }
 
   // Fetch coordinates based on constructed where clause
@@ -327,7 +343,11 @@ router.get("/heatmap/:mapId/:itemId/:zoom", async (ctx) => {
   }
 
   // 2. Instantiate PointAggregator
-  const cacheKeyPrefix = `${mapId}:${itemId}`; // Use combined key for caching
+  // Include bbox in cache key if present to differentiate cached results
+  const cacheKeyPrefix = bbox 
+    ? `${mapId}:${itemId}:bbox:${bbox.minX}-${bbox.minY}-${bbox.maxX}-${bbox.maxY}`
+    : `${mapId}:${itemId}`; 
+  
   const aggregatorOptions: Partial<PointAggregator<HeatmapPoint>["options"]> = {
     minCellSize: 1,
     maxCellSize: 64,

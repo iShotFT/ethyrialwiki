@@ -1,19 +1,5 @@
 import {
   faSearch,
-  faLeaf,
-  faGem,
-  faTree,
-  faSkullCrossbones,
-  faMapMarkerAlt,
-  faQuestionCircle,
-  faCity,
-  faCrosshairs,
-  faScroll,
-  faDragon,
-  faPaw,
-  faStreetView,
-  faChessRook,
-  faUniversity,
   faCaretDown,
   faCaretRight
 } from "@fortawesome/free-solid-svg-icons";
@@ -46,6 +32,38 @@ const formatCategoryTitle = (title: string): string => {
     .toLowerCase() // Convert to lowercase first
     .replace(/_/g, ' ') // Replace underscores with spaces
     .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+};
+
+// Helper function to get the first letter of a category
+const getCategoryLetter = (title: string): string => {
+  if (!title) return '?';
+  
+  // Handle specific cases
+  if (title.toUpperCase() === 'POI') return 'P';
+  if (title.toUpperCase() === 'NPC') return 'N';
+  
+  // Get first letter for other categories
+  return title.charAt(0).toUpperCase();
+};
+
+// Color mapping for different categories
+const categoryColors: Record<string, string> = {
+  ORE: '#c0c0c0',     // Silver
+  HERB: '#7CFC00',    // Bright green
+  SKIN: '#D2B48C',    // Tan
+  TREE: '#228B22',    // Forest green
+  CLOTH: '#FFD700',   // Gold
+  ENEMY: '#FF4500',   // Red-orange
+  POI: '#1E90FF',     // Dodger blue
+  NPC: '#9932CC',     // Purple
+  TOWN: '#8B4513',    // Brown
+  DUNGEON: '#800000', // Maroon
+  BANK: '#FFD700',    // Gold
+  TELEPORT: '#00BFFF', // Deep sky blue
+  DAILY_QUEST: '#FF69B4', // Hot pink
+  RAID: '#8B0000',    // Dark red
+  WORLD_BOSS: '#FF0000', // Bright red
+  OTHER: '#808080',   // Gray
 };
 
 // Update Category type to include children and parentId
@@ -100,13 +118,6 @@ const CategoryItem = styled.li<{ $isChild: boolean }>`
   input[type="checkbox"] {
     cursor: pointer;
   }
-
-  .fa-icon {
-    margin-right: 8px;
-    width: 16px; // Ensure icon width consistency
-    text-align: center;
-    opacity: 0.7;
-  }
 `;
 
 const CategoryList = styled.ul`
@@ -124,25 +135,22 @@ const ParentCategoryToggle = styled.button`
   opacity: 0.7;
 `;
 
-// Update icon map to match EthyrialMapFull
-const categoryIconMap: Record<string, any> = {
-  ORE: faGem,
-  HERB: faLeaf,
-  SKIN: faPaw, // Updated
-  TREE: faTree,
-  CLOTH: faScroll,
-  ENEMY: faSkullCrossbones,
-  POI: faMapMarkerAlt,
-  NPC: faCrosshairs,
-  TOWN: faCity,
-  OTHER: faQuestionCircle,
-  DUNGEON: faChessRook, // Updated
-  BANK: faUniversity, // Updated
-  TELEPORT: faStreetView, // Updated
-  DAILY_QUEST: faScroll,
-  RAID: faDragon,
-  WORLD_BOSS: faDragon,
-};
+// Styled category letter marker
+const CategoryMarker = styled.div<{ $color: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: ${props => props.$color || '#808080'};
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 12px;
+  margin-right: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+`;
 
 // Add a styled separator/header for divisions
 const DivisionHeader = styled.div`
@@ -274,6 +282,9 @@ const MapOverlayPanel: React.FC<Props> = ({
       const isParent = category.children && category.children.length > 0;
       // Use dedicated state for expansion
       const isExpanded = expandedParents[category.id] ?? false;
+      const categoryName = category.title.toUpperCase();
+      const categoryLetter = getCategoryLetter(category.title);
+      const categoryColor = categoryColors[categoryName] || '#808080';
 
       return (
         <React.Fragment key={category.id}>
@@ -286,11 +297,9 @@ const MapOverlayPanel: React.FC<Props> = ({
                 </ParentCategoryToggle>
               )}
             </div>
-            <FontAwesomeIcon
-              className="fa-icon"
-              icon={categoryIconMap[category.title] || faQuestionCircle}
-              fixedWidth
-            />
+            <CategoryMarker $color={categoryColor}>
+              {categoryLetter}
+            </CategoryMarker>
             <IngameCheckbox
                 id={`cat-${category.id}`}
                 checked={visibleCategoryIds[category.id] ?? true} // Checked state from visibility
@@ -320,6 +329,7 @@ const MapOverlayPanel: React.FC<Props> = ({
       zIndex={20}
       dragType={DRAG_TYPE}
       className="w-[300px] min-w-[300px]"
+      id="map-overlay"
     >
       <Input
         type="search"
@@ -345,6 +355,9 @@ const MapOverlayPanel: React.FC<Props> = ({
         {labelCategories.map(labelCat => (
             <CategoryItem key={labelCat.id} $isChild={false}>
                 <div className="w-5 h-5 mr-1"></div>
+                <CategoryMarker $color={'#1E90FF'}>
+                  {getCategoryLetter(labelCat.title)}
+                </CategoryMarker>
                 <IngameCheckbox
                     id={`cat-${labelCat.id}`} // Use category ID
                     checked={visibleCategoryIds[labelCat.id] ?? true} // Use combined state

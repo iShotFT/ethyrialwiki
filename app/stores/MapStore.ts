@@ -1,8 +1,7 @@
-import { observable, action, computed, makeObservable } from 'mobx';
+import { observable, action, computed, decorate } from 'mobx';
 import type { Map as OLMap } from 'ol';
 import type { Extent } from 'ol/extent';
 import Logger from "../utils/Logger";
-import { ensureLayerVisibility, refreshVectorLayers } from "~/utils/layerManager";
 import type { AggregatedPoint } from "@server/utils/PointAggregator";
 
 // Types
@@ -34,33 +33,6 @@ class MapStore {
   // Layer visibility
   visibleCategoryIds: string[] = [];
   
-  constructor() {
-    makeObservable(this, {
-      // Properties
-      mapInstance: observable,
-      viewState: observable,
-      heatmapData: observable,
-      currentHeatmapItemId: observable,
-      isLoadingHeatmap: observable,
-      heatmapError: observable,
-      visibleCategoryIds: observable,
-      
-      // Computed
-      hasHeatmapData: computed,
-      
-      // Actions
-      setMapInstance: action,
-      setViewState: action,
-      setHeatmapData: action,
-      setCurrentHeatmapItemId: action,
-      setHeatmapLoading: action,
-      setHeatmapError: action,
-      clearHeatmap: action,
-      setVisibleCategoryIds: action,
-      toggleVisibleCategory: action,
-    });
-  }
-  
   // Computed properties
   get hasHeatmapData(): boolean {
     return !!this.heatmapData && Array.isArray(this.heatmapData.points) && this.heatmapData.points.length > 0;
@@ -72,56 +44,82 @@ class MapStore {
     Logger.debug("misc", `[MapStore] Map instance ${map ? 'set' : 'cleared'}`);
   }
   
-  setViewState(viewState: ViewState | null): void {
-    this.viewState = viewState;
+  setViewState(state: ViewState): void {
+    this.viewState = state;
   }
   
   setHeatmapData(data: HeatmapData | null): void {
+    Logger.debug("misc", `[HEATMAP_FLOW] MapStore.setHeatmapData called with ${data?.points?.length || 0} points`);
+    // Just update the state without triggering any redraws
     this.heatmapData = data;
-    
-    // If setting heatmap data, ensure proper layer visibility
-    if (data && this.mapInstance) {
-      ensureLayerVisibility(this.mapInstance, { logMessages: true });
-      
-      // Use timeout to ensure rendering issues are fixed
-      setTimeout(() => {
-        if (this.mapInstance) {
-          refreshVectorLayers(this.mapInstance);
-        }
-      }, 100);
-    }
   }
   
   setCurrentHeatmapItemId(itemId: string | null): void {
+    Logger.debug("misc", `[HEATMAP_FLOW] MapStore.setCurrentHeatmapItemId: ${itemId || 'null'} (previous: ${this.currentHeatmapItemId || 'null'})`);
     this.currentHeatmapItemId = itemId;
   }
   
   setHeatmapLoading(loading: boolean): void {
+    Logger.debug("misc", `[HEATMAP_FLOW] MapStore.setHeatmapLoading: ${loading}`);
     this.isLoadingHeatmap = loading;
   }
   
   setHeatmapError(error: string | null): void {
+    if (error) {
+      Logger.error("misc", new Error(`[HEATMAP_FLOW] MapStore heatmap error: ${error}`));
+    }
     this.heatmapError = error;
   }
   
   clearHeatmap(): void {
+    Logger.debug("misc", `[HEATMAP_FLOW] MapStore.clearHeatmap called`);
     this.heatmapData = null;
     this.currentHeatmapItemId = null;
     this.heatmapError = null;
   }
   
-  setVisibleCategoryIds(categoryIds: string[]): void {
-    this.visibleCategoryIds = [...categoryIds];
+  setVisibleCategoryIds(ids: string[]): void {
+    this.visibleCategoryIds = ids;
   }
   
-  toggleVisibleCategory(categoryId: string): void {
-    if (this.visibleCategoryIds.includes(categoryId)) {
-      this.visibleCategoryIds = this.visibleCategoryIds.filter(id => id !== categoryId);
+  toggleVisibleCategory(id: string, visible: boolean): void {
+    if (visible) {
+      this.visibleCategoryIds = [...this.visibleCategoryIds, id];
     } else {
-      this.visibleCategoryIds = [...this.visibleCategoryIds, categoryId];
+      this.visibleCategoryIds = this.visibleCategoryIds.filter(
+        (currentId) => currentId !== id
+      );
     }
   }
 }
 
-// Export as singleton
-export default new MapStore(); 
+// Create and export a singleton instance
+const store = new MapStore();
+
+// Add decorators after class definition
+decorate(MapStore, {
+  // Properties
+  mapInstance: observable,
+  viewState: observable,
+  heatmapData: observable,
+  currentHeatmapItemId: observable,
+  isLoadingHeatmap: observable,
+  heatmapError: observable,
+  visibleCategoryIds: observable,
+  
+  // Computed
+  hasHeatmapData: computed,
+  
+  // Actions
+  setMapInstance: action,
+  setViewState: action,
+  setHeatmapData: action,
+  setCurrentHeatmapItemId: action,
+  setHeatmapLoading: action,
+  setHeatmapError: action,
+  clearHeatmap: action,
+  setVisibleCategoryIds: action,
+  toggleVisibleCategory: action,
+});
+
+export default store; 

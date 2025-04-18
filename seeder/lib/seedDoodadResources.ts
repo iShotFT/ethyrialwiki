@@ -18,7 +18,10 @@ import { seederLogger } from "./seederLogger";
 import * as readline from "readline";
 import { Transform } from "stream";
 
-// Interface for the resource entry from the cleaned_doodad.json file
+// Define Extra type locally to avoid import issues
+type Extra = Record<string, any>;
+
+// Interface for the resource entry from the doodad.json file
 interface DoodadResourceEntry {
   name: string;
   map: {
@@ -43,6 +46,11 @@ type ResourceIconMap = Record<string, { icon: string; category: string }>;
  * @param tags Tags from the resource
  */
 function normalizeResourceName(name: string, tags: string[]): string {
+  // Handle special case for Corrupted Birch - normalize to Birch Tree
+  if (name === "Corrupted Birch" || name.includes("Corrupted Birch")) {
+    return "Birch Tree";
+  }
+  
   // If it's a tree, try to normalize to base form
   if (tags.includes("Tree")) {
     // The prefixes and suffixes we want to strip
@@ -74,10 +82,26 @@ function normalizeResourceName(name: string, tags: string[]): string {
   return name;
 }
 
+// Add a function to check if a resource should be skipped
+function shouldSkipResource(resourceName: string, tags: string[]): boolean {
+  // List of resource names to skip
+  const skippedResources = [
+    "Flax Flower Petals"
+  ];
+  
+  // Check if the resource name is in the skip list
+  return skippedResources.includes(resourceName);
+}
+
 /**
  * Identifies the resource type based on tags
  */
-function identifyResourceType(tags: string[]): string | null {
+function identifyResourceType(tags: string[] | null | undefined): string | null {
+  // Handle null or undefined tags
+  if (!tags || !Array.isArray(tags)) {
+    return null; // Return null for unknown/invalid type
+  }
+  
   if (tags.includes("Vein")) return "Vein";
   if (tags.includes("Herbalism")) return "Herbalism";
   if (tags.includes("Tree")) return "Tree";
@@ -85,72 +109,50 @@ function identifyResourceType(tags: string[]): string | null {
 }
 
 /**
- * Creates a JSON parser transform stream that handles the large JSON array
+ * Load the doodad.json file entirely and parse it
+ * @param filePath Path to the doodad.json file
+ * @returns Array of parsed DoodadResourceEntry objects
  */
-function createJsonParserStream() {
-  let buffer = "";
-  let depth = 0;
-  let inArray = false;
-  let objectStart = -1;
-  
-  return new Transform({
-    objectMode: true,
-    transform(chunk, encoding, callback) {
-      const str = buffer + chunk.toString();
-      buffer = "";
-      
-      let i = 0;
-      
-      // Find the start of the array if we haven't found it yet
-      if (!inArray) {
-        i = str.indexOf('[');
-        if (i !== -1) {
-          inArray = true;
-          i++; // Move past the '['
-        } else {
-          buffer = str;
-          return callback();
+function loadDoodadJson(filePath: string): DoodadResourceEntry[] {
+  try {
+    // Read the file synchronously - this loads the entire file into memory
+    Logger.info("utils", `Loading entire JSON file: ${filePath}`);
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    Logger.info("utils", `File loaded, parsing JSON...`);
+    
+    // Parse the JSON content
+    const data = JSON.parse(fileContent);
+    
+    // Handle different possible structures
+    if (Array.isArray(data)) {
+      Logger.info("utils", `Successfully parsed JSON array with ${data.length} items`);
+      return data;
+    } else if (typeof data === "object") {
+      // Try to find an array inside the object
+      for (const key in data) {
+        if (Array.isArray(data[key])) {
+          Logger.info("utils", `Found array in key "${key}" with ${data[key].length} items`);
+          return data[key];
         }
       }
-      
-      // Process the characters
-      for (; i < str.length; i++) {
-        const char = str[i];
-        
-        if (char === '{' && depth === 0) {
-          objectStart = i;
-          depth++;
-        } else if (char === '{') {
-          depth++;
-        } else if (char === '}') {
-          depth--;
-          
-          if (depth === 0 && objectStart !== -1) {
-            // We have a complete object
-            const objectStr = str.substring(objectStart, i + 1);
-            try {
-              const object = JSON.parse(objectStr);
-              this.push(object);
-            } catch (error) {
-              Logger.error("utils", new Error(`Failed to parse JSON object: ${objectStr}`), error as Error);
-            }
-            objectStart = -1;
-          }
-        }
-      }
-      
-      // Store any incomplete object in the buffer
-      if (objectStart !== -1) {
-        buffer = str.substring(objectStart);
-      }
-      
-      callback();
     }
-  });
+    
+    // If we got here, the structure isn't what we expected
+    Logger.warn("utils", new Error("JSON structure is not an array as expected"));
+    return [];
+  } catch (error) {
+    const errorMessage = `Failed to load or parse doodad.json: ${(error as Error).message}`;
+    Logger.error(
+      "utils", 
+      new Error(errorMessage),
+      error as any
+    );
+    return [];
+  }
 }
 
 /**
- * Seeds game resources from the cleaned_doodad.json format
+ * Seeds game resources from the doodad.json format
  * @param mapTitle - The title of the map to seed resources for (e.g., "Irumesa")
  * @param parentTransaction - Optional parent transaction
  * @param batchSize - Batch size for processing (default: 100)
@@ -160,6 +162,7 @@ export async function seedDoodadResources(
   parentTransaction: Transaction | null = null,
   batchSize: number = 100
 ): Promise<void> {
+  const startTime = Date.now();
   Logger.info("utils", `Seeding doodad resources for map: ${mapTitle}...`);
   Logger.info("utils", `Using batch size of ${batchSize}`);
   
@@ -171,7 +174,12 @@ export async function seedDoodadResources(
   let resourceIconMapping: ResourceIconMap;
   try {
     const mappingFileContent = fs.readFileSync(mappingJsonPath, "utf-8");
-    resourceIconMapping = JSON.parse(mappingFileContent) as ResourceIconMap;
+    // Remove comments and parse - this handles JSON with comments
+    const cleanedContent = mappingFileContent
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+      .replace(/\/\/.*/g, '');          // Remove single-line comments
+    
+    resourceIconMapping = JSON.parse(cleanedContent) as ResourceIconMap;
     Logger.info(
       "utils",
       `Loaded resource icon mapping from ${mappingJsonPath}`
@@ -198,6 +206,7 @@ export async function seedDoodadResources(
   const mapId = targetMap.dataValues.id;
   
   // ----- STEP 1: Prepare & Seed Categories -----
+  Logger.info("utils", "Step 1: Preparing resource categories...");
   
   // Collect category data
   const categoryData = new Map<
@@ -216,6 +225,8 @@ export async function seedDoodadResources(
       });
     }
   }
+  
+  Logger.info("utils", `Found ${categoryData.size} unique resource categories`);
   
   // Create or get category icons in a separate transaction if needed
   // Map to keep track of icon IDs for categories
@@ -316,69 +327,51 @@ export async function seedDoodadResources(
   );
   
   // ----- STEP 2: Process Resources in Batches -----
+  Logger.info("utils", "Step 2: Processing doodad resources...");
   
-  // Source file path
-  const doodadJsonPath = path.join(INPUT_DIR, "cleaned_doodad.json");
+  // Source file path - use doodad.json file
+  const doodadJsonPath = path.join(INPUT_DIR, "doodad_fixed.json");
   
   // Check if file exists
   if (!fs.existsSync(doodadJsonPath)) {
     throw new Error(`Doodad resource file not found: ${doodadJsonPath}`);
   }
   
-  // Process the JSON file in a streaming manner
-  const jsonStream = createReadStream(doodadJsonPath, { encoding: 'utf8' })
-    .pipe(createJsonParserStream());
+  Logger.info("utils", `Reading doodad resource file: ${doodadJsonPath}`);
+
+  // Get file size for reporting
+  const fileStats = fs.statSync(doodadJsonPath);
+  Logger.info("utils", `Doodad file size: ${(fileStats.size / 1024 / 1024).toFixed(2)} MB`);
+
+  // Load the entire doodad.json file at once
+  const allResources = loadDoodadJson(doodadJsonPath);
+  const totalEntries = allResources.length;
+  Logger.info("utils", `Loaded ${totalEntries} total resources from file`);
   
-  let batch: DoodadResourceEntry[] = [];
-  let processedCount = 0;
+  // Process resources in batches
   let totalProcessed = 0;
-  let totalResources = 0;
+  let totalCreated = 0;
+  let totalUpdated = 0;
   let totalLinks = 0;
   let batchIndex = 0;
   
-  // Process each resource object
-  for await (const resource of jsonStream as any) {
-    const resourceEntry = resource as DoodadResourceEntry;
+  // Process resources in batches of batchSize
+  for (let i = 0; i < allResources.length; i += batchSize) {
+    const batchResources = allResources.slice(i, i + batchSize);
     
-    // Filter resources for target map (we only want resources from this map)
-    if (resourceEntry.map.map !== mapTitle) {
-      continue;
+    // Filter resources for the target map
+    const mapFilteredBatch = batchResources.filter(resource => 
+      resource.map && resource.map.map === mapTitle
+    );
+    
+    if (mapFilteredBatch.length === 0) {
+      totalProcessed += batchResources.length;
+      continue; // Skip empty batches
     }
     
-    // Add to current batch
-    batch.push(resourceEntry);
-    processedCount++;
-    
-    // Process the batch if it's full
-    if (batch.length >= batchSize) {
-      await processBatch(
-        batch,
-        mapId,
-        mapTitle,
-        categoryIdMap,
-        resourceIconMapping,
-        parentTransaction,
-        useParentTransaction,
-        batchIndex
-      );
-      
-      // Update counters
-      totalProcessed += batch.length;
-      batchIndex++;
-      batch = [];
-      
-      // Log progress
-      Logger.info(
-        "utils",
-        `Processed batch ${batchIndex} (${processedCount} resources so far)`
-      );
-    }
-  }
-  
-  // Process any remaining resources
-  if (batch.length > 0) {
-    await processBatch(
-      batch,
+    // Process the current batch
+    const batchResult = await processBatch(
+      mapFilteredBatch,
       mapId,
       mapTitle,
       categoryIdMap,
@@ -387,24 +380,39 @@ export async function seedDoodadResources(
       useParentTransaction,
       batchIndex
     );
-    totalProcessed += batch.length;
+    
+    // Update counters
+    totalProcessed += batchResources.length;
+    totalCreated += batchResult.created;
+    totalUpdated += batchResult.updated;
+    totalLinks += batchResult.links;
+    batchIndex++;
+    
+    // Log progress with percentage
+    const progressPercentage = Math.round((totalProcessed / totalEntries) * 100);
+    
     Logger.info(
       "utils",
-      `Processed final batch ${batchIndex + 1} (${processedCount} resources total)`
+      `Processed batch ${batchIndex}: ${batchResult.created} resources created, ` +
+      `${batchResult.updated} updated, ${batchResult.links} item-category links. ` +
+      `Total: ${totalProcessed}/${totalEntries} resources (${progressPercentage}%)`
     );
   }
   
+  const duration = ((Date.now() - startTime) / 1000).toFixed(2);
   Logger.info(
     "utils",
-    `Doodad resource seeding complete. Processed ${totalProcessed} resources.`
+    `Doodad resource seeding complete. Processed ${totalProcessed} resources in ${duration}s.`
   );
   
   // Add seederLogger.recordCounts
-  seederLogger.recordCounts("Doodad Resources Total", totalProcessed, 0);
+  seederLogger.recordCounts("Doodad Resources Total", totalCreated, totalUpdated);
+  seederLogger.recordCounts("Doodad Resource Items", totalLinks, 0);
 }
 
 /**
  * Process a batch of resource entries
+ * @returns {Object} Stats about created/updated resources and links
  */
 async function processBatch(
   batch: DoodadResourceEntry[],
@@ -415,174 +423,234 @@ async function processBatch(
   parentTransaction: Transaction | null,
   useParentTransaction: boolean,
   batchIndex: number
-): Promise<void> {
-  // Create a new transaction for this batch if we're not using a parent transaction
-  const batchTransaction = useParentTransaction ? parentTransaction : await sequelize.transaction();
-  
-  // Since we just created the transaction if needed, we can be sure it's not null
-  // If useParentTransaction is true, we use parentTransaction which is allowed to be null
-  if (!batchTransaction) {
-    throw new Error('Transaction is null - this should not happen');
-  }
+): Promise<{ created: number; updated: number; links: number }> {
+  // Determine which transaction to use
+  let batchTransaction: Transaction | null = null;
   
   try {
+    // Create a new transaction if we're not using the parent one
+    if (!useParentTransaction) {
+      batchTransaction = await sequelize.transaction();
+    } else {
+      batchTransaction = parentTransaction;
+    }
+    
+    if (!batchTransaction) {
+      throw new Error('No valid transaction available. This should not happen.');
+    }
+    
     // Temporary storage for this batch
     const resourcesToCreate: any[] = [];
     const itemCategoryLinks: { gameItemId: string; gameItemCategoryId: string }[] = [];
     const processedItemIds = new Set<string>();
+    let resourcesCreated = 0;
+    let resourcesUpdated = 0;
+    
+    // Track resource IDs to prevent duplicates in the same batch
+    const processedResourceIds = new Set<string>();
     
     // Process each resource in the batch
     for (const resource of batch) {
-      // We need to find the appropriate mapping from resource_icon_map.json
-      // First, determine the type of resource based on its tags
-      const resourceType = identifyResourceType(resource.info.tags);
-      if (!resourceType) {
-        continue;
-      }
-      
-      // Normalize the resource name
-      const normalizedName = normalizeResourceName(resource.name, resource.info.tags);
-      
-      // Look up the resource in our mapping
-      // For trees, we need to match against the normalized name or check various tree patterns
-      let mapping;
-      
-      if (resourceType === 'Tree') {
-        // First try to look up the exact name
-        mapping = resourceIconMapping[normalizedName];
+      try {
+        // Validate resource data
+        if (!resource.map || !resource.info) {
+          continue;
+        }
         
-        if (!mapping) {
-          // Try to find a match among the tree variants
-          const treeBase = normalizedName.replace(' Tree', '');
+        // Check if this resource should be skipped based on its name
+        const resourceName = resource.info.name || resource.name;
+        if (shouldSkipResource(resourceName, resource.info.tags || [])) {
+          Logger.debug(
+            "utils",
+            `Skipping unwanted resource: ${resourceName}`
+          );
+          continue;
+        }
+
+        // Normalize resource name
+        const normalizedName = normalizeResourceName(
+          resourceName,
+          resource.info.tags || []
+        );
+        
+        // Identify resource type - safely handle null tags
+        const resourceType = identifyResourceType(resource.info.tags);
+        if (!resourceType) {
+          continue;
+        }
+        
+        // Find mapping for this resource with flexible matching
+        let mapping = resourceIconMapping[normalizedName];
+        
+        // If no direct match, try different matching strategies based on resource type
+        if (!mapping && resourceType) {
+          if (resourceType === 'Tree') {
+            // For trees, try to find the base name match
+            const treeBase = normalizedName.replace(' Tree', '');
+            
+            // Check if any tree in the mapping contains this base name
+            for (const key of Object.keys(resourceIconMapping)) {
+              const keyMapping = resourceIconMapping[key];
+              if (keyMapping.category === 'Trees' && 
+                  (key.includes(treeBase) || treeBase.includes(key.replace(' Tree', '')))) {
+                mapping = keyMapping;
+                break;
+              }
+            }
+          } else if (resourceType === 'Vein') {
+            // For ore veins, try to match by category
+            for (const key of Object.keys(resourceIconMapping)) {
+              const keyMapping = resourceIconMapping[key];
+              if (key.includes('Vein') && keyMapping.category === 'Ores') {
+                // Try to match the ore name
+                const oreName = normalizedName.replace(' Vein', '');
+                const keyOreName = key.replace(' Vein', '');
+                
+                if (oreName === keyOreName || key.includes(oreName) || oreName.includes(keyOreName)) {
+                  mapping = keyMapping;
+                  break;
+                }
+              }
+            }
+          } else if (resourceType === 'Herbalism') {
+            // For herbs and plants, try category-based matching
+            const relevantCategories = ['Herbs', 'Plants', 'Fibers'];
+            
+            for (const key of Object.keys(resourceIconMapping)) {
+              const keyMapping = resourceIconMapping[key];
+              if (relevantCategories.includes(keyMapping.category)) {
+                // Check for name similarity
+                if (key.includes(normalizedName) || normalizedName.includes(key)) {
+                  mapping = keyMapping;
+                  break;
+                }
+              }
+            }
+          }
           
-          // Check for tree variants (Ancient, Verdant, Aging, Sapling)
-          for (const key of Object.keys(resourceIconMapping)) {
-            if (key.includes(treeBase) && resourceIconMapping[key].category === 'Trees') {
-              mapping = resourceIconMapping[key];
-              break;
+          // As a last resort, try a partial match on any resource
+          if (!mapping) {
+            for (const key of Object.keys(resourceIconMapping)) {
+              if (key.toLowerCase().includes(normalizedName.toLowerCase()) || 
+                  normalizedName.toLowerCase().includes(key.toLowerCase())) {
+                mapping = resourceIconMapping[key];
+                break;
+              }
             }
           }
         }
-      } else if (resourceType === 'Vein') {
-        // Try to find a matching ore vein
-        for (const key of Object.keys(resourceIconMapping)) {
-          if (key === resource.name && resourceIconMapping[key].category === 'Ores') {
-            mapping = resourceIconMapping[key];
-            break;
-          }
+        
+        // Skip if no mapping found
+        if (!mapping || !mapping.icon) {
+          continue;
         }
-      } else if (resourceType === 'Herbalism') {
-        // Try to find a matching herb or plant
-        for (const key of Object.keys(resourceIconMapping)) {
-          if (key === resource.name && 
-             (resourceIconMapping[key].category === 'Herbs' || 
-              resourceIconMapping[key].category === 'Plants' || 
-              resourceIconMapping[key].category === 'Fibers')) {
-            mapping = resourceIconMapping[key];
-            break;
-          }
+        
+        const iconFilename = mapping.icon;
+        const categoryName = mapping.category;
+        const categorySlug = generateSlug(categoryName);
+        const categoryId = categoryIdMap.get(categorySlug);
+        if (!categoryId) {
+          continue;
         }
-      }
-      
-      // Skip if no mapping found
-      if (!mapping) {
-        continue;
-      }
-      
-      const iconFilename = mapping.icon;
-      const categoryName = mapping.category;
-      const categorySlug = generateSlug(categoryName);
-      const categoryId = categoryIdMap.get(categorySlug);
-      if (!categoryId) {
-        continue;
-      }
-      
-      // --- Find/Create Icon ---
-      const iconSlug = generateSlug(path.parse(iconFilename).name);
-      const iconId = generateId(iconSlug);
-      
-      // Icon should have been created above, but check again just in case
-      const [icon] = await GameIcon.findOrCreate({
-        where: { id: iconId },
-        defaults: {
-          id: iconId,
-          slug: iconSlug,
-          title: formatTitle(path.parse(iconFilename).name),
-          originalName: iconFilename,
-          path: `icons/${iconFilename}`, // Assume icons are uploaded/available at this path
-          public: true,
-        } as any,
-        transaction: batchTransaction,
-      });
-      
-      if (!icon) {
-        Logger.warn(
-          "utils",
-          new Error(`Icon not found or created for ${iconFilename}`)
-        );
-        continue; // Skip if icon is missing
-      }
-      
-      // --- Find/Create Item ---
-      const itemTitle = formatTitle(normalizedName);
-      const itemSlug = generateSlug(itemTitle);
-      const itemId = generateId(itemSlug);
-      
-      const [item, created] = await GameItem.findOrCreate({
-        where: { id: itemId },
-        defaults: {
-          id: itemId,
-          slug: itemSlug,
-          title: itemTitle,
-          iconId: icon.id, // Use found/created icon ID
-          public: true, // Set resource items as public so they appear in the frontend
-          description: `${itemTitle} Resource Node`,
-          dropable: true,
-          rarityId: null,
-          tier: 0,
-          weight: 1.0,
-          onUseEffect: null,
-          usedForSkillId: null,
-          gatheringSpeed: null,
-          requiresSkillId: null,
-          requiresSkillLevel: 0,
-          blueprintId: null,
-        } as any,
-        transaction: batchTransaction,
-      });
-      
-      // If item already existed, update the public flag to ensure it's visible
-      if (!created) {
-        await item.update({
-          public: true, // Ensure existing items are also public
-          iconId: icon.id, // Update the icon if needed
-        }, { transaction: batchTransaction });
-      }
-      
-      // --- Link Item to Category (if not already processed) ---
-      if (!processedItemIds.has(item.id)) {
-        itemCategoryLinks.push({
-          gameItemId: item.id,
-          gameItemCategoryId: categoryId,
+        
+        // --- Find/Create Icon ---
+        const iconSlug = generateSlug(path.parse(iconFilename).name);
+        const iconId = generateId(iconSlug);
+        
+        // Icon should have been created above, but check again just in case
+        const [icon] = await GameIcon.findOrCreate({
+          where: { id: iconId },
+          defaults: {
+            id: iconId,
+            slug: iconSlug,
+            title: formatTitle(path.parse(iconFilename).name),
+            originalName: iconFilename,
+            path: `icons/${iconFilename}`, // Assume icons are uploaded/available at this path
+            public: true,
+          } as any,
+          transaction: batchTransaction,
         });
-        processedItemIds.add(item.id);
+        
+        if (!icon) {
+          continue; // Skip if icon is missing
+        }
+        
+        // --- Find/Create Item ---
+        const itemTitle = formatTitle(normalizedName);
+        const itemSlug = generateSlug(itemTitle);
+        const itemId = generateId(itemSlug);
+        
+        const [item, created] = await GameItem.findOrCreate({
+          where: { id: itemId },
+          defaults: {
+            id: itemId,
+            slug: itemSlug,
+            title: itemTitle,
+            iconId: icon.id, // Use found/created icon ID
+            public: true, // Set resource items as public so they appear in the frontend
+            description: `${itemTitle} Resource Node`,
+            dropable: true,
+            rarityId: null,
+            tier: 0,
+            weight: 1.0,
+            onUseEffect: null,
+            usedForSkillId: null,
+            gatheringSpeed: null,
+            requiresSkillId: null,
+            requiresSkillLevel: 0,
+            blueprintId: null,
+          } as any,
+          transaction: batchTransaction,
+        });
+        
+        // If item already existed, update the public flag to ensure it's visible
+        if (!created) {
+          await item.update({
+            public: true, // Ensure existing items are also public
+            iconId: icon.id, // Update the icon if needed
+          }, { transaction: batchTransaction });
+        }
+        
+        // --- Link Item to Category (if not already processed) ---
+        if (!processedItemIds.has(item.id)) {
+          itemCategoryLinks.push({
+            gameItemId: item.id,
+            gameItemCategoryId: categoryId,
+          });
+          processedItemIds.add(item.id);
+        }
+        
+        // Create a unique identifier for this resource node
+        const nodeId = generateId(`${mapId}-${item.id}-${resource.map.x}-${resource.map.y}-${resource.map.z}`);
+        
+        // Skip if we've already processed this resource ID in the current batch
+        if (processedResourceIds.has(nodeId)) {
+          Logger.debug(
+            "utils",
+            `Skipping duplicate resource ID ${nodeId} in batch ${batchIndex}`
+          );
+          continue;
+        }
+        
+        // Add this ID to our tracking set
+        processedResourceIds.add(nodeId);
+        
+        // --- Prepare Resource Node ---
+        resourcesToCreate.push({
+          id: nodeId,
+          mapId,
+          itemId: item.id,
+          coordinates: {
+            x: resource.map.x,
+            y: resource.map.y,
+            z: resource.map.z,
+          },
+          public: true,
+        });
+      } catch (resourceError) {
+        // Continue with next resource instead of failing the whole batch
+        continue;
       }
-      
-      // Create a unique identifier for this resource node
-      const nodeId = generateId(`${mapId}-${item.id}-${resource.map.x}-${resource.map.y}-${resource.map.z}`);
-      
-      // --- Prepare Resource Node ---
-      resourcesToCreate.push({
-        id: nodeId,
-        mapId,
-        itemId: item.id,
-        coordinates: {
-          x: resource.map.x,
-          y: resource.map.y,
-          z: resource.map.z,
-        },
-        public: true,
-      });
     }
     
     // Bulk create item-category links for this batch
@@ -591,12 +659,19 @@ async function processBatch(
         transaction: batchTransaction,
         ignoreDuplicates: true,
       });
-      Logger.info("utils", `Created ${itemCategoryLinks.length} item-category links in batch ${batchIndex + 1}`);
+    }
+    
+    // Log duplicate detection results
+    if (batch.length !== resourcesToCreate.length) {
+      Logger.info(
+        "utils",
+        `Batch ${batchIndex}: Filtered out ${batch.length - resourcesToCreate.length} duplicate resource entries`
+      );
     }
     
     // Bulk create resource nodes for this batch
     if (resourcesToCreate.length > 0) {
-      await GameResource.bulkCreate(resourcesToCreate as any, {
+      const createResult = await GameResource.bulkCreate(resourcesToCreate as any, {
         transaction: batchTransaction,
         updateOnDuplicate: [
           "mapId",
@@ -605,20 +680,47 @@ async function processBatch(
           "public",
           "updatedAt",
         ],
+        returning: true
       });
-      Logger.info("utils", `Created ${resourcesToCreate.length} resource nodes in batch ${batchIndex + 1}`);
+      
+      // Count created vs updated nodes
+      resourcesCreated = createResult.filter(r => {
+        return r.dataValues && (r as any)._options?.isNewRecord;
+      }).length;
+      resourcesUpdated = createResult.length - resourcesCreated;
     }
     
-    // Commit the batch transaction if we're not using a parent transaction
-    if (!useParentTransaction) {
+    // Commit the transaction if we created it and everything succeeded
+    if (!useParentTransaction && batchTransaction) {
       await batchTransaction.commit();
     }
+    
+    return {
+      created: resourcesCreated, 
+      updated: resourcesUpdated,
+      links: itemCategoryLinks.length
+    };
   } catch (error) {
-    // Roll back if there was an error and we're not using a parent transaction
+    // Only rollback if we created the transaction and it still exists
     if (!useParentTransaction && batchTransaction) {
-      await batchTransaction.rollback();
+      try {
+        await batchTransaction.rollback();
+      } catch (rollbackError) {
+        Logger.error(
+          "utils",
+          new Error(`Error during transaction rollback: ${rollbackError.message}`),
+          error
+        );
+      }
     }
-    Logger.error("utils", new Error(`Error processing doodad resource batch ${batchIndex + 1}`), error as Error);
+    
+    // Add more detailed error logging
+    Logger.error(
+      "utils",
+      new Error(`Error processing doodad resource batch ${batchIndex + 1}`),
+      error
+    );
+    
     throw error;
   }
 } 

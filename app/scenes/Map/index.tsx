@@ -1,30 +1,42 @@
 import { observer } from "mobx-react";
 import type { Map as OlMap } from "ol";
 import type { Extent } from "ol/extent";
+import HeatmapLayer from "ol/layer/Heatmap";
+import VectorSource from "ol/source/Vector";
 import * as React from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import styled from "styled-components";
-import type { AggregatedPoint } from "@server/utils/PointAggregator";
+import "react-toastify/dist/ReactToastify.css";
 import EthyrialMapFull from "~/components/EthyrialMapFull";
 import {
   HeatmapOverlayPanel,
   MapOverlayPanel,
   CoordinateOverlay,
-  ZLayerOverlay,
   GlobalCustomDragLayer
 } from "~/components/MapOverlays";
+import ToastOverlay from "~/components/MapOverlays/ToastOverlay";
 import { LoadingIndicatorBar } from "~/components/LoadingIndicator";
 import { client } from "~/utils/ApiClient";
 import Logger from "~/utils/Logger";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useHeatmapData } from "~/hooks/useHeatmapData";
+import MapStore from "~/stores/MapStore";
 
-// Define type for heatmap data prop passed to EthyrialMapFull
+// Define the AggregatedPoint type to match the server definition
+interface AggregatedPoint {
+  x: number;
+  y: number;
+  weight: number;
+  count: number;
+  cellSize: number;
+}
+
+// Core data types
 interface HeatmapData {
   points: AggregatedPoint[];
 }
 
-// Define types for heatmap data (can be moved later)
 interface HeatmapCategory {
   id: string;
   slug: string;
@@ -40,7 +52,6 @@ interface HeatmapItem {
   tier: number;
 }
 
-// Type for Categories fetched from API (ensure it includes isLabel)
 interface ApiCategoryData {
   id: string;
   slug: string;
@@ -51,7 +62,6 @@ interface ApiCategoryData {
   isLabel: boolean;
 }
 
-// Add type for Markers fetched from API (add categoryIsLabel)
 interface ApiMarkerData {
   id: string;
   title: string;
@@ -64,37 +74,14 @@ interface ApiMarkerData {
   categoryIsLabel: boolean;
 }
 
-// Interface for MapOverlayPanel props
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface MapOverlayPanelProps {
-  labelCategories: ApiCategoryData[]; // Use specific name
-  markerCategories: ApiCategoryData[]; // Use specific name
-  visibleCategoryIds: Record<string, boolean>; // Combined visibility state
-  onVisibilityChange: (visibilityState: Record<string, boolean>) => void; // Callback for state change
-  onSearch: (query: string) => void;
-}
-
-// Interface for EthyrialMapFull props
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface EthyrialMapFullProps {
-  mapId: string;
-  mapData: any; // Use specific type if available
-  allMarkers: ApiMarkerData[];
-  visibleCategoryIds: Record<string, boolean>; // Combined visibility state
-  labelCategoryIds: Set<string>;
-  heatmapData: HeatmapData | null;
-  onMapReady: (map: OlMap) => void;
-  onViewChange: (zoom: number, extent: Extent) => void;
-}
-
-// Styled components for layout
+// Styled component for layout
 const MapSceneContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden; // Ensure map takes full space
+  overflow: hidden;
 `;
 
 const ErrorMessage = styled.div`
@@ -103,46 +90,41 @@ const ErrorMessage = styled.div`
 `;
 
 function MapScene() {
+  // State for map data
   const [mapData, setMapData] = useState<any>(null);
   const [allMarkers, setAllMarkers] = useState<ApiMarkerData[]>([]);
   const [labelCategories, setLabelCategories] = useState<ApiCategoryData[]>([]);
-  const [markerCategories, setMarkerCategories] = useState<ApiCategoryData[]>(
-    []
-  );
-  const [visibleCategoryIds, setVisibleCategoryIds] = useState<
-    Record<string, boolean>
-  >({});
-  const [heatmapCategories, setHeatmapCategories] = useState<HeatmapCategory[]>(
-    []
-  );
-  const [heatmapItems, setHeatmapItems] = useState<
-    Record<string, HeatmapItem[]>
-  >({});
-  const [activeHeatmapCategorySlug, setActiveHeatmapCategorySlug] = useState<
-    string | null
-  >(null);
-  const [isLoadingHeatmapItems, setIsLoadingHeatmapItems] =
-    useState<boolean>(false);
+  const [markerCategories, setMarkerCategories] = useState<ApiCategoryData[]>([]);
+  const [visibleCategoryIds, setVisibleCategoryIds] = useState<Record<string, boolean>>({});
+  const [heatmapCategories, setHeatmapCategories] = useState<HeatmapCategory[]>([]);
+  const [heatmapItems, setHeatmapItems] = useState<Record<string, HeatmapItem[]>>({});
+  const [activeHeatmapCategorySlug, setActiveHeatmapCategorySlug] = useState<string | null>(null);
+  const [isLoadingHeatmapItems, setIsLoadingHeatmapItems] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [labelCategoryIds, setLabelCategoryIds] = useState<Set<string>>(
-    new Set()
-  );
-  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null); // Heatmap data state
-  const [isLoadingHeatmap, setIsLoadingHeatmap] = useState<boolean>(false); // Loading state for heatmap
-  const [currentHeatmapItemId, setCurrentHeatmapItemId] = useState<
-    string | null
-  >(null); // Track current item
-
-  // Refs for map instance and view state
-  const mapInstanceRef = useRef<OlMap | null>(null);
-  const viewStateRef = useRef<{ zoom: number; extent: Extent } | null>(null);
-
-  // Add mapState to track the OlMap instance
+  const [labelCategoryIds, setLabelCategoryIds] = useState<Set<string>>(new Set());
+  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
   const [mapState, setMapState] = useState<OlMap | null>(null);
 
+  // Get mapId from config
   const mapId = useMemo(() => window.env?.handlerConfig?.mapId, []);
+  
+  // View state tracking
+  const viewStateRef = useRef<{ zoom: number; extent: Extent } | null>(null);
+  
+  // Use the heatmap hook - this is the key integration point
+  const {
+    fetchHeatmapData,
+    clearHeatmap,
+    currentHeatmapItemId,
+    isLoading: isLoadingHeatmap,
+    error: heatmapError,
+    mapRef,
+    heatmapSourceRef,
+    heatmapLayerRef
+  } = useHeatmapData();
 
+  // Initial data fetching
   useEffect(() => {
     if (!mapId) {
       setError("Map ID not found in configuration.");
@@ -157,21 +139,20 @@ function MapScene() {
         const [mapJson, categoriesJson, markersJson, heatmapCategoriesJson] =
           await Promise.all([
             client.get(`/maps/${mapId}`, {}),
-            client.get(`/maps/${mapId}/categories`, {}), // Fetches categories with isLabel
-            client.get(`/maps/${mapId}/markers`, {}), // Fetches markers with categoryIsLabel
+            client.get(`/maps/${mapId}/categories`, {}),
+            client.get(`/maps/${mapId}/markers`, {}),
             client.get(`/game-data/categories/by-group/HEATMAP`, {}),
           ]);
 
-        // Set map data
+        // Process map data
         setMapData(mapJson.data);
 
-        // --- Process Categories --- //
+        // Process categories
         const fetchedCategories: ApiCategoryData[] = categoriesJson.data || [];
         const labelCats = fetchedCategories.filter((c) => c.isLabel);
         const markerCats = fetchedCategories.filter((c) => !c.isLabel);
         setLabelCategories(labelCats);
         setMarkerCategories(markerCats);
-        // Create set of label category IDs
         setLabelCategoryIds(new Set(labelCats.map((c) => c.id)));
 
         // Initialize visibility (all true initially)
@@ -184,16 +165,15 @@ function MapScene() {
           addChildren(cat);
         });
         setVisibleCategoryIds(initialVisibility);
-        // --- End Process Categories --- //
 
-        // Set all markers
+        // Set markers
         setAllMarkers(markersJson.data || []);
 
-        // Set state for heatmap panel
+        // Set heatmap categories
         const fetchedHeatmapCategories = heatmapCategoriesJson.data || [];
         setHeatmapCategories(fetchedHeatmapCategories);
-        setHeatmapItems({}); // Start with empty items
-        setActiveHeatmapCategorySlug(null); // Ensure starts closed
+        setHeatmapItems({});
+        setActiveHeatmapCategorySlug(null);
       } catch (err: any) {
         Logger.error("Failed to load map data", err);
         setError(`Failed to load map data: ${err.message || "Unknown error"}`);
@@ -204,229 +184,69 @@ function MapScene() {
     void fetchData();
   }, [mapId]);
 
-  // --- Heatmap Fetching Logic ---
-  const fetchHeatmapData = useCallback(
-    async (itemId: string) => {
-      Logger.info("misc", `===== CRITICAL EXECUTION PATH: fetchHeatmapData called for item ${itemId} =====`);
-      
-      if (!mapId || !viewStateRef.current) {
-        Logger.warn(
-          "utils",
-          new Error("Map ID or view state not available for heatmap fetch.")
-        );
-        return;
-      }
-
-      const { zoom, extent } = viewStateRef.current;
-      const [minX, minY, maxX, maxY] = extent;
-
-      // Use integer zoom level
-      const intZoom = Math.round(zoom);
-
-      const apiUrl = `/game-data/heatmap/${mapId}/${itemId}/${intZoom}?minX=${minX}&minY=${minY}&maxX=${maxX}&maxY=${maxY}`;
-
-      setIsLoadingHeatmap(true);
-      try {
-        Logger.debug("http", `Fetching heatmap data: ${apiUrl}`);
-        const heatmapJson = await client.get(apiUrl, {});
-        
-        // CRITICAL: Log the actual heatmap data before setting it
-        Logger.info(
-          "misc", 
-          `===== CRITICAL: Received heatmap data with ${heatmapJson.data?.length || 0} points =====`
-        );
-        
-        // Set data and current item ID
-        setHeatmapData({ points: heatmapJson.data || [] });
-        setCurrentHeatmapItemId(itemId);
-        
-        Logger.debug(
-          "http",
-          `Received ${heatmapJson.data?.length || 0} heatmap points.`
-        );
-        
-        // Simpler rendering approach that preserves all layers
-        if (mapInstanceRef.current) {
-          const map = mapInstanceRef.current;
-          
-          // CRITICAL: Log all layers before doing any manipulation
-          Logger.info("misc", `===== CRITICAL: Logging layer state BEFORE heatmap update =====`);
-          const allLayersBefore = map.getLayers().getArray();
-          allLayersBefore.forEach((layer, index) => {
-            Logger.info(
-              "misc", 
-              `Layer ${index}: id=${layer.get('id') || 'unknown'}, type=${layer.get('layerType') || 'unknown'}, visible=${layer.getVisible()}`
-            );
-          });
-          
-          // First, ensure all layers have correct z-index values
-          // This is critical for maintaining visibility order
-          const allLayers = map.getLayers().getArray();
-          
-          // Find marker/vector layers and ensure they have highest z-index
-          allLayers.forEach(layer => {
-            // Check if this is a VectorLayer (markers)
-            if (layer.get('source') && layer.get('source').getFeatures) {
-              // This looks like our marker layer - set highest z-index
-              const beforeVisible = layer.getVisible();
-              const beforeZIndex = layer.getZIndex();
-              
-              layer.setZIndex(10);
-              
-              // Explicitly ensure it's visible
-              layer.setVisible(true);
-              
-              // Log that we're preserving marker layer
-              Logger.info(
-                "misc", 
-                `===== CRITICAL: Setting marker layer visibility: ${beforeVisible} -> ${layer.getVisible()}, zIndex: ${beforeZIndex} -> ${layer.getZIndex()} =====`
-              );
-            }
-            
-            // Check if this is a HeatmapLayer
-            if (layer.get('source') && layer.get('gradient')) {
-              // This looks like a heatmap layer - set middle z-index
-              layer.setZIndex(5);
-              Logger.debug("http", "Set heatmap layer to z-index 5");
-            }
-          });
-          
-          // CRITICAL: Log all layers AFTER our attempted fix
-          Logger.info("misc", `===== CRITICAL: Logging layer state AFTER z-index changes =====`);
-          const allLayersAfter = map.getLayers().getArray();
-          allLayersAfter.forEach((layer, index) => {
-            Logger.info(
-              "misc", 
-              `Layer ${index}: id=${layer.get('id') || 'unknown'}, type=${layer.get('layerType') || 'unknown'}, visible=${layer.getVisible()}, zIndex=${layer.getZIndex() || 'default'}`
-            );
-          });
-          
-          // Trigger a render, but without modifying the view
-          map.render();
-          
-          // Use a simple timeout to complete rendering and update loading state
-          setTimeout(() => {
-            if (mapInstanceRef.current) {
-              mapInstanceRef.current.render();
-              
-              // CRITICAL: Log all layers in the timeout
-              Logger.info("misc", `===== CRITICAL: Logging layer state in TIMEOUT =====`);
-              const timeoutLayers = mapInstanceRef.current.getLayers().getArray();
-              timeoutLayers.forEach((layer, index) => {
-                Logger.info(
-                  "misc", 
-                  `Layer ${index}: id=${layer.get('id') || 'unknown'}, type=${layer.get('layerType') || 'unknown'}, visible=${layer.getVisible()}, zIndex=${layer.getZIndex() || 'default'}`
-                );
-              });
-              
-              // CRITICAL FIX: Check if markers are still rendered and fix if not
-              // This ensures markers don't disappear when heatmap loads
-              const allLayersTimeout = mapInstanceRef.current.getLayers().getArray();
-              allLayersTimeout.forEach(layer => {
-                // For any layer that might be a marker layer, force visibility
-                if (layer.setVisible) {
-                  const isMarkerLayer = layer.get('source') && layer.get('source').getFeatures;
-                  if (isMarkerLayer) {
-                    const wasVisible = layer.getVisible();
-                    layer.setVisible(true);
-                    layer.setZIndex(10); // Force highest z-index again
-                    Logger.info(
-                      "misc", 
-                      `===== CRITICAL: Re-enforced marker layer (timeout): ${wasVisible} -> ${layer.getVisible()} =====`
-                    );
-                  }
-                }
-              });
-              
-              // Force one more render
-              mapInstanceRef.current.render();
-              
-              // CRITICAL NEW FIX: Explicitly force a refresh of the marker features
-              // by simulating a change to visibleCategoryIds that will trigger the filter effect
-              Logger.info(
-                "misc",
-                `===== CRITICAL: Forcing marker feature refresh by updating visibleCategoryIds =====`
-              );
-              
-              // Make a shallow copy of the current state 
-              const currentVisibility = {...visibleCategoryIds};
-              
-              // Apply the key fix: force a state update to trigger marker refresh
-              setVisibleCategoryIds(currentVisibility);
-            }
-            
-            // Complete loading
-            setIsLoadingHeatmap(false);
-          }, 100);
-        } else {
-          setIsLoadingHeatmap(false);
-        }
-      } catch (err: any) {
-        Logger.error(`Failed to load heatmap data for item ${itemId}`, err);
-        setError(
-          `Failed to load heatmap data: ${err.message || "Unknown error"}`
-        );
-        setHeatmapData(null);
-        setCurrentHeatmapItemId(null);
-        setIsLoadingHeatmap(false);
-      }
-    },
-    [mapId, visibleCategoryIds]
-  );
-
-  // Callback to receive map instance from EthyrialMapFull
+  // Handle map ready event from EthyrialMapFull
   const handleMapReady = useCallback((map: OlMap) => {
-    mapInstanceRef.current = map;
-    setMapState(map); // Update state with map instance
+    // Store the map reference for context
+    setMapState(map);
+    
+    // Store the map reference in the mapRef from our hook
+    mapRef.current = map;
+    
+    // Initialize view state
     const view = map.getView();
     const zoom = view.getZoom();
     const extent = view.calculateExtent(map.getSize());
+    
     if (zoom !== undefined) {
-      viewStateRef.current = { zoom, extent }; // Store initial state
-      Logger.info(
-        "misc",
-        `Map ready. Initial view: zoom=${zoom}, extent=${extent}`
-      );
+      viewStateRef.current = { zoom, extent };
+      Logger.info("misc", `Map ready. Initial view: zoom=${zoom}, extent=${extent}`);
     }
-  }, []);
+  }, [mapRef]);
 
-  // Callback triggered by EthyrialMapFull on view change
+  // Store heatmap layer and source references
+  const handleHeatmapLayersReady = useCallback((layer: HeatmapLayer, source: VectorSource) => {
+    heatmapLayerRef.current = layer;
+    heatmapSourceRef.current = source;
+    Logger.info("misc", "Heatmap layer and source references stored");
+  }, [heatmapLayerRef, heatmapSourceRef]);
+
+  // Handle view changes from map
   const handleViewChange = useCallback(
     (zoom: number, extent: Extent) => {
-      const roundedZoom = Math.round(zoom);
-      // Check if zoom or extent actually changed significantly to avoid rapid refetching
-      const previousState = viewStateRef.current;
-      if (
-        previousState &&
-        previousState.zoom === roundedZoom &&
-        previousState.extent.every((val, i) => Math.abs(val - extent[i]) < 1)
-      ) {
-        // Skip refetch if view hasn't changed significantly
-        return;
-      }
-
-      viewStateRef.current = { zoom: roundedZoom, extent };
+      // Store current view state
+      viewStateRef.current = { zoom, extent };
+      
+      // Update MapStore's view state
+      MapStore.setViewState({ zoom, extent });
+      
+      // If we have a selected heatmap item, update the heatmap
       if (currentHeatmapItemId) {
-        // Debounce or throttle this call in a real app if needed
-        void fetchHeatmapData(currentHeatmapItemId);
+        // Fetch heatmap data with the updated view, but don't update store to prevent re-renders
+        fetchHeatmapData({
+          mapId,
+          itemId: currentHeatmapItemId,
+          viewState: { zoom, extent },
+          map: mapRef.current,
+          heatmapLayer: heatmapLayerRef.current,
+          heatmapSource: heatmapSourceRef.current,
+          updateStore: false // Prevent store updates during panning that might trigger React re-renders
+        });
       }
     },
-    [currentHeatmapItemId, fetchHeatmapData]
-  ); // Dependencies
+    [currentHeatmapItemId, fetchHeatmapData, heatmapLayerRef, heatmapSourceRef, mapId, mapRef]
+  );
 
-  // Visibility handler needs to accept the full state from the panel
-  const handleVisibilityChange = (
-    newVisibilityState: Record<string, boolean>
-  ) => {
+  // Handle visibility changes for markers
+  const handleVisibilityChange = (newVisibilityState: Record<string, boolean>) => {
     setVisibleCategoryIds(newVisibilityState);
   };
 
+  // Handle search (placeholder)
   const handleSearch = (query: string) => {
-    // Placeholder for future search implementation
     Logger.debug("misc", `Search triggered with query: ${query}`);
   };
 
-  // Handler for heatmap CATEGORY clicks (fetch items)
+  // Handler for heatmap category clicks
   const handleHeatmapCategoryClick = async (slug: string) => {
     if (activeHeatmapCategorySlug === slug) {
       setActiveHeatmapCategorySlug(null); // Toggle off
@@ -457,43 +277,90 @@ function MapScene() {
     }
   };
 
-  // Update heatmap item click handler
-  const handleHeatmapItemClick = (itemId: string) => {
+  // Handle heatmap item selection
+  const handleHeatmapItemClick = useCallback((itemId: string) => {
     Logger.info("misc", `Heatmap item clicked: ${itemId || 'none'} (current: ${currentHeatmapItemId || 'none'})`);
     
-    // Toggle behavior: if clicking the same item or sending empty string, clear the selection
+    // Toggle behavior: if clicking the same item, clear selection
     if (currentHeatmapItemId === itemId || itemId === "") {
-      // Clear selection
-      setHeatmapData(null);
-      setCurrentHeatmapItemId(null);
+      clearHeatmap();
       Logger.debug("misc", "Clearing heatmap selection");
     } else {
-      // New selection - fetch data
-      void fetchHeatmapData(itemId);
+      // Always update the current item ID in MapStore for UI state
+      MapStore.setCurrentHeatmapItemId(itemId);
+      
+      // Only fetch if we have the view state
+      if (viewStateRef.current) {
+        // Fetch new heatmap data using the hook - don't update store to prevent re-renders
+        fetchHeatmapData({
+          mapId,
+          itemId,
+          viewState: viewStateRef.current,
+          map: mapRef.current,
+          heatmapLayer: heatmapLayerRef.current,
+          heatmapSource: heatmapSourceRef.current,
+          updateStore: false // Prevent store updates that might trigger React re-renders
+        });
+      } else {
+        Logger.warn("misc", new Error("Cannot fetch heatmap data: view state not initialized"));
+      }
     }
-  };
+  }, [clearHeatmap, currentHeatmapItemId, fetchHeatmapData, heatmapLayerRef, heatmapSourceRef, mapId, mapRef]);
 
+  // Combine heatmap error with component error
+  useEffect(() => {
+    if (heatmapError && !error) {
+      setError(heatmapError);
+    }
+  }, [heatmapError, error]);
+
+  // Memoize props for EthyrialMapFull to prevent unnecessary rerenders
+  const mapProps = useMemo(() => ({
+    mapId,
+    mapData,
+    allMarkers,
+    visibleCategoryIds,
+    labelCategoryIds,
+    // Use proper type conversion for MapStore.heatmapData to meet component expectations
+    heatmapData: MapStore.heatmapData ? {
+      points: MapStore.heatmapData.points.map(point => ({
+        x: point[0],
+        y: point[1],
+        weight: point[2],
+        count: 1,
+        cellSize: 10 // Default cell size, since it's not available in the stored data
+      }))
+    } : null,
+    onMapReady: handleMapReady,
+    onViewChange: handleViewChange,
+    onHeatmapLayersReady: handleHeatmapLayersReady
+  }), [
+    mapId, 
+    mapData, 
+    allMarkers, 
+    visibleCategoryIds, 
+    labelCategoryIds,
+    // Add MapStore.heatmapData to dependencies
+    MapStore.heatmapData,
+    handleMapReady, 
+    handleViewChange,
+    handleHeatmapLayersReady
+  ]);
+
+  // Error handling
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
 
+  // Loading state
   if (isLoading || !mapData) {
-    return <LoadingIndicatorBar />; // Use Outline's loading indicator
+    return <LoadingIndicatorBar />;
   }
 
   return (
     <MapSceneContainer className="font-asul">
       <DndProvider backend={HTML5Backend}>
-        <EthyrialMapFull
-          mapId={mapId}
-          mapData={mapData}
-          allMarkers={allMarkers}
-          visibleCategoryIds={visibleCategoryIds}
-          labelCategoryIds={labelCategoryIds}
-          heatmapData={heatmapData} // Pass heatmap data
-          onMapReady={handleMapReady} // Pass callback
-          onViewChange={handleViewChange} // Pass callback
-        />
+        <EthyrialMapFull {...mapProps} />
         <MapOverlayPanel
           labelCategories={labelCategories}
           markerCategories={markerCategories}
@@ -501,19 +368,20 @@ function MapScene() {
           onVisibilityChange={handleVisibilityChange}
           onSearch={handleSearch}
         />
-        {/* Add loading indicator specifically for heatmap */}
         {isLoadingHeatmap && <LoadingIndicatorBar />}
         <HeatmapOverlayPanel
           categories={heatmapCategories}
           itemsByCategory={heatmapItems}
           activeCategorySlug={activeHeatmapCategorySlug}
           isLoadingItems={isLoadingHeatmapItems}
+          isLoadingHeatmap={isLoadingHeatmap}
           onCategoryClick={handleHeatmapCategoryClick}
           onItemClick={handleHeatmapItemClick}
           selectedItemId={currentHeatmapItemId}
         />
         <CoordinateOverlay mapInstance={mapState} />
         <GlobalCustomDragLayer />
+        <ToastOverlay />
       </DndProvider>
     </MapSceneContainer>
   );

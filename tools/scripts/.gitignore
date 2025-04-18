@@ -7,3 +7,4 @@
 !scrape*.json
 !terrain.png
 !background.png
+*.md

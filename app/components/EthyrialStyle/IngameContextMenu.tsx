@@ -1,3 +1,5 @@
+import "react-toastify/dist/ReactToastify.css"; // Add direct import of toast styles
+
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   useFloating,
@@ -13,7 +15,10 @@ import styled from 'styled-components';
 import { cn } from '~/utils/twMerge';
 import IngameBorderedDiv from './IngameBorderedDiv';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faShare, faTimes, faPlus, faCheck, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faShare, faTimes, faPlus, faCheck, faCopy, faUndoAlt } from '@fortawesome/free-solid-svg-icons';
+import { resetAllOverlayPositions } from '../MapOverlays/OverlayRegistry';
+import ContextMenuRegistry, { ContextMenuItem } from './ContextMenuRegistry';
+import { showSuccessToast, showErrorToast } from '~/utils/toastUtils';
 
 interface IngameContextMenuProps {
   coordX?: number;
@@ -96,6 +101,13 @@ const MenuItem = styled.button`
   }
 `;
 
+// Divider for menu sections
+const MenuDivider = styled.div`
+  height: 1px;
+  background-color: #2c2824;
+  margin: 4px 0;
+`;
+
 // Adjust the close button container's padding
 const CloseButtonContainer = styled.div`
   display: flex;
@@ -138,26 +150,6 @@ const CloseButton = styled.button`
   }
 `;
 
-// Add notification component - Improve its visibility
-const CopyNotification = styled.div<{ show: boolean }>`
-  position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #38322c;
-  border: 1px solid #ffd5ae;
-  color: #ffd5ae;
-  padding: 8px 12px;
-  border-radius: 3px;
-  font-size: 14px;
-  opacity: ${props => props.show ? 1 : 0};
-  transition: opacity 0.3s;
-  pointer-events: none;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  z-index: 1001;
-`;
-
 // Menu item component
 const MenuItemComponent: React.FC<MenuItemProps> = ({ icon, label, disabled = false, onClick, className }) => {
   return (
@@ -171,12 +163,55 @@ const MenuItemComponent: React.FC<MenuItemProps> = ({ icon, label, disabled = fa
 };
 
 /**
+ * Initialize default context menu items
+ */
+const initializeDefaultMenuItems = () => {
+  // Register "Copy XYZ" menu item
+  ContextMenuRegistry.registerItem({
+    id: 'copy-xyz',
+    label: 'Copy XYZ',
+    icon: faCopy,
+    group: 1,
+    order: 10,
+    onClick: () => {}, // Will be overridden in the component
+    closeOnClick: false // Don't close when copying coordinates
+  });
+
+  // Register "Reset UI positions" menu item
+  ContextMenuRegistry.registerItem({
+    id: 'reset-ui-positions',
+    label: 'Reset UI positions',
+    icon: faUndoAlt,
+    group: 2,
+    order: 10,
+    onClick: () => {
+      resetAllOverlayPositions();
+    },
+    closeOnClick: true // Close the menu when resetting UI positions
+  });
+
+  // Register "Add marker" menu item (disabled)
+  ContextMenuRegistry.registerItem({
+    id: 'add-marker',
+    label: 'Add marker',
+    icon: faMapMarkerAlt,
+    group: 1,
+    order: 5,
+    onClick: () => {},
+    disabled: true,
+    closeOnClick: true
+  });
+};
+
+// Initialize default items
+initializeDefaultMenuItems();
+
+/**
  * IngameContextMenu component that displays a styled context menu at the current cursor position
  */
 const IngameContextMenu: React.FC<IngameContextMenuProps> = ({ coordX, coordY, coordZ, position, onClose }) => {
-  // State to track if coordinates were copied
+  // State to track if coordinates were copied (for icon display)
   const [copied, setCopied] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
   
   // Fix dismiss to properly handle outside clicks and Escape key
   const { refs, floatingStyles, context } = useFloating({
@@ -229,50 +264,67 @@ const IngameContextMenu: React.FC<IngameContextMenuProps> = ({ coordX, coordY, c
   // Get props from interactions
   const { getFloatingProps } = useInteractions([dismiss]);
 
-  // Handle copy to clipboard with improved feedback
+  // Handle copy to clipboard with toast notifications
   const handleCopyCoords = () => {
     if (coordX === undefined || coordY === undefined) {
       console.error('Cannot copy coordinates: coordinates are undefined');
+      showErrorToast('Failed to copy coordinates: Invalid position');
       return;
     }
     
     // Create a formatted string of coordinates
     const coords = `${coordX}, ${coordY}${coordZ !== undefined ? `, ${coordZ}` : ''}`;
     
-    try {
-      // For broader browser support, try multiple clipboard methods
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(coords)
-          .then(() => {
-            setCopied(true);
-            setShowNotification(true);
-            
-            // Reset states after delays
-            setTimeout(() => {
-              setCopied(false);
-            }, 2000);
-            
-            setTimeout(() => {
-              setShowNotification(false);
-            }, 1800);
-            
-            console.log(`Coordinates copied to clipboard: ${coords}`);
-          })
-          .catch(err => {
-            console.error('Clipboard API failed:', err);
-            fallbackCopyToClipboard(coords);
+    // Debug toast
+    console.log('[TOAST_DEBUG] Attempting to show toast notification for coordinates:', coords);
+    
+    // Try the modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(coords)
+        .then(() => {
+          setCopied(true);
+          console.log('[TOAST_DEBUG] Clipboard API successful, showing success toast');
+          showSuccessToast(`Coordinates copied: ${coords}`, { 
+            autoClose: 3000,
+            icon: <FontAwesomeIcon icon={faCopy} />
           });
-      } else {
-        fallbackCopyToClipboard(coords);
-      }
-    } catch (err) {
-      console.error('Failed to copy coordinates:', err);
+          
+          // Reset the icon after a delay
+          setTimeout(() => {
+            setCopied(false);
+          }, 2500);
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          console.log('[TOAST_DEBUG] Clipboard API failed, showing error toast');
+          showErrorToast('Failed to copy coordinates to clipboard');
+          
+          // Fall back to alternative method
+          fallbackCopyToClipboard(coords);
+        });
+    } else {
+      // Use fallback for browsers without clipboard API
+      fallbackCopyToClipboard(coords);
     }
   };
 
-  // Add a fallback method for copying to clipboard
+  // Handle reset UI with close menu
+  const handleItemClick = (item: ContextMenuItem) => {
+    // Call the item's onClick handler with coordinates
+    item.onClick({
+      x: coordX || 0,
+      y: coordY || 0,
+      z: coordZ
+    });
+    
+    // Close the menu if this item is configured to do so
+    if (item.closeOnClick) {
+      closeMenu();
+    }
+  };
+
+  // Handle default fallback copy method
   const fallbackCopyToClipboard = (text: string) => {
-    // Create temporary element
     const textArea = document.createElement('textarea');
     textArea.value = text;
     
@@ -281,62 +333,52 @@ const IngameContextMenu: React.FC<IngameContextMenuProps> = ({ coordX, coordY, c
     textArea.style.left = '-999999px';
     textArea.style.top = '-999999px';
     document.body.appendChild(textArea);
-    
-    // Select and copy
     textArea.focus();
     textArea.select();
     
-    let success = false;
     try {
-      success = document.execCommand('copy');
-      if (success) {
+      const successful = document.execCommand('copy');
+      if (successful) {
         setCopied(true);
-        setShowNotification(true);
+        showSuccessToast(`Coordinates copied: ${text}`, { 
+          autoClose: 3000,
+          icon: <FontAwesomeIcon icon={faCopy} />
+        });
         
-        // Reset states after delays
+        // Reset the icon after a delay
         setTimeout(() => {
           setCopied(false);
-        }, 2000);
-        
-        setTimeout(() => {
-          setShowNotification(false);
-        }, 1800);
-        
-        console.log(`Coordinates copied to clipboard using fallback: ${text}`);
+        }, 2500);
+      } else {
+        showErrorToast('Copy failed. Please try again.');
       }
     } catch (err) {
-      console.error('Fallback clipboard copy failed:', err);
+      console.error('Fallback: Oops, unable to copy', err);
+      showErrorToast('Copy failed. Please try again.');
     }
     
-    // Cleanup
     document.body.removeChild(textArea);
   };
-
-  // Apply the position directly to avoid type errors
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-
-  // Calculate effective menu width and height (estimate)
-  const menuWidth = 200;
-  const menuHeight = 150;
-
-  // Adjust position to keep menu within viewport
-  let adjustedX = position.x;
-  let adjustedY = position.y;
-
-  // Check if menu would extend beyond right edge
-  if (position.x + menuWidth > viewportWidth) {
-    adjustedX = position.x - menuWidth;
+  
+  // Get all registry items organized by groups
+  const menuItems = ContextMenuRegistry.getItems();
+  const menuGroups = ContextMenuRegistry.getGroups();
+  
+  // Adjust position to avoid edge overflow
+  const viewport = {
+    width: window.innerWidth,
+    height: window.innerHeight
+  };
+  
+  const adjustedX = Math.min(position.x, viewport.width - 250);
+  const adjustedY = Math.min(position.y, viewport.height - 300);
+  
+  // Override the copy XYZ action with our handler
+  const copyItem = menuItems.find(item => item.id === 'copy-xyz');
+  if (copyItem) {
+    copyItem.onClick = handleCopyCoords;
+    copyItem.icon = copied ? faCheck : faCopy;
   }
-
-  // Check if menu would extend beyond bottom edge
-  if (position.y + menuHeight > viewportHeight) {
-    adjustedY = position.y - menuHeight;
-  }
-
-  // Make sure we don't position outside the left or top edge
-  adjustedX = Math.max(5, adjustedX);
-  adjustedY = Math.max(5, adjustedY);
 
   return (
     <FloatingPortal>
@@ -353,6 +395,7 @@ const IngameContextMenu: React.FC<IngameContextMenuProps> = ({ coordX, coordY, c
         <MenuContainer>
           <IngameBorderedDiv 
             noPadding={true} 
+            noBorder={false}
             className="context-menu-bordered-div"
             style={{ 
               overflow: 'hidden',
@@ -361,34 +404,43 @@ const IngameContextMenu: React.FC<IngameContextMenuProps> = ({ coordX, coordY, c
           >
             <MenuInnerContainer>
               <div style={{ position: 'relative', overflow: 'hidden' }}>
-                {/* Copy notification */}
-                <CopyNotification show={showNotification}>
-                  Coordinates copied to clipboard!
-                </CopyNotification>
-                
                 {/* Menu Title */}
                 <MenuTitle>Map Actions</MenuTitle>
                 
-                {/* Menu Items */}
-                <MenuItemComponent
-                  icon={<FontAwesomeIcon icon={faMapMarkerAlt} />}
-                  label="Add marker"
-                  disabled={true}
-                />
-                
-                <MenuItemComponent
-                  icon={<FontAwesomeIcon icon={copied ? faCheck : faCopy} />}
-                  label="Copy XYZ"
-                  onClick={handleCopyCoords}
-                />
+                {/* Dynamic Menu Items by Group */}
+                {menuGroups.map((group, groupIndex) => {
+                  const groupItems = ContextMenuRegistry.getItemsByGroup(group.id);
+                  if (groupItems.length === 0) return null;
+                  
+                  return (
+                    <React.Fragment key={`group-${group.id}`}>
+                      {/* Add divider between groups (except before the first group) */}
+                      {groupIndex > 0 && <MenuDivider />}
+                      
+                      {/* Render items in this group */}
+                      {groupItems.map(item => (
+                        <MenuItemComponent
+                          key={item.id}
+                          icon={<FontAwesomeIcon icon={item.icon} />}
+                          label={item.label}
+                          disabled={item.disabled}
+                          onClick={() => handleItemClick(item)}
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </MenuInnerContainer>
           </IngameBorderedDiv>
+          
           {/* Render close button outside of IngameBorderedDiv for seamless integration */}
-          <CloseButton onClick={closeMenu}>
-            <FontAwesomeIcon icon={faTimes} className="mr-1" />
-            Close
-          </CloseButton>
+          <CloseButtonContainer>
+            <CloseButton onClick={closeMenu}>
+              <FontAwesomeIcon icon={faTimes} size="sm" className="mr-1" />
+              <span>Close</span>
+            </CloseButton>
+          </CloseButtonContainer>
         </MenuContainer>
       </div>
     </FloatingPortal>

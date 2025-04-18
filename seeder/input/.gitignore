@@ -1,5 +1,8 @@
 cleaned_doodad.json
 cleaned_npcs.json
 doodad.json
+doodad_fixed.json
+doodad_stream.json
 monsters.json
 npcs.json
+*.bak

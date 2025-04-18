@@ -15,12 +15,13 @@ const IngameBorderedDiv = forwardRef<HTMLDivElement, GameHUDProps>(
       <div
         ref={ref}
         style={style}
-        className={[
+        className={cn(
           "select-none max-h-[80vh]",
           "bg-[#38322c]",
+          !noBorder && "p-[9px]",
           "rounded-sm",
           className
-        ].filter(Boolean).join(' ')}
+        )}
       >
         <div 
           className={cn(
