@@ -1,9 +1,11 @@
 import fs from "fs/promises";
 import path from "path";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import mime from "mime-types";
 import env from "@server/env";
 import Logger from "@server/logging/Logger";
+import { createWriteStream } from "fs";
+import { pipeline } from "stream/promises";
 
 // Reusable S3 client instance
 const s3Client = new S3Client({
@@ -42,11 +44,62 @@ export async function uploadFileToS3(
     });
 
     await s3Client.send(command);
-    // Logger.debug("s3Utils", `Uploaded ${fileName} to ${s3Bucket}/${s3Key}`); // Optional: more detailed logging
+    // Logger.debug("utils", `Uploaded ${fileName} to ${s3Bucket}/${s3Key}`); // Optional: more detailed logging
     return true;
   } catch (error) {
     Logger.error(
       `Failed to upload ${fileName} to ${s3Bucket}/${s3Key}`,
+      error as Error
+    );
+    return false;
+  }
+}
+
+/**
+ * Downloads a single file from S3.
+ * @param s3Bucket - The source S3 bucket name.
+ * @param s3Key - The full path (key) for the object in S3.
+ * @param localFilePath - The local path where the file should be saved.
+ * @returns True if download was successful, false otherwise.
+ */
+export async function downloadFileFromS3(
+  s3Bucket: string,
+  s3Key: string,
+  localFilePath: string
+): Promise<boolean> {
+  try {
+    // Ensure the directory exists
+    const dirPath = path.dirname(localFilePath);
+    await fs.mkdir(dirPath, { recursive: true });
+
+    // Create a command to get the object from S3
+    const command = new GetObjectCommand({
+      Bucket: s3Bucket,
+      Key: s3Key,
+    });
+
+    // Execute the command and get the response
+    const response = await s3Client.send(command);
+    
+    if (!response.Body) {
+      throw new Error(`No response body for S3 key: ${s3Key}`);
+    }
+
+    // Create a write stream to the local file
+    const writeStream = createWriteStream(localFilePath);
+    
+    // Use pipeline to safely pipe the data from S3 to the local file
+    await pipeline(
+      response.Body as NodeJS.ReadableStream,
+      writeStream
+    );
+
+    const fileName = path.basename(localFilePath);
+    Logger.info("utils", `Downloaded ${s3Key} from ${s3Bucket} to ${localFilePath}`);
+    return true;
+  } catch (error) {
+    Logger.error(
+      `Failed to download ${s3Key} from ${s3Bucket}`,
       error as Error
     );
     return false;

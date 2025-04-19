@@ -77,6 +77,36 @@ Environment variables for Redis connection
   value: {{ .Values.env.REDIS_URL | default (printf "redis://%s/0" .Values.redis.master.service.name) | quote }}
 {{- end }}
 
+{{/*
+Environment variables for OpenSearch connection
+*/}}
+{{- define "outline.opensearchEnv" -}}
+{{- if .Values.opensearch.enabled }}
+- name: OPENSEARCH_URL
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "outline.fullname" . }}
+      key: OPENSEARCH_URL
+- name: OPENSEARCH_SSL_VERIFY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "outline.fullname" . }}
+      key: OPENSEARCH_SSL_VERIFY
+{{- if .Values.opensearch.auth.enabled }}
+- name: OPENSEARCH_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "outline.fullname" . }}-opensearch
+      key: username
+- name: OPENSEARCH_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "outline.fullname" . }}-opensearch
+      key: admin-password
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{/* Generate environment variables from existing secrets */}}
 {{- define "outline.secretEnv" -}}
 {{- if .Values.existingSecrets -}}
@@ -134,6 +164,28 @@ Environment variables for Redis connection
     secretKeyRef:
       name: {{ .Values.existingSecrets.notion }}
       key: NOTION_CLIENT_SECRET
+{{- end }}
+{{- if .Values.existingSecrets.opensearch }}
+- name: OPENSEARCH_URL
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.opensearch }}
+      key: OPENSEARCH_URL
+- name: OPENSEARCH_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.opensearch }}
+      key: OPENSEARCH_USERNAME
+- name: OPENSEARCH_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.opensearch }}
+      key: OPENSEARCH_PASSWORD
+- name: OPENSEARCH_SSL_VERIFY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.existingSecrets.opensearch }}
+      key: OPENSEARCH_SSL_VERIFY
 {{- end }}
 {{- end }}
 {{- end -}} 

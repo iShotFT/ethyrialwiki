@@ -1,39 +1,35 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Style } from 'ol/style';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { FeatureLike } from 'ol/Feature';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import Logger from '~/utils/Logger';
 import { useMapContext } from '../Context/MapContext';
 import { LAYER_Z_INDEXES } from './LayerManager';
-import { createLetterMarkerStyleFunction, createLabelStyleBase } from '~/utils/markerStyleUtils';
+import { useMarkerStyleContext } from '~/components/MarkerStyleContext';
 
 interface MarkerLayerProps {
   visible?: boolean;
-  categoryIconMap?: Record<string, IconDefinition>; // Optional now, as we're using letters
   labelCategoryIds?: Set<string>;
   onLayerReady?: (layer: VectorLayer<VectorSource>, source: VectorSource) => void;
 }
 
 /**
- * Vector layer component for map markers with Ethyrial styling
- * Uses letter-based markers instead of icons for guaranteed visibility
+ * Vector layer component for map markers with standard OpenLayers styling
  */
-const MarkerLayer: React.FC<MarkerLayerProps> = ({
+const MarkerLayer = forwardRef<any, MarkerLayerProps>(({
   visible = true,
-  categoryIconMap = {}, // Not used with letter markers, but kept for compatibility
   labelCategoryIds = new Set<string>(),
   onLayerReady,
-}) => {
+}, ref) => {
   const { map, setMarkerLayer, setMarkerSource } = useMapContext();
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null);
   const sourceRef = useRef<VectorSource | null>(null);
-  const [iconStyleCache] = useState<Record<string, Style>>({});
-  const labelStyleBaseRef = useRef<Style>(createLabelStyleBase());
+  // Use shared marker styles
+  const { getMarkerStyle } = useMarkerStyleContext();
   
   console.log('[LAYER DEBUG] MarkerLayer initializing', {
     visible,
@@ -58,13 +54,7 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
       Logger.debug('misc', '[MarkerLayer] Created new vector source');
     }
     
-    // Create style function for markers using letters instead of icons
-    const getMarkerStyle = createLetterMarkerStyleFunction(
-      iconStyleCache,
-      labelStyleBaseRef.current
-    );
-    
-    console.log('[LAYER DEBUG] Created marker style function with labelCategoryIds:', 
+    console.log('[LAYER DEBUG] Using shared marker style function with labelCategoryIds:', 
                Array.from(labelCategoryIds).join(', '));
     
     // Create vector layer for markers
@@ -86,7 +76,7 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
     
     // Add the layer to the map
     map.addLayer(layerRef.current);
-    Logger.debug('misc', '[MarkerLayer] Added letter-based marker layer to map');
+    Logger.debug('misc', '[MarkerLayer] Added standard marker layer to map');
     console.log('[LAYER DEBUG] Marker layer added to map with zIndex:', LAYER_Z_INDEXES.MARKERS);
     
     // Update context with layer and source references
@@ -111,7 +101,7 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
         console.log('[LAYER DEBUG] Marker layer removed during cleanup');
       }
     };
-  }, [map, visible, categoryIconMap, setMarkerLayer, setMarkerSource, onLayerReady, iconStyleCache, labelCategoryIds]);
+  }, [map, visible, setMarkerLayer, setMarkerSource, onLayerReady, getMarkerStyle, labelCategoryIds]);
   
   // Update when label categories change
   useEffect(() => {
@@ -119,10 +109,6 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
       console.log('[LAYER DEBUG] Updating styles due to label category changes');
       // Force redraw by setting a new style function with updated labelCategoryIds
       layerRef.current.setStyle((feature: FeatureLike) => {
-        const getMarkerStyle = createLetterMarkerStyleFunction(
-          iconStyleCache,
-          labelStyleBaseRef.current
-        );
         return getMarkerStyle(feature, labelCategoryIds);
       });
       
@@ -133,7 +119,7 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
       layerRef.current.changed();
       console.log('[LAYER DEBUG] Layer visibility set to', visible, 'and redraw triggered');
     }
-  }, [labelCategoryIds, visible, categoryIconMap, iconStyleCache]);
+  }, [labelCategoryIds, visible, getMarkerStyle]);
   
   // Update markers with current zoom level
   useEffect(() => {
@@ -201,7 +187,6 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
         
         try {
           // Ensure we're using the correct category format
-          // Force uppercase consistently for all category references
           const normalizedCategoryId = (marker.categoryId || '').toUpperCase();
           
           // Using direct console.log for easier debugging
@@ -212,16 +197,18 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
             id: marker.id,
             title: marker.title || '',
             description: marker.description || '',
-            // Store category information consistently - all UPPERCASE
             categoryId: normalizedCategoryId,
-            categoryName: normalizedCategoryId, // Add explicit categoryName field
-            category: normalizedCategoryId,     // Add explicit category field 
-            _categoryTitle: normalizedCategoryId, // Ensure _categoryTitle is also normalized
+            categoryName: normalizedCategoryId,
+            category: normalizedCategoryId,
+            _categoryTitle: normalizedCategoryId,
             iconId: marker.iconId || '',
             _mapZoom: zoom,
           });
           
           feature.setId(marker.id);
+          
+          // Use the getMarkerStyle from context instead of the local style function
+          feature.setStyle((feature) => getMarkerStyle(feature, labelCategoryIds));
           
           return feature;
         } catch (error) {
@@ -250,31 +237,24 @@ const MarkerLayer: React.FC<MarkerLayerProps> = ({
    */
   const clearMarkers = () => {
     if (sourceRef.current) {
-      console.log('[LAYER DEBUG] Clearing all markers from source');
       sourceRef.current.clear();
-      
-      // Force redraw
-      if (layerRef.current) {
-        layerRef.current.changed();
-        console.log('[LAYER DEBUG] Forced layer redraw after clearing markers');
-      }
+      console.log('[LAYER DEBUG] Cleared all markers from layer');
     }
   };
   
-  // Expose methods via React ref pattern
-  React.useImperativeHandle(
-    React.createRef(),
+  // Expose methods to parent component
+  useImperativeHandle(
+    ref,
     () => ({
       addMarkers,
       clearMarkers,
       getSource: () => sourceRef.current,
       getLayer: () => layerRef.current,
     }),
-    [sourceRef, layerRef]
+    [sourceRef.current, layerRef.current]
   );
   
-  // This is a logical component, it doesn't render anything
   return null;
-};
+});
 
 export default MarkerLayer; 

@@ -1,10 +1,3 @@
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import {
-  faChessRook, faCity, faCrosshairs, faDragon, faGem, faLeaf, faMapMarkerAlt,
-  faPaw, faQuestionCircle, faScroll, faSkullCrossbones, faStreetView, faTree, faUniversity,
-} from "@fortawesome/free-solid-svg-icons";
-import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
-import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import type { Map as OlMap } from "ol";
 import Feature from "ol/Feature";
 import Map from "ol/Map";
@@ -19,21 +12,20 @@ import VectorLayer from "ol/layer/Vector";
 import Projection from "ol/proj/Projection";
 import TileImage from "ol/source/TileImage";
 import VectorSource from "ol/source/Vector";
-import { Style, Icon } from "ol/style";
+import { Style, Circle } from "ol/style";
 import TileGrid from "ol/tilegrid/TileGrid";
 import * as React from "react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import styled from "styled-components";
-import { v5 as uuidv5 } from "uuid";
 import Logger from "~/utils/Logger";
 import { getHeatmapParams } from "../utils/heatmapUtils";
 import { parseMapHash, updateMapHashWithZ, encodeResource } from "../utils/mapUtils";
-import { createLabelStyleBase, createMarkerStyleFunction } from "../utils/markerStyleUtils";
+import { createLabelStyleBase, createStandardMarkerStyleFunction } from "../utils/markerStyleUtils";
 import IngameContextMenu, { useContextMenu } from './EthyrialStyle/IngameContextMenu';
 import { ZLayerOverlay } from './MapOverlays';
-
-// NAMESPACE for category UUIDs
-const NAMESPACE_UUID = "f5d7a4e8-6a3b-4e6f-8a4c-7f3d7a1b9e0f";
+import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
+import type { AggregatedPoint } from "@server/utils/PointAggregator";
+import { useMarkerStyleContext } from './MarkerStyleContext';
 
 // Core data types
 interface ApiMarkerData {
@@ -77,54 +69,6 @@ const MapContainer = styled.div`
   isolation: isolate;
 `;
 
-// Category icon mapping
-const categoryIconMap: Record<string, IconDefinition> = {
-  [uuidv5("ORE", NAMESPACE_UUID)]: faGem,
-  [uuidv5("HERB", NAMESPACE_UUID)]: faLeaf,
-  [uuidv5("SKIN", NAMESPACE_UUID)]: faPaw,
-  [uuidv5("TREE", NAMESPACE_UUID)]: faTree,
-  [uuidv5("CLOTH", NAMESPACE_UUID)]: faScroll,
-  [uuidv5("ENEMY", NAMESPACE_UUID)]: faSkullCrossbones,
-  [uuidv5("POI", NAMESPACE_UUID)]: faMapMarkerAlt,
-  [uuidv5("NPC", NAMESPACE_UUID)]: faCrosshairs,
-  [uuidv5("TOWN", NAMESPACE_UUID)]: faCity,
-  [uuidv5("DUNGEON", NAMESPACE_UUID)]: faChessRook,
-  [uuidv5("BANK", NAMESPACE_UUID)]: faUniversity,
-  [uuidv5("TELEPORT", NAMESPACE_UUID)]: faStreetView,
-  [uuidv5("DAILY_QUEST", NAMESPACE_UUID)]: faScroll,
-  [uuidv5("RAID", NAMESPACE_UUID)]: faDragon,
-  [uuidv5("WORLD_BOSS", NAMESPACE_UUID)]: faDragon,
-  [uuidv5("OTHER", NAMESPACE_UUID)]: faQuestionCircle,
-};
-
-const iconStyleCache: Record<string, Style> = {};
-const labelStyleBase = createLabelStyleBase();
-const getMarkerStyle = (feature: any, labelCategoryIds: Set<string>) => {
-  console.log('[OPENLAYERS DEBUG] getMarkerStyle called for feature:', {
-    categoryId: feature.get('categoryId'),
-    id: feature.get('id'),
-    isLabel: labelCategoryIds.has(feature.get('categoryId')),
-  });
-  
-  // Call the original style function
-  const style = createMarkerStyleFunction(iconStyleCache, categoryIconMap, labelStyleBase)(feature, labelCategoryIds);
-  
-  // Log style information
-  if (style && style.getImage()) {
-    console.log('[OPENLAYERS DEBUG] Style created with icon:', {
-      hasIcon: !!style.getImage(),
-      src: style.getImage() instanceof Icon ? (style.getImage() as Icon).getSrc() : 'No src'
-    });
-  } else if (style && style.getText()) {
-    console.log('[OPENLAYERS DEBUG] Style created with text:', {
-      text: style.getText()?.getText(),
-      font: style.getText()?.getFont()
-    });
-  }
-  
-  return style;
-};
-
 const getLayerIdentifier = (layer: any): string => {
   if (layer.get && typeof layer.get === 'function') {
     const layerType = layer.get('layerType');
@@ -150,6 +94,9 @@ const EthyrialMapFull: React.FC<Props> = ({
   onResourceSelect,
   onHeatmapLayersReady,
 }) => {
+  // Get marker styling from context
+  const { getMarkerStyle } = useMarkerStyleContext();
+
   // Debug logging for props
   useEffect(() => {
     if (heatmapData) {
@@ -358,7 +305,7 @@ const EthyrialMapFull: React.FC<Props> = ({
         }
       });
 
-      // Create marker layer
+      // Create marker layer with shared style function
       const markerLayer = new VectorLayer({
         source: vectorSourceRef.current,
         style: (feature) => getMarkerStyle(feature, labelCategoryIds),
@@ -657,7 +604,7 @@ const EthyrialMapFull: React.FC<Props> = ({
       heatmapInitializedRef.current = false;
       Logger.info("misc", "OpenLayers map disposed");
     };
-  }, [mapId, labelCategoryIds, onMapReady, onViewChange, onResourceSelect, selectedResourceId, currentZLayer, updateUrlWithResource, onHeatmapLayersReady]);
+  }, [mapId, labelCategoryIds, onMapReady, onViewChange, onResourceSelect, selectedResourceId, currentZLayer, updateUrlWithResource, onHeatmapLayersReady, getMarkerStyle]);
 
   // Marker update effect
   useEffect(() => {

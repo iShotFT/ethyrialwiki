@@ -54,6 +54,9 @@ spec:
               # Try service DNS names with retry logic
               POSTGRES_HOST="{{ include "outline.fullname" . }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
               REDIS_HOST="{{ include "outline.fullname" . }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+              {{- if .Values.opensearch.enabled }}
+              OPENSEARCH_HOST="{{ include "outline.fullname" . }}-opensearch.{{ .Release.Namespace }}.svc.cluster.local"
+              {{- end }}
               
               echo "Checking DNS resolution for $POSTGRES_HOST..."
               for i in $(seq 1 30); do
@@ -83,6 +86,22 @@ spec:
                 fi
               done
               
+              {{- if .Values.opensearch.enabled }}
+              echo "Checking DNS resolution for $OPENSEARCH_HOST..."
+              for i in $(seq 1 30); do
+                if nslookup $OPENSEARCH_HOST > /dev/null 2>&1; then
+                  echo "DNS resolution successful for OpenSearch"
+                  break
+                fi
+                echo "Attempt $i: DNS resolution failed for OpenSearch, retrying in 2s..."
+                sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: DNS resolution still failing for OpenSearch after 30 attempts"
+                  # Continue anyway, we'll check connectivity directly
+                fi
+              done
+              {{- end }}
+              
               # Try connection to PostgreSQL
               echo "Checking connection to PostgreSQL..."
               for i in $(seq 1 30); do
@@ -110,6 +129,22 @@ spec:
                   echo "WARNING: Redis still not accessible after 30 attempts"
                 fi
               done
+              
+              {{- if .Values.opensearch.enabled }}
+              # Try connection to OpenSearch
+              echo "Checking connection to OpenSearch..."
+              for i in $(seq 1 30); do
+                if nc -z -w 2 $OPENSEARCH_HOST 9200; then
+                  echo "OpenSearch is accessible!"
+                  break
+                fi
+                echo "Attempt $i: OpenSearch not accessible, retrying in 2s..."
+                sleep 2
+                if [ $i -eq 30 ]; then
+                  echo "WARNING: OpenSearch still not accessible after 30 attempts"
+                fi
+              done
+              {{- end }}
               
               echo "Dependency check completed, proceeding with startup"
       containers:
@@ -139,6 +174,9 @@ spec:
           {{- if and .Values.services.collaboration (not .Values.env.COLLABORATION_URL) }}
             - name: COLLABORATION_URL
               value: wss://{{ .Values.ingress.host }}/collaboration
+          {{- end }}
+          {{- if .Values.opensearch.enabled }}
+          {{- include "outline.opensearchEnv" . | nindent 12 }}
           {{- end }}
           {{- range .Values.extraEnv }}
             - name: {{ .name }}

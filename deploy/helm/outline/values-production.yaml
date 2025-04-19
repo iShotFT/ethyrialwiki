@@ -41,9 +41,31 @@ storageClasses:
 
 # Authentication configuration
 auth:
+  google:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+  slack:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+  oidc:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+    authUri: ""
+    tokenUri: ""
+    userInfoUri: ""
+    usernameClaim: "email"
   discord:
     enabled: true
-    # Credentials stored in Kubernetes secret
+    clientId: ""
+    clientSecret: ""
+    serverId: ""
+  # Add Steam authentication configuration
+  steam:
+    enabled: true
+    apiKey: ""  # This will be pulled from the outline-auth secret
 
 # Disable other authentication methods
 auth.google.enabled: false
@@ -208,3 +230,57 @@ nginxProxyManager:
   enabled: false
   domains: "ethyrial.wiki"
   certificateId: 1
+
+# OpenSearch configuration for production
+opensearch:
+  enabled: true
+  replicas: 1
+  image:
+    repository: opensearchproject/opensearch
+    tag: "2.11.0"
+    pullPolicy: IfNotPresent
+  javaOpts: "-Xms1g -Xmx1g"
+  securityDisabled: "false"
+  sslVerify: "true"
+  ssl:
+    # These will be auto-generated if not provided
+    cert: ""
+    key: ""
+  auth:
+    enabled: true
+    username: "admin"
+    # adminPassword is auto-generated if not specified
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    accessMode: ReadWriteOnce
+    size: 50Gi
+  dashboards:
+    enabled: true
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 200m
+        memory: 512Mi
+    ingress:
+      enabled: true
+      className: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      host: "opensearch.ethyrial.wiki"
+      path: /
+      pathType: Prefix
+      tls:
+        enabled: true
+        secretName: "opensearch-dashboards-tls"

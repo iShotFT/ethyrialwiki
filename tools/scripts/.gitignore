@@ -8,3 +8,7 @@
 !terrain.png
 !background.png
 *.md
+!db-port-forward.sh
+!extract-db-env-debug.sh
+!extract-db-env.sh
+!setup-kubectl-windows.sh

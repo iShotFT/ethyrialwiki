@@ -82,6 +82,8 @@ When `yarn seed:all` is executed, it performs the following steps:
 - `--resources-mode <mode>`: Controls which resource seeders to run. Options: `all` (default, run both), `standard` (only run standard resources), `doodad` (only run doodad resources).
 - `--skip-custom-domains`: Skips custom domain seeding. Use this if you don't want to modify existing domain configurations.
 - `--skip-redis-flush`: Skips flushing the Redis cache. Use this if you want to preserve cached data.
+- `--skip-cs-extractor`: Skips the C# marker extractor build/run step and uses an existing `markers_markers_full_dump.json` file from the filesystem. Useful for CI/CD environments where building the C# application is problematic.
+- `--use-s3-files`: Downloads input files from S3 before seeding. Use this to get the latest input files from S3 instead of using local files.
 - `--map-title <title>`: Specifies the map title to use when seeding resources (`seedResources`), doodad resources (`seedDoodadResources`), and uploading map tiles (`seedMapTiles`). Defaults to "Irumesa".
 - `--batch-size <size>`: Sets the database operation batch size for large operations. Smaller values use less memory but may be slower. Defaults to 100.
 
@@ -90,6 +92,15 @@ When `yarn seed:all` is executed, it performs the following steps:
 ```bash
 # Run everything
 yarn seed:all
+
+# Run everything using input files from S3
+yarn seed:all:s3
+
+# Run the seeder using an existing markers JSON file (skip C# marker extractor)
+yarn seed:all:no-cs
+
+# Run the seeder using existing markers JSON file and input files from S3 (ideal for CI/CD)
+yarn seed:all:ci
 
 # Only seed custom domains (skips Python, resources, and tile upload)
 yarn seed:domains
@@ -108,6 +119,15 @@ yarn seed:all --resources-mode doodad
 
 # Seed doodad resources separately (for a specific map)
 yarn seed:game-resources --map Irumesa
+
+# Upload input files to S3
+yarn s3:seed-files --upload
+
+# Download input files from S3
+yarn s3:seed-files --download
+
+# Download just the markers file for CI/CD usage
+yarn s3:download-markers
 ```
 
 ## Logging System
@@ -212,7 +232,7 @@ The seeder populates or updates the following database tables:
 - `marker_categories` - Categories for map markers with parent-child relationships
 - `markers` - Map markers generated from the C# tool output
 - `game_resources` - Resource nodes with coordinates on the map (non-tree resources)
-- `game_resources` - Tree and other doodad resource nodes from cleaned_doodad.json
+- `game_resources` - Tree and other doodad resource nodes from doodad_fixed.json
 - `game_item_item_category` - Join table for item-category relationships
 - `custom_domains` - Subdomain routing configuration for map and app interfaces
 
@@ -248,3 +268,84 @@ The seeder is designed to be idempotent. Running it multiple times will:
 - **Create** records if they don't exist (based on deterministic UUIDs generated from slugs/names).
 - **Update** existing records with the latest data from the source files/definitions.
 - **Not** create duplicate records.
+
+## S3 File Support
+
+The seeder now supports uploading and downloading input files to/from S3. This is particularly useful for:
+
+1. **CI/CD Environments**: Enables running seeders in GitHub Actions without needing to commit large input files.
+2. **Collaborative Teams**: Share consistent input data across developers and environments.
+3. **Gitignored Files**: Easily distribute files that are gitignored (like doodad.json, monsters.json, and npcs.json).
+
+### Uploading Files to S3
+
+To upload input files to S3, use the dedicated s3-seed-files script:
+
+```bash
+# Upload all input files to S3
+yarn s3:seed-files --upload
+
+# Upload a specific file to S3
+yarn s3:seed-files --upload --file doodad_fixed.json
+```
+
+### Downloading Files from S3
+
+You can download files from S3 in two ways:
+
+1. Using the dedicated s3-seed-files script:
+   ```bash
+   # Download all input files from S3
+   yarn s3:seed-files --download
+   
+   # Download a specific file from S3
+   yarn s3:seed-files --download --file monsters.json
+   ```
+
+2. Using the `--use-s3-files` flag with any seed command:
+   ```bash
+   # Run the full seeder using files from S3
+   yarn seed:all:s3
+   
+   # Or use the flag with any other seed command
+   yarn seed:all --use-s3-files
+   ```
+
+### Required Environment Variables
+
+To use the S3 file functionality, ensure these environment variables are properly configured:
+
+```env
+AWS_S3_UPLOAD_BUCKET_NAME=your-bucket-name
+AWS_REGION=your-region
+AWS_S3_FORCE_PATH_STYLE=true
+AWS_S3_ACL=private
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+```
+
+### S3 File Locations
+
+Input files are stored in the S3 bucket with the following structure:
+
+```
+s3://your-bucket-name/
+└── seeder/
+    ├── doodad_fixed.json
+    ├── monsters.json
+    ├── npcs.json
+    └── markers_markers_full_dump.json
+```
+
+When downloaded, they will be placed in the appropriate locations in your local `seeder/input/` directory.
+
+### Marker JSON for CI/CD
+
+For CI/CD pipelines, you can skip the C# marker extractor step by using a pre-generated `markers_markers_full_dump.json` file. Use the following command to download just the markers file:
+
+```bash
+# Download just the markers JSON file from S3
+yarn s3:download-markers
+```
+
+This is especially useful when running the seeder in environments where building the C# tool might be difficult or impossible (like GitHub Actions).

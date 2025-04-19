@@ -25,3 +25,38 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: opensearch
+    environment:
+      - "discovery.type=single-node"
+      - "bootstrap.memory_lock=true" # Disable memory swapping for better performance
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Adjust heap size as needed
+      - "plugins.security.disabled=true" # Disable security for local dev (remove in production)
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+      - "9600:9600" # Performance analyzer port
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health?pretty | grep status | grep -v red"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+  
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.0
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      - "OPENSEARCH_HOSTS=http://opensearch:9200"
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true" # For local dev only
+    depends_on:
+      - opensearch

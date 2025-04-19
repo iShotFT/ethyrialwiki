@@ -67,3 +67,24 @@ kubectl get pods -n {{ .Release.Namespace }}
 
 For logs, use:
 kubectl logs -n {{ .Release.Namespace }} <pod-name> 
+
+{{- if .Values.opensearch.enabled }}
+8. OpenSearch:
+   - OpenSearch is deployed at: http://{{ include "outline.fullname" . }}-opensearch:9200
+   {{- if .Values.opensearch.dashboards.enabled }}
+   - OpenSearch Dashboards available at:
+     {{- if .Values.opensearch.dashboards.ingress.enabled }}
+     {{- if .Values.opensearch.dashboards.ingress.tls.enabled }}
+     https://{{ .Values.opensearch.dashboards.ingress.host }}
+     {{- else }}
+     http://{{ .Values.opensearch.dashboards.ingress.host }}
+     {{- end }}
+     - The dashboard is secured with basic authentication. Username: {{ or .Values.opensearch.dashboards.adminUser "admin" }}
+     {{- else }}
+     http://{{ include "outline.fullname" . }}-opensearch-dashboards:5601 (internal access only)
+     {{- end }}
+   {{- end }}
+   - Authentication: {{ if .Values.opensearch.auth.enabled }}Enabled{{ else }}Disabled{{ end }}
+   - Security Plugin: {{ if eq .Values.opensearch.securityDisabled "true" }}Disabled (for development only){{ else }}Enabled{{ end }}
+   - Dashboard Security Plugin: {{ if eq .Values.opensearch.dashboards.securityDisabled "true" }}Disabled (for development only){{ else }}Enabled{{ end }}
+{{- end }} 

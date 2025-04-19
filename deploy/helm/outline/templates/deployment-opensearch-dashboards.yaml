@@ -1,0 +1,91 @@
+{{- if and .Values.opensearch.enabled .Values.opensearch.dashboards.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "outline.fullname" . }}-opensearch-dashboards
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opensearch-dashboards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "outline.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: opensearch-dashboards
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "outline.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: opensearch-dashboards
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "outline.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-opensearch-dashboards
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.opensearch.dashboards.image.repository }}:{{ .Values.opensearch.dashboards.image.tag }}"
+          imagePullPolicy: {{ .Values.opensearch.dashboards.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5601
+              protocol: TCP
+          env:
+            - name: "OPENSEARCH_HOSTS"
+              value: {{ if eq .Values.opensearch.sslVerify "true" }}"https://{{ include "outline.fullname" . }}-opensearch:9200"{{ else }}"http://{{ include "outline.fullname" . }}-opensearch:9200"{{ end }}
+            - name: "DISABLE_SECURITY_DASHBOARDS_PLUGIN"
+              value: {{ .Values.opensearch.dashboards.securityDisabled | quote }}
+            {{- if eq .Values.opensearch.sslVerify "true" }}
+            - name: "NODE_TLS_REJECT_UNAUTHORIZED"
+              value: "0"
+            {{- end }}
+            {{- if .Values.opensearch.auth.enabled }}
+            - name: "OPENSEARCH_USERNAME"
+              value: "admin"
+            - name: "OPENSEARCH_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "outline.fullname" . }}-opensearch
+                  key: admin-password
+            {{- end }}
+            {{- with .Values.opensearch.dashboards.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.opensearch.dashboards.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /app/dashboards
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /app/dashboards
+              port: http
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }} 

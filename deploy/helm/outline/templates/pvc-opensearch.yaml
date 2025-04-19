@@ -1,0 +1,16 @@
+{{- if and .Values.opensearch.enabled .Values.opensearch.persistence.enabled (not .Values.opensearch.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "outline.fullname" . }}-opensearch
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opensearch
+spec:
+  accessModes:
+    - {{ .Values.opensearch.persistence.accessMode | quote }}
+  storageClassName: {{ .Values.opensearch.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.opensearch.persistence.size | quote }}
+{{- end }} 

@@ -1,5 +1,7 @@
+SHELL := /bin/bash
+
 up:
-	docker compose up -d redis postgres proxy
+	docker compose up -d redis postgres proxy opensearch opensearch-dashboards
 	yarn install-local-ssl
 	yarn install --pure-lockfile
 	yarn dev:watch
@@ -21,8 +23,32 @@ watch:
 	NODE_ENV=test yarn sequelize db:migrate
 	yarn test:watch
 
+treefile:
+	@echo "Generating tree file for directory: $(dir)"
+	@mkdir -p tmp
+	@bash -c 'timestamp=$$(date +%Y%m%d_%H%M%S); \
+	outfile="tmp/treefile_$${timestamp}.txt"; \
+	echo "Directory structure:" > "$$outfile"; \
+	find "$(dir)" -type f -name "*" | sort >> "$$outfile"; \
+	echo "" >> "$$outfile"; \
+	echo "File contents:" >> "$$outfile"; \
+	if [ -n "$(ext)" ]; then \
+		find "$(dir)" -type f -name "*.$(ext)" -not -path "*/node_modules/*" -not -path "*/.git/*" | sort | while read file; do \
+			echo "--- $$file ---" >> "$$outfile"; \
+			cat "$$file" >> "$$outfile"; \
+			echo "" >> "$$outfile"; \
+		done; \
+	else \
+		find "$(dir)" -type f -not -path "*/node_modules/*" -not -path "*/.git/*" | sort | while read file; do \
+			echo "--- $$file ---" >> "$$outfile"; \
+			cat "$$file" >> "$$outfile"; \
+			echo "" >> "$$outfile"; \
+		done; \
+	fi; \
+	echo "Tree file generated at $$outfile"'
+
 destroy:
 	docker compose stop
 	docker compose rm -f
 
-.PHONY: up build destroy test watch # let's go to reserve rules names
+.PHONY: up build destroy test watch treefile # let's go to reserve rules names

@@ -15,13 +15,13 @@ import {
   GlobalCustomDragLayer
 } from "~/components/MapOverlays";
 import ToastOverlay from "~/components/MapOverlays/ToastOverlay";
-import { LoadingIndicatorBar } from "~/components/LoadingIndicator";
 import { client } from "~/utils/ApiClient";
 import Logger from "~/utils/Logger";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useHeatmapData } from "~/hooks/useHeatmapData";
 import MapStore from "~/stores/MapStore";
+import { MarkerStyleProvider } from "~/components/MarkerStyleContext";
 
 // Define the AggregatedPoint type to match the server definition
 interface AggregatedPoint {
@@ -352,36 +352,32 @@ function MapScene() {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
 
-  // Loading state
-  if (isLoading || !mapData) {
-    return <LoadingIndicatorBar />;
-  }
-
   return (
     <MapSceneContainer className="font-asul">
       <DndProvider backend={HTML5Backend}>
-        <EthyrialMapFull {...mapProps} />
-        <MapOverlayPanel
-          labelCategories={labelCategories}
-          markerCategories={markerCategories}
-          visibleCategoryIds={visibleCategoryIds}
-          onVisibilityChange={handleVisibilityChange}
-          onSearch={handleSearch}
-        />
-        {isLoadingHeatmap && <LoadingIndicatorBar />}
-        <HeatmapOverlayPanel
-          categories={heatmapCategories}
-          itemsByCategory={heatmapItems}
-          activeCategorySlug={activeHeatmapCategorySlug}
-          isLoadingItems={isLoadingHeatmapItems}
-          isLoadingHeatmap={isLoadingHeatmap}
-          onCategoryClick={handleHeatmapCategoryClick}
-          onItemClick={handleHeatmapItemClick}
-          selectedItemId={currentHeatmapItemId}
-        />
-        <CoordinateOverlay mapInstance={mapState} />
-        <GlobalCustomDragLayer />
-        <ToastOverlay />
+        <MarkerStyleProvider>
+          <EthyrialMapFull {...mapProps} />
+          <MapOverlayPanel
+            labelCategories={labelCategories}
+            markerCategories={markerCategories}
+            visibleCategoryIds={visibleCategoryIds}
+            onVisibilityChange={handleVisibilityChange}
+            onSearch={handleSearch}
+          />
+          <HeatmapOverlayPanel
+            categories={heatmapCategories}
+            itemsByCategory={heatmapItems}
+            activeCategorySlug={activeHeatmapCategorySlug}
+            isLoadingItems={isLoadingHeatmapItems}
+            isLoadingHeatmap={isLoadingHeatmap}
+            onCategoryClick={handleHeatmapCategoryClick}
+            onItemClick={handleHeatmapItemClick}
+            selectedItemId={currentHeatmapItemId}
+          />
+          <CoordinateOverlay mapInstance={mapState} />
+          <GlobalCustomDragLayer />
+          <ToastOverlay />
+        </MarkerStyleProvider>
       </DndProvider>
     </MapSceneContainer>
   );

@@ -16,6 +16,8 @@ import { seedDoodadResources } from "../lib/seedDoodadResources";
 import { seedCustomDomains } from "../lib/seedCustomDomains";
 import { flushRedisCache } from "../lib/flushRedisCache";
 import { seederLogger } from "../lib/seederLogger";
+import { downloadFileFromS3 } from "../lib/s3Utils";
+import env from "@server/env";
 import fs from "fs/promises";
 
 const program = new Command();
@@ -52,6 +54,14 @@ program
   .option(
     "--skip-redis-flush",
     "Skip flushing Redis cache"
+  )
+  .option(
+    "--skip-cs-extractor",
+    "Skip C# marker extractor and use existing markers_markers_full_dump.json file"
+  )
+  .option(
+    "--use-s3-files",
+    "Download input files from S3 instead of using local files"
   )
   .option(
     "--map-title <title>",
@@ -94,6 +104,15 @@ const backgroundInputFile = path.join(INPUT_DIR, "background.png");
 const extractedTilesDir = path.join(OUTPUT_DIR, "extracted_tiles");
 const stitchedOutputDir = path.join(OUTPUT_DIR, "stitched_maps");
 
+// S3 file mapping for the three required input files
+const S3_SEEDER_PREFIX = "seeder/";
+const S3_BUCKET_NAME = env.AWS_S3_UPLOAD_BUCKET_NAME;
+const S3_INPUT_FILES = [
+  { localPath: path.join(INPUT_DIR, "doodad_fixed.json"), s3Path: S3_SEEDER_PREFIX + "doodad_fixed.json" },
+  { localPath: path.join(INPUT_DIR, "monsters.json"), s3Path: S3_SEEDER_PREFIX + "monsters.json" },
+  { localPath: path.join(INPUT_DIR, "npcs.json"), s3Path: S3_SEEDER_PREFIX + "npcs.json" },
+];
+
 async function runPythonScript(
   scriptName: string,
   args: string[]
@@ -110,6 +129,56 @@ async function runPythonScript(
     );
   }
   Logger.info("utils", `Finished Python script: ${scriptName}.`);
+}
+
+/**
+ * Downloads required input files from S3
+ */
+async function downloadInputFilesFromS3(): Promise<void> {
+  Logger.info("utils", "Downloading input files from S3...");
+  
+  if (!S3_BUCKET_NAME) {
+    throw new Error("AWS_S3_UPLOAD_BUCKET_NAME environment variable is not set");
+  }
+  
+  // Ensure input directory exists
+  await fs.mkdir(INPUT_DIR, { recursive: true });
+  
+  // Track success and failures
+  let successCount = 0;
+  let failCount = 0;
+  
+  // Download each file
+  for (const fileMap of S3_INPUT_FILES) {
+    try {
+      Logger.info("utils", `Downloading ${fileMap.s3Path} from S3...`);
+      const success = await downloadFileFromS3(
+        S3_BUCKET_NAME,
+        fileMap.s3Path,
+        fileMap.localPath
+      );
+      
+      if (success) {
+        Logger.info("utils", `Successfully downloaded ${fileMap.s3Path} to ${fileMap.localPath}`);
+        successCount++;
+      } else {
+        Logger.warn(`Failed to download ${fileMap.s3Path}`);
+        failCount++;
+      }
+    } catch (error) {
+      Logger.error(
+        `Error downloading file ${fileMap.s3Path}`,
+        error as Error
+      );
+      failCount++;
+    }
+  }
+  
+  Logger.info("utils", `S3 download summary: ${successCount} succeeded, ${failCount} failed`);
+  
+  if (failCount > 0) {
+    throw new Error(`Failed to download ${failCount} files from S3`);
+  }
 }
 
 async function runCSharpMarkerExtractor(): Promise<void> {
@@ -326,6 +395,20 @@ async function runSeeder() {
   const startTime = Date.now();
 
   try {
+    // --- Download files from S3 if option is enabled ---
+    if (options.useS3Files) {
+      seederLogger.startStep("S3 Input File Download");
+      try {
+        await downloadInputFilesFromS3();
+        seederLogger.completeStep("S3 Input File Download");
+      } catch (error) {
+        seederLogger.error("Failed to download input files from S3", error);
+        return 1; // Exit with error if S3 download fails (critical)
+      }
+    } else {
+      seederLogger.info("Using local input files (S3 download not enabled)");
+    }
+
     // --- Step 0: Flush Redis Cache (unless skipped) ---
     if (!options.skipRedisFlush) {
       seederLogger.startStep("Redis Cache Flush");
@@ -372,13 +455,29 @@ async function runSeeder() {
 
     // --- Step 1.5: Run C# Marker Extractor ---
     // This needs to run before seedMapData, which relies on the generated JSON dump.
-    seederLogger.startStep("C# Marker Extraction");
-    try {
-      await runCSharpMarkerExtractor();
-      seederLogger.completeStep("C# Marker Extraction");
-    } catch (error) {
-      seederLogger.error("C# marker extraction failed", error);
-      return 1; // Exit with error if marker extraction fails (critical)
+    if (!options.skipCsExtractor) {
+      seederLogger.startStep("C# Marker Extraction");
+      try {
+        await runCSharpMarkerExtractor();
+        seederLogger.completeStep("C# Marker Extraction");
+      } catch (error) {
+        seederLogger.error("C# marker extraction failed", error);
+        return 1; // Exit with error if marker extraction fails (critical)
+      }
+    } else {
+      seederLogger.startStep("Checking for existing markers JSON");
+      try {
+        // Check if the markers JSON file exists
+        await fs.access(finalMarkerJson);
+        seederLogger.info(`Using existing markers file at ${finalMarkerJson}`);
+        seederLogger.completeStep("Checking for existing markers JSON");
+      } catch (error) {
+        seederLogger.error(
+          `Could not find existing markers JSON file at ${finalMarkerJson}. When using --skip-cs-extractor, this file must exist.`,
+          error
+        );
+        return 1; // Exit with error if the marker JSON file doesn't exist
+      }
     }
 
     // --- Step 2a: Core Database Seeding ---

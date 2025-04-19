@@ -1,0 +1,6 @@
+{
+  "id": "steam",
+  "name": "Steam",
+  "priority": 10,
+  "description": "Adds a Steam authentication provider."
+} 

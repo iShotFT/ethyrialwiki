@@ -214,3 +214,63 @@ redis:
 
 extraConfig: {}
 extraSecrets: {}
+
+# OpenSearch configuration
+opensearch:
+  enabled: true
+  replicas: 1
+  image:
+    repository: opensearchproject/opensearch
+    tag: "2.11.0"
+    pullPolicy: IfNotPresent
+  javaOpts: "-Xms512m -Xmx512m"
+  securityDisabled: "false"
+  sslVerify: "false"
+  ssl:
+    cert: ""
+    key: ""
+  auth:
+    enabled: true
+    username: "admin"
+    adminPassword: ""
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  extraEnv: []
+  dashboards:
+    enabled: true
+    image:
+      repository: opensearchproject/opensearch-dashboards
+      tag: "2.11.0"
+      pullPolicy: IfNotPresent
+    securityDisabled: "false"
+    adminUser: "admin"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    extraEnv: []
+    ingress:
+      enabled: false
+      className: "nginx"
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      host: ""
+      path: /
+      pathType: Prefix
+      tls:
+        enabled: false
+        secretName: ""

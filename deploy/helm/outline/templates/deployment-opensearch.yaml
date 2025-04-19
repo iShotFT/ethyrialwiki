@@ -1,0 +1,136 @@
+{{- if .Values.opensearch.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "outline.fullname" . }}-opensearch
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opensearch
+spec:
+  replicas: {{ .Values.opensearch.replicas }}
+  selector:
+    matchLabels:
+      {{- include "outline.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: opensearch
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "outline.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: opensearch
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "outline.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: setup-vm-max-map-count
+          image: busybox
+          command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+          securityContext:
+            privileged: true
+      containers:
+        - name: {{ .Chart.Name }}-opensearch
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.opensearch.image.repository }}:{{ .Values.opensearch.image.tag }}"
+          imagePullPolicy: {{ .Values.opensearch.image.pullPolicy }}
+          env:
+            - name: "discovery.type"
+              value: "single-node"
+            - name: "bootstrap.memory_lock"
+              value: "true"
+            - name: "OPENSEARCH_JAVA_OPTS"
+              value: {{ .Values.opensearch.javaOpts | quote }}
+            - name: "plugins.security.disabled"
+              value: {{ .Values.opensearch.securityDisabled | quote }}
+            {{- if eq .Values.opensearch.sslVerify "true" }}
+            - name: "plugins.security.ssl.http.enabled"
+              value: "true"
+            - name: "plugins.security.ssl.transport.enabled"
+              value: "true"
+            - name: "plugins.security.ssl.http.pemcert_filepath"
+              value: "/usr/share/opensearch/config/certs/tls.crt"
+            - name: "plugins.security.ssl.http.pemkey_filepath"
+              value: "/usr/share/opensearch/config/certs/tls.key"
+            - name: "plugins.security.ssl.transport.pemcert_filepath"
+              value: "/usr/share/opensearch/config/certs/tls.crt"
+            - name: "plugins.security.ssl.transport.pemkey_filepath"
+              value: "/usr/share/opensearch/config/certs/tls.key"
+            {{- end }}
+            {{- if .Values.opensearch.auth.enabled }}
+            - name: "OPENSEARCH_INITIAL_ADMIN_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "outline.fullname" . }}-opensearch
+                  key: admin-password
+            {{- end }}
+            {{- with .Values.opensearch.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 9200
+              protocol: TCP
+            - name: performance
+              containerPort: 9600
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/opensearch/data
+            {{- if eq .Values.opensearch.sslVerify "true" }}
+            - name: certs
+              mountPath: /usr/share/opensearch/config/certs
+              readOnly: true
+            {{- end }}
+          resources:
+            {{- toYaml .Values.opensearch.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: http
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: data
+          {{- if .Values.opensearch.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "outline.fullname" . }}-opensearch
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if eq .Values.opensearch.sslVerify "true" }}
+        - name: certs
+          secret:
+            secretName: {{ include "outline.fullname" . }}-opensearch-certs
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }} 

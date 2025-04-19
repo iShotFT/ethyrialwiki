@@ -1,0 +1,38 @@
+{{- if and .Values.opensearch.enabled .Values.opensearch.dashboards.enabled .Values.opensearch.dashboards.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "outline.fullname" . }}-opensearch-dashboards
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opensearch-dashboards
+  {{- with .Values.opensearch.dashboards.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    # Add basic auth annotation
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: {{ include "outline.fullname" . }}-opensearch-dashboards-auth
+    nginx.ingress.kubernetes.io/auth-realm: "OpenSearch Dashboards Authentication Required"
+  {{- end }}
+spec:
+  {{- if .Values.opensearch.dashboards.ingress.className }}
+  ingressClassName: {{ .Values.opensearch.dashboards.ingress.className }}
+  {{- end }}
+  {{- if .Values.opensearch.dashboards.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.opensearch.dashboards.ingress.host | quote }}
+      secretName: {{ .Values.opensearch.dashboards.ingress.tls.secretName | default (printf "%s-dashboards-tls" (include "outline.fullname" .)) }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.opensearch.dashboards.ingress.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.opensearch.dashboards.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "outline.fullname" . }}-opensearch-dashboards
+                port:
+                  number: 5601
+{{- end }} 
