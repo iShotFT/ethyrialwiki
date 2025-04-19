@@ -55,9 +55,9 @@ Create the name of the service account to use
 */}}
 {{- define "outline.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "outline.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "outline.fullname" .) (hasKey .Values.serviceAccount "name" | ternary .Values.serviceAccount.name "") }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" (hasKey .Values.serviceAccount "name" | ternary .Values.serviceAccount.name "") }}
 {{- end }}
 {{- end }}
 
