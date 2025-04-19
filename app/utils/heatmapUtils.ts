@@ -18,26 +18,27 @@ interface HeatmapData {
 }
 
 /**
- * Ultra high-visibility gradient with maximum intensity colors
- * Each color step has been intensified for better visibility at all zoom levels
+ * Ethyrial-themed gradient using vibrant game-inspired colors for maximum visibility
+ * Enhanced colors for better heatmap distinction
  */
 export const ETHYRIAL_GRADIENT = [
-  'rgba(255, 255, 255, 0)',    // Transparent
-  'rgba(255, 255, 255, 0.85)', // Nearly opaque white
-  'rgba(255, 236, 139, 0.9)',  // Bright yellow
-  'rgba(255, 215, 0, 0.95)',   // Vibrant gold
-  'rgba(255, 165, 0, 1)',      // Pure orange
-  'rgba(255, 69, 0, 1)',       // Red-orange (stronger)
-  'rgba(255, 0, 0, 1)',        // Pure red
-  'rgba(255, 20, 147, 1)',     // Deep pink
-  'rgba(128, 0, 255, 1)',      // Vibrant purple
-  'rgba(255, 255, 255, 1)'     // Center white
+  'rgba(15, 32, 69, 0.83)',     // Deep midnight blue
+  'rgba(30, 58, 112, 0.85)',    // Royal night blue
+  'rgba(44, 92, 148, 0.87)',    // Ocean blue
+  'rgba(67, 134, 169, 0.89)',   // Steel blue
+  'rgba(88, 157, 165, 0.91)',   // Teal
+  'rgba(121, 175, 147, 0.92)',  // Sea green
+  'rgba(166, 188, 118, 0.93)',  // Sage green
+  'rgba(211, 201, 88, 0.95)',   // Gold yellow
+  'rgba(238, 193, 56, 0.97)',   // Bright gold
+  'rgba(251, 161, 41, 0.98)',   // Amber
+  'rgba(248, 102, 36, 1.0)'     // Ethyrial orange
 ];
 
 /**
  * Update heatmap with new data points using an advanced approach that preserves all layers
- * Enhanced version with improved visibility at all zoom levels
- * @param data Heatmap data containing points
+ * Enhanced version with improved visibility at all zoom levels and intelligent data utilization
+ * @param data Heatmap data containing points with count and cellSize information
  * @param source Vector source for the heatmap
  * @param layer Heatmap layer to update
  * @param map Optional map reference for explicit rendering
@@ -87,7 +88,7 @@ export const updateHeatmap = (
     
     Logger.debug("misc", `[HEATMAP_FLOW] Applied zoom-based parameters: radius=${params.radius}, blur=${params.blur}, opacity=${params.opacity}`);
     
-    // Create features array directly
+    // Create features from points
     const featureStartTime = performance.now();
     Logger.debug("misc", `${PERF_LOG_PREFIX} #${updateId} FEATURE_CREATION_START at ${(featureStartTime - startTime).toFixed(2)}ms`);
     Logger.debug("misc", `[HEATMAP_FLOW] Creating ${data.points.length} features for heatmap`);
@@ -95,50 +96,68 @@ export const updateHeatmap = (
     const features: Feature<Geometry>[] = [];
     const points = data.points;
     
-    // Always normalize the weights for better visibility
-    let minWeight = Infinity;
-    let maxWeight = 0;
+    // Calculate zoom-based intensity factor to boost weights at higher zoom levels
+    // At low zoom: normal weights, at high zoom: dramatically boosted weights
+    const zoomIntensityFactor = Math.min(1.0 + (zoom - 3) * 0.15, 1.7);
+    Logger.debug("misc", `[HEATMAP_FLOW] Using zoom intensity factor: ${zoomIntensityFactor.toFixed(2)} for zoom ${zoom}`);
     
-    // First pass to find min/max values
-    for (const point of points) {
-      const weight = point.weight || 1;
-      minWeight = Math.min(minWeight, weight);
-      maxWeight = Math.max(maxWeight, weight);
-    }
-    
-    // Handle edge case of all points having same weight
-    const weightRange = maxWeight - minWeight;
-    const hasVariation = weightRange > 0.001;
-    
-    // Second pass to create enhanced normalized features
+    // Create features with high-visibility weight values that scale with zoom
     for (const point of points) {
       try {
-        const originalWeight = point.weight || 1;
+        // Get the raw data
+        const baseWeight = point.weight || 1;
+        const count = 'count' in point ? point.count : 1;
+        const cellSize = 'cellSize' in point ? point.cellSize : 50;
         
-        // Apply enhanced normalization for better visibility
-        let normalizedWeight;
+        // Use high-visibility weight values that scale with zoom level
+        let smartWeight;
         
-        if (!hasVariation) {
-          // If all weights are the same, use a relatively high weight
-          normalizedWeight = 0.8; // Higher base weight for better visibility
+        // Different handling based on count with much higher base weights at higher zooms
+        if (count <= 1) {
+          // Single item - zoom-boosted medium intensity
+          smartWeight = Math.min(baseWeight * 0.55 * zoomIntensityFactor, 0.8);
+        } else if (count <= 3) {
+          // Very small cluster (2-3) - zoom-boosted medium-high intensity
+          smartWeight = Math.min((0.6 + (count * 0.05)) * zoomIntensityFactor, 0.85);
+        } else if (count <= 7) {
+          // Small cluster (4-7) - zoom-boosted high intensity
+          smartWeight = Math.min((0.75 + ((count - 3) * 0.03)) * zoomIntensityFactor, 0.9);
+        } else if (count <= 15) {
+          // Medium cluster (8-15) - zoom-boosted very high intensity
+          smartWeight = Math.min((0.85 + ((count - 7) * 0.01)) * zoomIntensityFactor, 0.95);
+        } else if (count <= 30) {
+          // Large cluster (16-30) - zoom-boosted near maximum intensity
+          smartWeight = Math.min((0.9 + ((count - 15) * 0.003)) * zoomIntensityFactor, 0.98);
         } else {
-          // Scale from 0-1
-          const percentile = (originalWeight - minWeight) / weightRange;
-          
-          // Apply a curve that boosts mid-range and higher values
-          // This makes more points visible while still maintaining differentiation
-          normalizedWeight = Math.pow(percentile, 0.8) * 0.9;
-          
-          // Ensure stronger minimum weight for better visibility
-          normalizedWeight = Math.max(0.5, normalizedWeight);
+          // Massive cluster (31+) - zoom-boosted maximum intensity
+          smartWeight = Math.min(0.99 * zoomIntensityFactor, 1.0);
         }
         
-        features.push(
-          new Feature({
-            geometry: new Point([point.x, point.y]),
-            weight: normalizedWeight
-          })
+        // Create a feature with the enhanced weight
+        const feature = new Feature({
+          geometry: new Point([point.x, point.y]),
+          weight: smartWeight,
+          // Store original data for potential tooltips or label rendering
+          originalCount: count,
+          originalWeight: baseWeight,
+          cellSize: cellSize,
+          // Store zoom level when the feature was created
+          createdAtZoom: zoom
+        });
+        
+        // Apply dynamic radius adjustment based on count and cellSize
+        const radiusAdjustment = getRadiusAdjustmentFactor(
+          typeof count === 'number' ? count : 1,
+          typeof cellSize === 'number' ? cellSize : 50,
+          zoom
         );
+        
+        // Set a custom radius factor on the feature
+        if (radiusAdjustment !== 1.0) {
+          feature.set('radiusFactor', radiusAdjustment);
+        }
+        
+        features.push(feature);
       } catch (error) {
         // Skip error features
       }
@@ -192,42 +211,97 @@ export const updateHeatmap = (
 };
 
 /**
+ * Calculate radius adjustment based on count and cellSize
+ * @param count Number of items at this point
+ * @param cellSize Size of the aggregation cell
+ * @param zoom Current zoom level
+ * @returns Radius adjustment factor (1.0 = no change)
+ */
+export const getRadiusAdjustmentFactor = (count: number, cellSize: number, zoom: number): number => {
+  // Much more aggressive adjustment based on count (more items = significantly larger radius)
+  let adjustmentFactor = 1.0;
+  
+  if (count === 1) {
+    // Single items remain at base size
+    adjustmentFactor = 1.0;
+  } else if (count <= 5) {
+    // Small clusters - significant boost (+10% per item)
+    adjustmentFactor = 1.0 + (count * 0.10);
+  } else if (count <= 20) {
+    // Medium clusters - strong boost but with slight diminishing returns
+    adjustmentFactor = 1.5 + (Math.sqrt(count - 5) * 0.2);
+  } else if (count <= 50) {
+    // Large clusters - very prominent
+    adjustmentFactor = 2.3 + (Math.log10(count) * 0.4);
+  } else {
+    // Massive clusters - extremely noticeable but capped
+    adjustmentFactor = 3.0 + (Math.log10(count) * 0.3);
+  }
+  
+  // Bold adjustment based on cellSize relative to zoom level
+  const expectedCellSize = 50 / Math.pow(2, Math.max(0, zoom - 4));
+  
+  if (cellSize > expectedCellSize) {
+    // Larger cell than expected for this zoom - increase radius more aggressively
+    const cellSizeFactor = cellSize / expectedCellSize;
+    adjustmentFactor *= 1.0 + ((cellSizeFactor - 1) * 0.15);
+  }
+  
+  // Cap at a reasonable maximum to prevent excessive domination
+  return Math.min(adjustmentFactor, 4.5);
+};
+
+/**
  * Calculate heatmap parameters based on zoom level
+ * INVERTED LOGIC: Intensity increases dramatically with zoom level
  * @param zoom Current zoom level
  * @returns Parameters for heatmap rendering
  */
 export const getHeatmapParams = (zoom: number) => {
   Logger.debug("misc", `[HEATMAP_FLOW] Getting heatmap parameters for zoom level ${zoom}`);
   
-  // Enhanced parameters for Ethyrial-themed heatmap 
-  // Slightly increased blur to create a more glowing effect that matches the UI
+  // Progressive intensity scaling - stronger at higher zooms
   if (zoom <= 2) {
-    // Very zoomed out - make the heatmap spread out significantly more
+    // Very zoomed out - moderate intensity
     return {
-      radius: 45,     // Increased for better visibility
-      blur: 30,       // More blur for a softer glow
-      opacity: 0.95,  // Slightly reduced for better blend
+      radius: 25,
+      blur: 15,
+      opacity: 0.95,
     };
-  } else if (zoom <= 4) {
-    // Moderately zoomed out - make the heatmap spread out more
+  } else if (zoom === 3) {
+    // Increasing intensity
     return {
-      radius: 35,     // Increased for better visibility 
-      blur: 25,       // More blur for softer edges
-      opacity: 0.92,  // Slight opacity adjustment
+      radius: 32,
+      blur: 20,
+      opacity: 0.97,
+    };
+  } else if (zoom === 4) {
+    // Medium zoom - high intensity
+    return {
+      radius: 40,
+      blur: 25,
+      opacity: 0.98,
     };
   } else if (zoom === 5) {
-    // Medium zoom - slightly less spread
+    // Medium-high zoom - very high intensity
     return {
-      radius: 28,     // Increased for better visibility
-      blur: 22,       // More blur for softer edges
-      opacity: 0.88,  // Balanced opacity
+      radius: 50,
+      blur: 30,
+      opacity: 0.99,
+    };
+  } else if (zoom === 6) {
+    // High zoom - extremely high intensity
+    return {
+      radius: 65,
+      blur: 40,
+      opacity: 1.0,
     };
   } else {
-    // Zoomed in - focused heatmap with glow effect
+    // Maximum zoom - maximum intensity with extreme obfuscation
     return {
-      radius: 22,     // Increased for better visibility
-      blur: 18,       // More blur for a softer glow effect
-      opacity: 0.85,  // Maintained opacity
+      radius: 80,
+      blur: 55, 
+      opacity: 1.0,
     };
   }
 }; 

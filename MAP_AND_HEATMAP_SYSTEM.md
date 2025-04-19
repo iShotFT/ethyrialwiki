@@ -7,13 +7,46 @@ This document provides a comprehensive overview of the map and heatmap system us
 ## Core Components
 
 1. **MapStore** (`app/stores/MapStore.ts`): Central state management for map-related data using MobX. Stores heatmap data, loading states, and error states.
+
 2. **useHeatmapData** (`app/hooks/useHeatmapData.ts`): Custom hook for fetching and managing heatmap data. Provides direct layer updating methods that bypass React re-rendering for performance.
+
 3. **Map Components** (`app/components/Map/`): Organized directory of React components and utilities for map rendering:
    - **Core**: Base components and utilities
    - **Context**: React context for sharing map state
    - **Layers**: Layer creation and management
    - **Controls**: UI controls for map interaction
    - **URL**: Hash management for keeping state in URL
+   - **Styles**: Centralized StyleManager for consistent styling
+   - **Features**: Components for feature interaction, including tooltips and markers
+
+4. **EthyrialMapFull** (`app/components/EthyrialMapFull.tsx`): The main map rendering component that uses the modular components from `app/components/Map/`.
+
+5. **LayerManager** (`app/components/Map/Layers/LayerManager.ts`): Centralized manager for all layer operations with standardized layer IDs, types, and z-indexes.
+
+6. **StyleManager** (`app/components/Map/Styles/StyleManager.ts`): Centralized manager for handling all marker and label styling with proper style caching.
+
+7. **MapScene** (`app/scenes/Map/index.tsx`): The primary scene component orchestrating data fetching, state management, and rendering of `EthyrialMapFull` and its overlays.
+
+8. **MapOverlays** (`app/components/MapOverlays/`): Directory containing all overlay components:
+   - **OverlayRegistry** (`app/components/MapOverlays/OverlayRegistry.ts`): Central registry for managing all UI overlays with dynamic registration and position management.
+   - **BaseOverlay** (`app/components/MapOverlays/BaseOverlay.tsx`): Base component for all overlays with dragging capability and standardized positioning.
+   - **CoordinateOverlay** (`app/components/MapOverlays/CoordinateOverlay.tsx`): Draggable overlay displaying cursor coordinates.
+   - **HeatmapOverlayPanel** (`app/components/MapOverlays/HeatmapOverlayPanel.tsx`): Overlay for selecting heatmap items.
+   - **MapOverlayPanel** (`app/components/MapOverlays/MapOverlayPanel.tsx`): Overlay for controlling marker visibility.
+   - **ZLayerOverlay** (`app/components/MapOverlays/ZLayerOverlay.tsx`): Overlay for controlling the map's Z-layer.
+   - **GlobalCustomDragLayer** (`app/components/MapOverlays/GlobalCustomDragLayer.tsx`): Component rendering the drag preview for all overlays.
+   - **ToastOverlay** (`app/components/MapOverlays/ToastOverlay.tsx`): Overlay for displaying toast notifications.
+
+9. **Utility files** located in `app/utils/`:
+   - **heatmapUtils** (`app/utils/heatmapUtils.ts`): Utilities for rendering and updating heatmap layers.
+   - **mapUtils** (`app/utils/mapUtils.ts`): Utilities for map operation (mostly moved to Map/URL components).
+   - **markerStyleUtils** (`app/utils/markerStyleUtils.ts`): Utilities for creating marker styles.
+   - **categoryColorUtils** (`app/utils/categoryColorUtils.ts`): Centralized definitions for category colors.
+   - **toastUtils** (`app/utils/toastUtils.ts`): Helper functions for displaying different types of toast notifications.
+
+10. **Feature Interaction Components** (`app/components/Map/Features/`):
+    - **MapFeatureTooltip** (`app/components/Map/Features/MapFeatureTooltip.tsx`): Custom tooltip system using direct DOM manipulation for better performance.
+    - **TooltipManager** (`app/components/Map/Features/TooltipManager.tsx`): Context provider and hooks for managing tooltips through a centralized system.
 
 ### Map Component Structure
 
@@ -27,26 +60,7 @@ This document provides a comprehensive overview of the map and heatmap system us
 * **HeatmapLayer** (`app/components/Map/Layers/HeatmapLayer.tsx`): Dedicated component for managing heatmap layer visualization
 * **ZLayerControl** (`app/components/Map/Controls/ZLayerControl.tsx`): UI component for changing map Z-layer
 * **HashManager** (`app/components/Map/URL/HashManager.ts`): Utilities for URL hash management
-
-4. **Utility files** located in `app/utils/`:
-   - **heatmapUtils** (`app/utils/heatmapUtils.ts`): Utilities for rendering and updating heatmap layers.
-   - **mapUtils** (`app/utils/mapUtils.ts`): Utilities for map operation (mostly moved to Map/URL components).
-   - **markerStyleUtils** (`app/utils/markerStyleUtils.ts`): Utilities for creating marker styles.
-   - **layerManager** (`app/utils/layerManager.ts`): Legacy layer management (mostly moved to Map/Layers components).
-
-5. **MapOverlays** (`app/components/MapOverlays/`): Directory containing all overlay components:
-   - **OverlayRegistry** (`app/components/MapOverlays/OverlayRegistry.ts`): Central registry for managing all UI overlays with dynamic registration and position management.
-   - **BaseOverlay** (`app/components/MapOverlays/BaseOverlay.tsx`): Base component for all overlays with dragging capability and standardized positioning.
-   - **CoordinateOverlay** (`app/components/MapOverlays/CoordinateOverlay.tsx`): Draggable overlay displaying cursor coordinates.
-   - **HeatmapOverlayPanel** (`app/components/MapOverlays/HeatmapOverlayPanel.tsx`): Overlay for selecting heatmap items.
-   - **MapOverlayPanel** (`app/components/MapOverlays/MapOverlayPanel.tsx`): Overlay for controlling marker visibility.
-   - **ZLayerOverlay** (`app/components/MapOverlays/ZLayerOverlay.tsx`): Overlay for controlling the map's Z-layer.
-   - **GlobalCustomDragLayer** (`app/components/MapOverlays/GlobalCustomDragLayer.tsx`): Component rendering the drag preview for all overlays.
-   - **index.ts**: Exports all overlay components for easy importing.
-
-6. **EthyrialMapFull** (`app/components/EthyrialMapFull.tsx`): The main map component that now uses the modular components from `app/components/Map/`.
-
-7. **MapScene** (`app/scenes/Map/index.tsx`): The primary scene component orchestrating data fetching, state management, and rendering of `EthyrialMapFull` and its overlays. Manages the central `DndProvider`.
+* **StyleManager** (`app/components/Map/Styles/StyleManager.ts`): Centralized manager for all styles
 
 ## Layer Structure
 
@@ -72,10 +86,9 @@ The heatmap data flow has been refactored for better performance and separation 
 2. When the user clicks a heatmap item, `handleHeatmapItemClick` in `MapScene` calls `fetchHeatmapData` from the hook
 3. The hook makes an API request to `/game-data/heatmap/${mapId}/${itemId}/${intZoom}?minX=${minX}&minY=${minY}&maxX=${maxX}&maxY=${maxY}`
 4. After receiving data, the hook:
-   - Updates the heatmap layer and source directly via OpenLayers (bypassing React)
+   - Updates the heatmap layer through the LayerManager
    - Stores the data in `MapStore` for state tracking
-5. Both approaches use the same `updateHeatmap` utility from `heatmapUtils.ts`
-6. The direct OpenLayers update prevents flash/flicker by avoiding React re-renders
+5. The direct OpenLayers update prevents flash/flicker by avoiding React re-renders
 
 ### Key Synchronization Points
 
@@ -90,8 +103,8 @@ The system maintains synchronization between React context and the MobX store:
    - Updates the store on view changes with `MapStore.setViewState()`
 
 3. In `useHeatmapData.ts`:
-   - Directly updates OpenLayers objects for performance
    - Updates the store with minimal changes to prevent unnecessary re-renders
+   - Uses LayerManager for direct layer updates
 
 ## UI Components
 
@@ -118,6 +131,40 @@ Benefits of the registry system:
 2. Resetting UI positions affects all registered overlays consistently
 3. Centralized storage key management prevents conflicts
 4. Engineers can create new overlays without modifying multiple files
+
+## Tooltip Implementation
+
+The system has a custom tooltip implementation for map features that focuses on performance and smooth interaction:
+
+### MapFeatureTooltip Component
+
+The map features (markers and points) use a specialized tooltip implementation in `app/components/Map/Features/MapFeatureTooltip.tsx` that:
+
+1. **Uses direct DOM manipulation** instead of React's normal rendering for better performance
+2. **Displays tooltips on click** rather than hover (switched from hover to reduce frequent recalculations)
+3. **Tracks continuously** with marker/feature position during map movements using requestAnimationFrame
+4. **Toggles on/off** when clicking the same feature twice
+5. **Supports Z-layer information** in coordinate display
+6. **Consistent styling** with the Ethyrial theme
+
+Implementation details:
+- Uses `ReactDOM.render()` and `ReactDOM.unmountComponentAtNode()` (React 17 API)
+- Creates tooltip DOM elements on-demand and appends them to document.body
+- Calculates precise positioning using OpenLayers' coordinate conversion functions
+- Uses FontAwesomeIcon for pin and marker icons
+- Shows feature title, category, and coordinates in a consistent format
+- Updates position in real-time during map render events
+
+### TooltipManager Component
+
+For more generalized tooltip needs, the system also provides a `TooltipManager` component (`app/components/Map/Features/TooltipManager.tsx`) that offers:
+
+1. **React Context API** for sharing tooltip functionality
+2. **Centralized tooltip state** managed through a context provider
+3. **Simplified integration** with standard components through hooks
+4. **Auto-hiding** during map movements
+
+The TooltipManager uses the `IngameTooltip` component for consistent styling with the rest of the UI.
 
 ## Overlay Component Standards
 
@@ -245,6 +292,64 @@ decorate(MapStore, {
 });
 ```
 
+### React Version Requirements
+
+The application uses React 17 rather than React 18, which affects certain API choices:
+
+1. **Tooltip Rendering**: Uses React 17's `ReactDOM.render()` and `ReactDOM.unmountComponentAtNode()` rather than React 18's createRoot API.
+2. **React-toastify Compatibility**: Uses react-toastify v9.1.3 which is compatible with React 17.
+3. **No Concurrent Mode**: Features relying on React 18's concurrent mode aren't available.
+
+This is important to remember when upgrading libraries or implementing new features that might depend on newer React APIs.
+
+## Key Improvements Made
+
+### 1. Centralized Layer Management
+
+- Enhanced `LayerManager` to be the single source of truth for all layer operations
+- Added proper logging for layer operations
+- Implemented standardized layer IDs, types, and z-indexes
+- Created dedicated methods for updating each layer type
+- Integrated `LayerManager` with the heatmap system
+
+### 2. Consistent Styling System
+
+- Created a centralized `StyleManager` to handle all marker and label styling
+- Extracted category colors to a shared `categoryColorUtils.ts` utility
+- Removed duplicate color and styling definitions
+- Implemented proper style caching for performance
+- Fixed marker appearance to match category colors defined in UI
+
+### 3. Clear Architectural Boundaries
+
+- Simplified the `useHeatmapData` hook to use LayerManager instead of direct OpenLayers manipulation
+- Made `MarkerStyleContext` work with our StyleManager
+- Simplified the `EthyrialMapFull` component by removing duplicate layer management code
+- Moved marker updating logic to the Map scene component where it belongs
+
+### 4. Proper Logging
+
+- Added clear, consistent logging patterns across all components
+- Made layer operations explicitly trackable in the console with the `[LayerManager]` prefix
+- Added style operation logging with the `[StyleManager]` prefix
+- Enhanced existing heatmap logs to show which manager is handling operations
+
+### 5. Improved Feature Interaction
+
+- Created specialized feature tooltip component (`MapFeatureTooltip`) for better performance
+- Switched tooltip display from hover to click-based interaction to reduce frequent recalculations
+- Implemented real-time tooltip position updates during map movements
+- Added toggle functionality for tooltips (click to show, click again to hide)
+
+## Benefits of the Refactoring
+
+1. **Maintainability**: Clear separation of concerns makes code easier to maintain
+2. **Consistency**: Centralized managers ensure consistent behavior across the application
+3. **Debuggability**: Structured logging makes it easier to track what's happening
+4. **Performance**: Proper caching and reduced duplication improves performance
+5. **Extensibility**: Adding new features is now simpler with well-defined interfaces
+6. **Stability**: Direct DOM manipulation for tooltips provides better performance without React re-rendering
+
 ## Code Evolution Context
 
 This system has evolved to address specific challenges:
@@ -255,12 +360,15 @@ This system has evolved to address specific challenges:
 5. Coordinate and Z-Layer overlay components added for better user control/feedback
 6. Drag and Drop was refactored from individual providers per overlay to a single, centralized `DndProvider` in `MapScene`
 7. Overlay positioning was standardized using a `defaultPosition` prop in `BaseOverlay`
-8. Heatmap update flow was optimized to bypass React rendering and directly update OpenLayers objects
+8. Heatmap update flow was optimized to bypass React rendering and directly update OpenLayers objects via LayerManager
 9. Component-specific logic was moved to a reusable `useHeatmapData` hook
 10. Map component was completely refactored into smaller, focused components in a dedicated directory structure
 11. Implemented fixed-width overlays and accurate drag previews
 12. Created a centralized OverlayRegistry system for managing all map overlays, with automatic registration and a unified reset mechanism via the context menu
-13. **LATEST**: Enhanced heatmap visualization with adaptive parameters based on zoom level for optimal visibility at all zoom levels
+13. Enhanced heatmap visualization with adaptive parameters based on zoom level for optimal visibility at all zoom levels
+14. Implemented consistent styling through StyleManager and centralized category colors
+15. Refactored tooltip system from hover-based to click-based to improve performance and reduce unnecessary recalculations
+16. Updated tooltip implementation to use direct DOM manipulation with React 17's render API for better performance
 
 ## Using the Modular Map Components
 
@@ -291,7 +399,7 @@ const MyMapComponent = ({ mapId }) => {
 
 ## Performance Optimizations
 
-1. **Direct OpenLayers Updates**: Bypassing React's rendering cycle for performance-critical operations
+1. **Direct OpenLayers Updates**: Using LayerManager for performance-critical operations
 2. **Debounced API Calls**: Preventing rapid API calls during map navigation
 3. **Centralized State**: Using MapStore for sharing state between components
 4. **Reusable Hooks**: Encapsulating complex logic in reusable hooks
@@ -299,6 +407,10 @@ const MyMapComponent = ({ mapId }) => {
 6. **Modular Architecture**: Breaking down large components into smaller, focused pieces
 7. **Context API**: Using React Context to avoid excessive prop drilling
 8. **Performance Logging**: Detailed timing logs in useHeatmapData for identifying bottlenecks (can be disabled in production)
+9. **Style Caching**: Implementing proper style caching in StyleManager for better performance
+10. **Direct DOM Manipulation**: Using ReactDOM.render for tooltips instead of React component state to avoid unnecessary re-renders
+11. **Click-Based Tooltips**: Switching from hover to click-based tooltips to reduce frequent position recalculations
+12. **RequestAnimationFrame**: Using requestAnimationFrame for smooth tooltip position updates during map movements
 
 ## Styling Patterns
 
@@ -309,6 +421,10 @@ The UI components follow consistent Ethyrial styling patterns:
 - Monospace fonts for coordinate displays
 - Font family: 'Asul' for UI elements
 - Fixed widths for overlays to ensure consistent UI (e.g., HeatmapOverlayPanel: 450px, MapOverlayPanel: 300px)
+- Category colors defined centrally in categoryColorUtils.ts
+- Consistent highlight color: `#ffd5ae` for titles and important elements
+- Text colors: `#e0e0e0` (primary), `#a0a0a0` (secondary), `#ffd5ae` (highlight)
+- FontAwesomeIcon for consistent iconography
 
 ## Heatmap Visualization
 
@@ -376,63 +492,80 @@ The normalization approach:
 - Handles edge cases where all points have the same weight
 - Dynamically sets the gradient for consistent styling
 
-## Known Issues & Future Improvements
+## Map Feature Interactions
 
-* Data type conversion between MapStore and components could be more efficient with standardized types
-* Consider moving more OpenLayers-specific logic to dedicated hooks for better separation of concerns
-* Layer visibility management could be simplified further
-* Direct map updates could be extended to other aspects of the system for better performance
-* Add environment flag to disable verbose performance logging in production
-* React-toastify version must be kept at v9.1.3 for React 17 compatibility (current React version)
+The map features (markers, points) support several interactions:
 
-## Type Safety Considerations
+### Marker Display
 
-1. Layer type checking uses both instance checks and property comparisons:
-   - `instanceof VectorLayer` for basic type checking
-   - `l.get('id') !== layer.get('id')` to avoid TypeScript errors between incompatible layer types
-   - Properties like `layerType === 'heatmap'` for semantic identification
+- Markers are rendered as colored circles with their color determined by the category
+- Styling is controlled by StyleManager which ensures consistent appearance
+- Marker visibility can be toggled by category through the MapOverlayPanel
 
-2. HeatmapData interfaces have two formats:
-   - In MapStore: `points: Array<[number, number, number]>;` (x,y,weight as tuple array)
-   - In components: `points: AggregatedPoint[];` (with x, y, weight, count, cellSize properties)
-   - Conversion is needed between these formats
+### Tooltip Display
 
-3. AggregatedPoint interface follows the server-side definition:
-   ```typescript
-   interface AggregatedPoint {
-     x: number;          // X coordinate 
-     y: number;          // Y coordinate
-     weight: number;     // Combined weight of the point
-     count: number;      // Number of original points in this cell
-     cellSize: number;   // Size of the cell that created this aggregation
-   }
-   ```
+Markers and features now use a click-based tooltip system instead of hover:
 
-4. Event handling in OpenLayers requires careful type management:
-   - Using proper types for event handlers (`OLPointerEvent` for `pointermove`)
-   - Ensuring handler references are maintained for proper cleanup
+1. **Click Interaction**: 
+   - Click a feature to show its tooltip
+   - Click the same feature again to hide the tooltip
+   - Click elsewhere on the map to dismiss any open tooltip
 
-## Rendering Sequence
+2. **Tooltip Content**:
+   - Feature title (in #ffd5ae highlight color)
+   - Category name (if available)
+   - Coordinates (X, Y, Z) in monospace font
+   - Consistent styling with the rest of the UI
 
-The system ensures proper layer rendering through:
+3. **Position Updates**:
+   - Tooltip follows the feature during map movements
+   - Uses requestAnimationFrame for smooth updates
+   - Positioned just above the feature with a small arrow pointing down
 
-1. Using direct OpenLayers references through useHeatmapData hook
-2. Clearing existing features and adding new ones in a batch
-3. Ensuring proper z-index values for layers (heatmap at 5, markers at 10)
-4. Setting appropriate visibility based on state
-5. Forcing layer redraw with layer.changed() when needed
-6. Applying the custom gradient and adaptive parameters based on zoom level
+4. **Implementation**:
+   - Direct DOM manipulation for performance
+   - ReactDOM.render for content updates (React 17 approach)
+   - Automatic cleanup on unmount
 
-## Local Storage Usage
+## Toast Notification System
 
-The system uses LocalStorage for persisting user preferences:
-- Overlay positioning: Managed through the OverlayRegistry
-- Standard keys:
-  - `coordinate-overlay-position`: Coordinate overlay position
-  - `heatmap-overlay-position`: Heatmap overlay position
-  - `map-overlay-panel-position`: Map/marker control panel position
-  - `z-layer-overlay-position`: Z-layer control position
-- New overlays should use unique keys following the pattern: `[overlay-id]-position`
+The map interface includes a toast notification system based on `react-toastify` for displaying non-intrusive notifications to the user. The system is structured as follows:
+
+1. **ToastOverlay** (`app/components/MapOverlays/ToastOverlay.tsx`): A component that renders the `ToastContainer` from react-toastify, positioned at the bottom-left of the screen by default. It applies custom styling to match the Ethyrial visual theme.
+
+2. **Toast Utilities** (`app/utils/toastUtils.ts`): Helper functions for displaying different types of toast notifications:
+   - `showInfoToast`: For informational messages
+   - `showSuccessToast`: For success messages
+   - `showWarningToast`: For warning messages
+   - `showErrorToast`: For error messages
+   - `showToast`: For generic messages
+   - `dismissAllToasts`: For dismissing all active toasts
+
+3. **Usage in ContextMenu**: The right-click context menu uses toast notifications for user feedback (e.g., when copying coordinates).
+
+### Implementation Notes
+
+- **React 17 Compatibility**: The system requires `react-toastify@9.1.3` for compatibility with React 17. Later versions of react-toastify require React 18+ as they use the `useSyncExternalStore` hook.
+- **Styling**: Custom styles are applied to match the Ethyrial theme, including specific colors for success and error notifications.
+- **Automatic Integration**: The `ToastOverlay` component is included in the `MapScene`, making toast notifications available throughout the map interface.
+
+### Example Usage
+
+```typescript
+import { showSuccessToast, showErrorToast } from '~/utils/toastUtils';
+
+// Display a success toast
+showSuccessToast('Resource created successfully!');
+
+// Display an error toast
+showErrorToast('Failed to save changes');
+
+// Display a success toast with custom options
+showSuccessToast('Coordinates copied', { 
+  autoClose: 3000,
+  icon: <FontAwesomeIcon icon={faCopy} />
+});
+```
 
 ## Context Menu Integration
 
@@ -486,17 +619,26 @@ The Z-layer system allows viewing different vertical levels of the map:
 - **Keyboard Controls**: PageUp/PageDown can be used to navigate Z-layers.
 - **Visual Control**: The Z-layer overlay provides a UI for changing levels.
 
+## Future Improvements
+
+Following the refactoring, some areas for future improvement include:
+
+1. Continue refactoring remaining map components to use the centralized managers
+2. Consider adding dedicated managers for other aspects (e.g., `MarkersManager`, `ViewManager`)
+3. Add comprehensive unit tests for the managers and hooks
+4. Update documentation to reflect the new architecture
+5. Data type conversion between MapStore and components could be more efficient with standardized types
+6. Consider moving more OpenLayers-specific logic to dedicated hooks for better separation of concerns
+7. Add environment flag to disable verbose performance logging in production
+8. Keep React-toastify version at v9.1.3 for React 17 compatibility (until potential React 18 upgrade)
+9. Consider optimizing feature click detection by pre-filtering features before pixel checks
+
 ## Common Breaking Issues and Solutions
 
 1. **React-DnD Context Missing**
    - **Error**: `Uncaught Invariant Violation: Expected drag drop context`
    - **Cause**: Using React-DnD hooks (like `useDrag`) without wrapping components in a `DndProvider`
-   - **Solution**: Always wrap components that use DnD hooks in a `DndProvider` with a backend:
-     ```jsx
-     <DndProvider backend={HTML5Backend}>
-       <ComponentUsingDragDrop />
-     </DndProvider>
-     ```
+   - **Solution**: Always wrap components that use DnD hooks in a `DndProvider` with a backend
 
 2. **OpenLayers Event Listener Type Errors**
    - **Cause**: OpenLayers has specific typing requirements for event listeners
@@ -504,17 +646,7 @@ The Z-layer system allows viewing different vertical levels of the map:
 
 3. **Overlay Width Expansion**
    - **Issue**: Overlays expanding width when content changes (e.g., selecting a category)
-   - **Solution**: Apply fixed width constraints using styled components or Tailwind classes:
-     ```tsx
-     // Styled component approach
-     const FixedWidthContainer = styled.div`
-       width: ${PANEL_WIDTH};
-       max-width: ${PANEL_WIDTH};
-     `;
-     
-     // Or Tailwind approach
-     <div className="w-[450px] min-w-[450px]">...</div>
-     ```
+   - **Solution**: Apply fixed width constraints using styled components or Tailwind classes
 
 4. **New Overlay Not Registering**
    - **Issue**: A new overlay component doesn't reset properly with the "Reset UI" option
@@ -524,71 +656,14 @@ The Z-layer system allows viewing different vertical levels of the map:
 5. **Heatmap Visibility Issues at High Zoom Levels**
    - **Issue**: Heatmap becomes difficult to see or disappears at high zoom levels
    - **Cause**: Default OpenLayers heatmap settings don't adapt well to different zoom contexts
-   - **Solution**: 
-     - Use the enhanced gradient with bright, high-visibility colors
-     - Apply the adaptive zoom parameters that increase radius, adjust blur, and optimize opacity at high zoom levels
-     - Implement the enhanced weight normalization to boost point visibility
+   - **Solution**: Use the enhanced gradient with bright, high-visibility colors and apply the adaptive zoom parameters
 
-## Dead Code and Optimizations
+6. **React 18 API Usage**
+   - **Issue**: Code using React 18 APIs (like createRoot) causing runtime errors
+   - **Cause**: The application uses React 17, not React 18
+   - **Solution**: Use React 17 compatible APIs (ReactDOM.render instead of createRoot, etc.)
 
-While seemingly redundant, the multiple checks and timeouts are intentional safeguards against OpenLayers rendering quirks. What might appear as "dead code" is actually critical for ensuring proper layer visibility in all scenarios. The system prioritizes reliability over code minimalism.
-
-## Overlay System Components
-
-The map interface utilizes a flexible overlay system for UI components. Each overlay is independently positioned and can be dragged by the user.
-
-### Core Overlays
-
-1. **MapOverlayPanel**: Controls visibility of map markers and labels
-2. **HeatmapOverlayPanel**: Manages resource heatmap data display
-3. **CoordinateOverlay**: Shows the current cursor position on the map 
-4. **ZLayerOverlay**: Controls the current Z-level view of the map 
-
-## Toast Notification System
-
-The map interface includes a toast notification system based on `react-toastify` for displaying non-intrusive notifications to the user. The system is structured as follows:
-
-1. **ToastOverlay** (`app/components/MapOverlays/ToastOverlay.tsx`): A component that renders the `ToastContainer` from react-toastify, positioned at the bottom-left of the screen by default. It applies custom styling to match the Ethyrial visual theme.
-
-2. **Toast Utilities** (`app/utils/toastUtils.ts`): Helper functions for displaying different types of toast notifications:
-   - `showInfoToast`: For informational messages
-   - `showSuccessToast`: For success messages
-   - `showWarningToast`: For warning messages
-   - `showErrorToast`: For error messages
-   - `showToast`: For generic messages
-   - `dismissAllToasts`: For dismissing all active toasts
-
-3. **Usage in ContextMenu**: The right-click context menu uses toast notifications for user feedback (e.g., when copying coordinates).
-
-### Implementation Notes
-
-- **React 17 Compatibility**: The system requires `react-toastify@9.1.3` for compatibility with React 17. Later versions of react-toastify require React 18+ as they use the `useSyncExternalStore` hook.
-- **Styling**: Custom styles are applied to match the Ethyrial theme, including specific colors for success and error notifications.
-- **Automatic Integration**: The `ToastOverlay` component is included in the `MapScene`, making toast notifications available throughout the map interface.
-
-### Example Usage
-
-```typescript
-import { showSuccessToast, showErrorToast } from '~/utils/toastUtils';
-
-// Display a success toast
-showSuccessToast('Resource created successfully!');
-
-// Display an error toast
-showErrorToast('Failed to save changes');
-
-// Display a success toast with custom options
-showSuccessToast('Coordinates copied', { 
-  autoClose: 3000,
-  icon: <FontAwesomeIcon icon={faCopy} />
-});
-```
-
-## Known Issues & Future Improvements
-
-* Data type conversion between MapStore and components could be more efficient with standardized types
-* Consider moving more OpenLayers-specific logic to dedicated hooks for better separation of concerns
-* Layer visibility management could be simplified further
-* Direct map updates could be extended to other aspects of the system for better performance
-* Add environment flag to disable verbose performance logging in production
-* React-toastify version must be kept at v9.1.3 for React 17 compatibility (current React version)
+7. **Tooltip Not Following Feature**
+   - **Issue**: Tooltip position doesn't update during map movements
+   - **Cause**: Missing postrender event handler or requestAnimationFrame
+   - **Solution**: Ensure the map's postrender event is connected to a position update function using requestAnimationFrame

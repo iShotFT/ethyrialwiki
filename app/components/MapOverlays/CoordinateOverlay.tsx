@@ -24,7 +24,7 @@ const CoordinateContainer = styled.div`
   justify-content: space-between;
   padding: 6px;
   color: #e0e0e0;
-  font-family: monospace;
+  font-family: 'Asul', sans-serif;
   font-size: 12px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
@@ -52,11 +52,13 @@ const CoordinateValue = styled.span`
   font-weight: 600;
   color: #ffd5ae;
   margin-left: 4px;
+  font-family: 'Asul', sans-serif;
 `;
 
 const CoordinateLabel = styled.span`
   color: #a0a0a0;
   margin-right: 2px;
+  font-family: 'Asul', sans-serif;
 `;
 
 /**
@@ -150,6 +152,7 @@ const CoordinateOverlay: React.FC<CoordinateOverlayProps> = ({ mapInstance }) =>
   
   return (
     <BaseOverlay
+      id="coordinate-overlay"
       title="Coordinates"
       collapsedTitle="C"
       localStorageKey={STORAGE_POSITION_KEY}
@@ -160,7 +163,6 @@ const CoordinateOverlay: React.FC<CoordinateOverlayProps> = ({ mapInstance }) =>
       showHeader={false}
       noPadding={true}
       noBorder={true}
-      id="coordinate-overlay"
     >
       <CoordinateContainer>
         <CoordinateItem>
@@ -173,10 +175,10 @@ const CoordinateOverlay: React.FC<CoordinateOverlayProps> = ({ mapInstance }) =>
           <CoordinateValue>{coordinates.y}</CoordinateValue>
         </CoordinateItem>
         
-        {/* <CoordinateItem>
+        <CoordinateItem>
           <CoordinateLabel>Z:</CoordinateLabel>
           <CoordinateValue>{coordinates.zoom ?? 'N/A'}</CoordinateValue>
-        </CoordinateItem> */}
+        </CoordinateItem>
       </CoordinateContainer>
     </BaseOverlay>
   );

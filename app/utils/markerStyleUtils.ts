@@ -8,7 +8,7 @@ import { FeatureLike } from "ol/Feature";
 export const createLabelStyleBase = (): Style => {
   return new Style({
     text: new Text({
-      font: "bold 18px Arial, sans-serif",
+      font: "bold 18px 'Asul', sans-serif",
       fill: new Fill({ color: "#FFFFFF" }),
       stroke: new Stroke({ color: "#000000", width: 2 }),
       textAlign: "center",
@@ -58,7 +58,7 @@ export const createStandardMarkerStyleFunction = (
         }
         
         // Update text style with adjusted size
-        style.getText()?.setFont(`bold ${fontSize}px Arial, sans-serif`);
+        style.getText()?.setFont(`bold ${fontSize}px 'Asul', sans-serif`);
         style.getText()?.getStroke()?.setWidth(strokeWidth);
       }
       
@@ -98,4 +98,53 @@ export const createStandardMarkerStyleFunction = (
     
     return iconStyleCache[cacheKey];
   };
+};
+
+/**
+ * Creates a basic marker style with a given fill color
+ */
+export const createMarkerStyle = (fillColor: string): Style => {
+  return new Style({
+    image: new Circle({
+      radius: 8,
+      fill: new Fill({
+        color: fillColor
+      }),
+      stroke: new Stroke({
+        color: '#fff',
+        width: 2
+      })
+    })
+  });
+};
+
+// Also ensure we update text font in any places where it's modified dynamically
+export const createMarkerStyleWithLabel = (
+  text: string,
+  fillColor: string,
+  fontSize: number = 14
+): Style => {
+  const style = createMarkerStyle(fillColor);
+  style.setText(
+    new Text({
+      text,
+      font: `bold ${fontSize}px 'Asul', sans-serif`,
+      fill: new Fill({
+        color: "#fff",
+      }),
+      stroke: new Stroke({
+        color: "#000",
+        width: 3,
+      }),
+      offsetY: 20,
+    })
+  );
+  return style;
+};
+
+// Update any function that modifies font directly
+export const updateLabelFontSize = (style: Style, fontSize: number): void => {
+  if (style.getText()) {
+    style.getText()?.setFont(`bold ${fontSize}px 'Asul', sans-serif`);
+  }
 }; 

@@ -14,57 +14,11 @@ import IngameCheckbox from '~/components/EthyrialStyle/IngameCheckbox';
 import IngameTooltip from '~/components/EthyrialStyle/IngameTooltip';
 import BaseOverlay, { DefaultPosition } from './BaseOverlay';
 import { Coordinate } from "ol/coordinate";
+import { CATEGORY_COLORS, formatCategoryTitle, getCategoryLetter } from "~/utils/categoryColorUtils";
 
 // Constants
 const LOCAL_STORAGE_KEY = "map-overlay-panel-position";
 const DRAG_TYPE = "map-overlay";
-
-// Helper function to format category titles
-const formatCategoryTitle = (title: string): string => {
-  if (!title) return '';
-
-  // Handle specific abbreviations first
-  if (title.toUpperCase() === 'POI') return 'POI';
-  if (title.toUpperCase() === 'NPC') return 'NPC';
-
-  // General formatting for others
-  return title
-    .toLowerCase() // Convert to lowercase first
-    .replace(/_/g, ' ') // Replace underscores with spaces
-    .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
-};
-
-// Helper function to get the first letter of a category
-const getCategoryLetter = (title: string): string => {
-  if (!title) return '?';
-  
-  // Handle specific cases
-  if (title.toUpperCase() === 'POI') return 'P';
-  if (title.toUpperCase() === 'NPC') return 'N';
-  
-  // Get first letter for other categories
-  return title.charAt(0).toUpperCase();
-};
-
-// Color mapping for different categories
-const categoryColors: Record<string, string> = {
-  ORE: '#c0c0c0',     // Silver
-  HERB: '#7CFC00',    // Bright green
-  SKIN: '#D2B48C',    // Tan
-  TREE: '#228B22',    // Forest green
-  CLOTH: '#FFD700',   // Gold
-  ENEMY: '#FF4500',   // Red-orange
-  POI: '#1E90FF',     // Dodger blue
-  NPC: '#9932CC',     // Purple
-  TOWN: '#8B4513',    // Brown
-  DUNGEON: '#800000', // Maroon
-  BANK: '#FFD700',    // Gold
-  TELEPORT: '#00BFFF', // Deep sky blue
-  DAILY_QUEST: '#FF69B4', // Hot pink
-  RAID: '#8B0000',    // Dark red
-  WORLD_BOSS: '#FF0000', // Bright red
-  OTHER: '#808080',   // Gray
-};
 
 // Update Category type to include children and parentId
 type Category = {
@@ -284,7 +238,7 @@ const MapOverlayPanel: React.FC<Props> = ({
       const isExpanded = expandedParents[category.id] ?? false;
       const categoryName = category.title.toUpperCase();
       const categoryLetter = getCategoryLetter(category.title);
-      const categoryColor = categoryColors[categoryName] || '#808080';
+      const categoryColor = CATEGORY_COLORS[categoryName] || CATEGORY_COLORS.OTHER;
 
       return (
         <React.Fragment key={category.id}>
@@ -355,7 +309,7 @@ const MapOverlayPanel: React.FC<Props> = ({
         {labelCategories.map(labelCat => (
             <CategoryItem key={labelCat.id} $isChild={false}>
                 <div className="w-5 h-5 mr-1"></div>
-                <CategoryMarker $color={'#1E90FF'}>
+                <CategoryMarker $color={CATEGORY_COLORS.POI}>
                   {getCategoryLetter(labelCat.title)}
                 </CategoryMarker>
                 <IngameCheckbox

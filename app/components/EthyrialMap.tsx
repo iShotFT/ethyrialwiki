@@ -52,6 +52,19 @@ const ErrorMessage = styled.div`
   font-size: 14px;
 `;
 
+const CoordinateDisplay = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: 'Asul', sans-serif;
+  font-size: 12px;
+  z-index: 1000;
+`;
+
 /**
  * EthyrialMap component for displaying game maps
  */

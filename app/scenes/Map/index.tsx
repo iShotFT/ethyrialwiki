@@ -22,6 +22,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useHeatmapData } from "~/hooks/useHeatmapData";
 import MapStore from "~/stores/MapStore";
 import { MarkerStyleProvider } from "~/components/MarkerStyleContext";
+import LayerManager from "~/components/Map/Layers/LayerManager";
 
 // Define the AggregatedPoint type to match the server definition
 interface AggregatedPoint {
@@ -103,7 +104,6 @@ function MapScene() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [labelCategoryIds, setLabelCategoryIds] = useState<Set<string>>(new Set());
-  const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
   const [mapState, setMapState] = useState<OlMap | null>(null);
 
   // Get mapId from config
@@ -119,9 +119,7 @@ function MapScene() {
     currentHeatmapItemId,
     isLoading: isLoadingHeatmap,
     error: heatmapError,
-    mapRef,
-    heatmapSourceRef,
-    heatmapLayerRef
+    mapRef
   } = useHeatmapData();
 
   // Initial data fetching
@@ -184,6 +182,35 @@ function MapScene() {
     void fetchData();
   }, [mapId]);
 
+  // Update markers when visibility changes
+  useEffect(() => {
+    if (mapState && allMarkers.length > 0) {
+      // Enhance marker data with category name information
+      const enhancedMarkers = allMarkers.map(marker => {
+        const findCategoryName = (categories: ApiCategoryData[], id: string): string => {
+          for (const cat of categories) {
+            if (cat.id === id) return cat.title;
+            if (cat.children) {
+              const foundInChildren = findCategoryName(cat.children, id);
+              if (foundInChildren) return foundInChildren;
+            }
+          }
+          return '';
+        };
+        
+        const categoryName = findCategoryName([...markerCategories, ...labelCategories], marker.categoryId);
+        
+        return {
+          ...marker,
+          categoryName
+        };
+      });
+      
+      LayerManager.updateMarkersLayer(mapState, enhancedMarkers, visibleCategoryIds, labelCategoryIds);
+      Logger.debug('misc', `[Map] Updated markers with visibility changes (${Object.keys(visibleCategoryIds).length} categories)`);
+    }
+  }, [mapState, allMarkers, visibleCategoryIds, labelCategoryIds, markerCategories, labelCategories]);
+
   // Handle map ready event from EthyrialMapFull
   const handleMapReady = useCallback((map: OlMap) => {
     // Store the map reference for context
@@ -201,14 +228,10 @@ function MapScene() {
       viewStateRef.current = { zoom, extent };
       Logger.info("misc", `Map ready. Initial view: zoom=${zoom}, extent=${extent}`);
     }
+    
+    // Ensure proper layer management
+    LayerManager.ensureLayerVisibility(map, { logMessages: true });
   }, [mapRef]);
-
-  // Store heatmap layer and source references
-  const handleHeatmapLayersReady = useCallback((layer: HeatmapLayer, source: VectorSource) => {
-    heatmapLayerRef.current = layer;
-    heatmapSourceRef.current = source;
-    Logger.info("misc", "Heatmap layer and source references stored");
-  }, [heatmapLayerRef, heatmapSourceRef]);
 
   // Handle view changes from map
   const handleViewChange = useCallback(
@@ -220,25 +243,41 @@ function MapScene() {
       MapStore.setViewState({ zoom, extent });
       
       // If we have a selected heatmap item, update the heatmap
-      if (currentHeatmapItemId) {
-        // Fetch heatmap data with the updated view, but don't update store to prevent re-renders
+      if (currentHeatmapItemId && mapRef.current) {
+        // Fetch heatmap data with the updated view
         fetchHeatmapData({
           mapId,
           itemId: currentHeatmapItemId,
           viewState: { zoom, extent },
           map: mapRef.current,
-          heatmapLayer: heatmapLayerRef.current,
-          heatmapSource: heatmapSourceRef.current,
           updateStore: false // Prevent store updates during panning that might trigger React re-renders
         });
       }
     },
-    [currentHeatmapItemId, fetchHeatmapData, heatmapLayerRef, heatmapSourceRef, mapId, mapRef]
+    [currentHeatmapItemId, fetchHeatmapData, mapId, mapRef]
   );
 
   // Handle visibility changes for markers
   const handleVisibilityChange = (newVisibilityState: Record<string, boolean>) => {
     setVisibleCategoryIds(newVisibilityState);
+    
+    // Apply changes to existing markers via LayerManager if map is ready
+    if (mapState) {
+      // Get changed categories
+      Object.keys(newVisibilityState).forEach(categoryId => {
+        if (visibleCategoryIds[categoryId] !== newVisibilityState[categoryId]) {
+          // If visibility changed, update this specific category
+          LayerManager.setCategoryVisibility(
+            mapState, 
+            categoryId, 
+            newVisibilityState[categoryId], 
+            labelCategoryIds
+          );
+        }
+      });
+      
+      Logger.debug('misc', `[Map] Applied visibility changes via LayerManager`);
+    }
   };
 
   // Handle search (placeholder)
@@ -283,29 +322,36 @@ function MapScene() {
     
     // Toggle behavior: if clicking the same item, clear selection
     if (currentHeatmapItemId === itemId || itemId === "") {
-      clearHeatmap();
+      // Clear heatmap through LayerManager to maintain consistent approach
+      if (mapRef.current) {
+        Logger.debug("misc", "Clearing heatmap via LayerManager");
+        LayerManager.clearHeatmapLayer(mapRef.current);
+        
+        // Also clear the store state
+        clearHeatmap();
+      } else {
+        clearHeatmap();
+      }
       Logger.debug("misc", "Clearing heatmap selection");
     } else {
-      // Always update the current item ID in MapStore for UI state
+      // Update the current item ID in MapStore for UI state
       MapStore.setCurrentHeatmapItemId(itemId);
       
-      // Only fetch if we have the view state
-      if (viewStateRef.current) {
-        // Fetch new heatmap data using the hook - don't update store to prevent re-renders
+      // Only fetch if we have the view state and map
+      if (viewStateRef.current && mapRef.current) {
+        // Fetch new heatmap data using the hook
         fetchHeatmapData({
           mapId,
           itemId,
           viewState: viewStateRef.current,
           map: mapRef.current,
-          heatmapLayer: heatmapLayerRef.current,
-          heatmapSource: heatmapSourceRef.current,
           updateStore: false // Prevent store updates that might trigger React re-renders
         });
       } else {
-        Logger.warn("misc", new Error("Cannot fetch heatmap data: view state not initialized"));
+        Logger.warn("misc", new Error("Cannot fetch heatmap data: view state or map not initialized"));
       }
     }
-  }, [clearHeatmap, currentHeatmapItemId, fetchHeatmapData, heatmapLayerRef, heatmapSourceRef, mapId, mapRef]);
+  }, [clearHeatmap, currentHeatmapItemId, fetchHeatmapData, mapId, mapRef]);
 
   // Combine heatmap error with component error
   useEffect(() => {
@@ -332,8 +378,7 @@ function MapScene() {
       }))
     } : null,
     onMapReady: handleMapReady,
-    onViewChange: handleViewChange,
-    onHeatmapLayersReady: handleHeatmapLayersReady
+    onViewChange: handleViewChange
   }), [
     mapId, 
     mapData, 
@@ -343,8 +388,7 @@ function MapScene() {
     // Add MapStore.heatmapData to dependencies
     MapStore.heatmapData,
     handleMapReady, 
-    handleViewChange,
-    handleHeatmapLayersReady
+    handleViewChange
   ]);
 
   // Error handling

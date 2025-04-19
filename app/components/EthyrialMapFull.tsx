@@ -18,7 +18,7 @@ import * as React from "react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import styled from "styled-components";
 import Logger from "~/utils/Logger";
-import { getHeatmapParams } from "../utils/heatmapUtils";
+import { getHeatmapParams, ETHYRIAL_GRADIENT } from "../utils/heatmapUtils";
 import { parseMapHash, updateMapHashWithZ, encodeResource } from "../utils/mapUtils";
 import { createLabelStyleBase, createStandardMarkerStyleFunction } from "../utils/markerStyleUtils";
 import IngameContextMenu, { useContextMenu } from './EthyrialStyle/IngameContextMenu';
@@ -26,6 +26,9 @@ import { ZLayerOverlay } from './MapOverlays';
 import type { Coordinate as ServerCoordinate } from "@server/models/Marker";
 import type { AggregatedPoint } from "@server/utils/PointAggregator";
 import { useMarkerStyleContext } from './MarkerStyleContext';
+import LayerManager from '~/components/Map/Layers/LayerManager';
+import MapFeatureTooltip from './Map/Features/MapFeatureTooltip';
+import { MapBrowserEvent } from 'ol';
 
 // Core data types
 interface ApiMarkerData {
@@ -55,7 +58,6 @@ type Props = {
   onViewChange: (zoom: number, extent: Extent) => void;
   selectedResourceId?: string;
   onResourceSelect?: (resourceId: string | null) => void;
-  onHeatmapLayersReady?: (layer: HeatmapLayer, source: VectorSource) => void;
 };
 
 const MapContainer = styled.div`
@@ -92,7 +94,6 @@ const EthyrialMapFull: React.FC<Props> = ({
   onViewChange,
   selectedResourceId,
   onResourceSelect,
-  onHeatmapLayersReady,
 }) => {
   // Get marker styling from context
   const { getMarkerStyle } = useMarkerStyleContext();
@@ -111,14 +112,12 @@ const EthyrialMapFull: React.FC<Props> = ({
   const mapInstanceRef = useRef<Map | null>(null);
   const vectorSourceRef = useRef<VectorSource>(new VectorSource());
   const heatmapSourceRef = useRef<VectorSource>(new VectorSource());
-  const heatmapLayerRef = useRef<HeatmapLayer | null>(null);
   const [error, setError] = useState<string | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const popupContentRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<Overlay | null>(null);
   const moveEndHandlerRef = useRef<(() => void) | null>(null);
   const timeoutIdRef = useRef<number | undefined>();
-  const heatmapInitializedRef = useRef<boolean>(false);
 
   // Context menu state
   const {
@@ -298,54 +297,55 @@ const EthyrialMapFull: React.FC<Props> = ({
       // Create the base tile layer
       const tileLayer = new TileLayer({ 
         source: tileSource,
-        zIndex: 1,
+        zIndex: LayerManager.LAYER_Z_INDEXES.BASE_TILE,
         properties: {
-          layerType: 'basemap',
-          id: 'base-osm'
+          layerType: LayerManager.LayerType.BASEMAP,
+          id: LayerManager.LAYER_IDS.BASE_TILE
         }
       });
 
-      // Create marker layer with shared style function
+      // Create marker layer
       const markerLayer = new VectorLayer({
         source: vectorSourceRef.current,
         style: (feature) => getMarkerStyle(feature, labelCategoryIds),
-        zIndex: 10,
+        zIndex: LayerManager.LAYER_Z_INDEXES.MARKERS,
         maxZoom,
         properties: {
-          layerType: 'marker',
-          id: 'main-markers'
+          layerType: LayerManager.LayerType.MARKER,
+          id: LayerManager.LAYER_IDS.MARKERS
         }
       });
       
       // Get initial heatmap parameters
       const initialHeatmapParams = getHeatmapParams(initialZoom);
       
-      // Create heatmap layer
+      // Create heatmap layer using LayerManager approach to ensure consistency
+      // Create a bare heatmap layer with source only, other properties will be set via LayerManager
       const heatmapLayer = new HeatmapLayer({
         source: heatmapSourceRef.current,
         blur: initialHeatmapParams.blur,
         radius: initialHeatmapParams.radius,
+        // Enhanced weight function that considers both weight and radiusFactor
         weight: (feature) => {
           const weight = feature.get("weight");
-          return typeof weight === 'number' ? weight : 1;
+          // Also consider radiusFactor if available (we'll slightly adjust weight instead)
+          const radiusFactor = feature.get("radiusFactor");
+          const baseWeight = typeof weight === 'number' ? weight : 1;
+          
+          // Use a more balanced power factor to distribute colors more evenly
+          return typeof radiusFactor === 'number' ? 
+            baseWeight * Math.pow(radiusFactor, 1.7) : baseWeight;
         },
         opacity: initialHeatmapParams.opacity,
-        zIndex: 5,
-        gradient: [
-          'rgba(0,0,255,0.6)',
-          'rgba(0,255,255,0.7)', 
-          'rgba(0,255,0,0.7)', 
-          'rgba(255,255,0,0.8)', 
-          'rgba(255,128,0,0.9)', 
-          'rgba(255,0,0,1.0)'
-        ],
+        zIndex: LayerManager.LAYER_Z_INDEXES.HEATMAP,
+        // Use ETHYRIAL_GRADIENT from heatmapUtils for consistency across components
+        gradient: ETHYRIAL_GRADIENT,
         visible: true,
         properties: {
-          layerType: 'heatmap',
-          id: 'main-heatmap'
+          layerType: LayerManager.LayerType.HEATMAP,
+          id: LayerManager.LAYER_IDS.HEATMAP
         }
       });
-      heatmapLayerRef.current = heatmapLayer;
 
       // 5. Create map view
       const view = new View({
@@ -366,21 +366,46 @@ const EthyrialMapFull: React.FC<Props> = ({
         controls: [],
       });
 
-      // Ensure proper layer order
-      tileLayer.setZIndex(1);
-      heatmapLayer.setZIndex(5);
-      markerLayer.setZIndex(10);
-
+      // Store the map instance
       mapInstanceRef.current = map;
+
+      // Set willReadFrequently on all canvas contexts to fix performance warnings
+      const applyWillReadFrequently = () => {
+        const canvases = map.getViewport().querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          // Get existing context
+          const existingContext = canvas.getContext('2d');
+          if (existingContext) {
+            // Create a new context with willReadFrequently set to true
+            canvas.getContext('2d', { willReadFrequently: true });
+          }
+        });
+        Logger.debug("misc", "Applied willReadFrequently to all map canvases");
+      };
+      
+      // Apply immediately and also after first render
+      applyWillReadFrequently();
+      map.once('rendercomplete', applyWillReadFrequently);
+
+      // Ensure proper layer visibility and z-indexes
+      LayerManager.ensureLayerVisibility(map, { logMessages: true });
 
       // Add listener for initial render completion
       map.once('rendercomplete', () => {
-        Logger.debug("misc", `[HeatmapDebug] Map initial render complete`);
-        heatmapInitializedRef.current = true;
+        Logger.debug("misc", `Map initial render complete`);
         
-        if (heatmapData && heatmapSourceRef.current) {
-          Logger.debug("misc", `[HeatmapDebug] Map ready for heatmap rendering after initial render`);
-          // The hook will handle heatmap updates
+        // If we have heatmap data, update it via LayerManager
+        if (heatmapData && map) {
+          Logger.debug("misc", `Initializing heatmap via LayerManager after render`);
+          LayerManager.updateHeatmapLayer(map, heatmapData);
+        }
+        
+        // Ensure proper heatmap gradient is set using the gradient from utils
+        const heatmapLayer = LayerManager.getLayerById(map, LayerManager.LAYER_IDS.HEATMAP) as HeatmapLayer;
+        if (heatmapLayer) {
+          Logger.debug("misc", `Setting consistent ETHYRIAL_GRADIENT on heatmap layer`);
+          heatmapLayer.setGradient(ETHYRIAL_GRADIENT);
+          heatmapLayer.changed();
         }
       });
 
@@ -391,18 +416,19 @@ const EthyrialMapFull: React.FC<Props> = ({
       map.getView().on('change:resolution', () => {
         const currentZoom = Math.round(map.getView().getZoom() || 0);
         
-        if (!heatmapLayerRef.current || currentZoom === lastProcessedZoom) return;
+        if (currentZoom === lastProcessedZoom) return;
         
         lastProcessedZoom = currentZoom;
         clearTimeout(zoomTimeoutId);
         
         zoomTimeoutId = window.setTimeout(() => {
-          if (!heatmapLayerRef.current) return;
+          const heatmapLayer = LayerManager.getLayerById(map, LayerManager.LAYER_IDS.HEATMAP) as HeatmapLayer;
+          if (!heatmapLayer) return;
           
           const params = getHeatmapParams(currentZoom);
-          heatmapLayerRef.current.setRadius(params.radius);
-          heatmapLayerRef.current.setBlur(params.blur);
-          heatmapLayerRef.current.setOpacity(params.opacity);
+          heatmapLayer.setRadius(params.radius);
+          heatmapLayer.setBlur(params.blur);
+          heatmapLayer.setOpacity(params.opacity);
         }, 50);
       });
 
@@ -486,52 +512,14 @@ const EthyrialMapFull: React.FC<Props> = ({
 
       map.on("moveend", moveEndHandlerRef.current);
 
-      // Create popup overlay
-      if (popupRef.current && !overlayRef.current) {
-        const overlay = new Overlay({
-          element: popupRef.current,
-          autoPan: { animation: { duration: 250 } },
-          positioning: "bottom-center",
-          offset: [0, -10],
-        });
-        overlayRef.current = overlay;
-        map.addOverlay(overlay);
-
-        const closerElement = popupRef.current.querySelector(".popup-closer");
-        if (closerElement) {
-          closerElement.addEventListener("click", () => {
-            overlay.setPosition(undefined);
-            return false;
-          });
-        }
-      }
-
-      // Add click handler for features
-      map.on("click", (evt) => {
-        const feature = map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
-        const overlay = overlayRef.current;
-        const contentEl = popupContentRef.current;
-
-        if (feature && overlay && contentEl) {
-          const coordinates = (feature.getGeometry() as Point).getCoordinates();
-          const title = feature.get("title") || "Unnamed Marker";
-          const description = feature.get("description") || "No description.";
-
-          contentEl.innerHTML = `<div class="font-bold mb-1">${title}</div><div class="text-xs">${description}</div>`;
-          overlay.setPosition(coordinates);
-        } else if (overlay) {
-          overlay.setPosition(undefined);
-        }
-      });
-
-      // Add cursor change on hover
-      map.on("pointermove", (e) => {
-        const pixel = map.getEventPixel(e.originalEvent);
+      // Set cursor style on hover for features
+      map.on('pointermove', (evt) => {
+        if (evt.dragging) return;
+        
+        const pixel = map.getEventPixel(evt.originalEvent);
         const hit = map.hasFeatureAtPixel(pixel);
-        const target = map.getTargetElement();
-        if (target) {
-          target.style.cursor = hit ? "pointer" : "";
-        }
+        
+        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
       });
 
       // Setup context menu
@@ -562,12 +550,6 @@ const EthyrialMapFull: React.FC<Props> = ({
       
       map.getViewport().addEventListener('contextmenu', handleContextMenuEvent);
       map.getTargetElement().addEventListener('contextmenu', preventContextMenu);
-
-      // Expose heatmap layer and source to parent component
-      if (typeof onHeatmapLayersReady === 'function') {
-        Logger.debug("misc", `[HEATMAP_FLOW] Calling onHeatmapLayersReady with layer and source references`);
-        onHeatmapLayersReady(heatmapLayer, heatmapSourceRef.current);
-      }
     } catch (err: any) {
       Logger.error("Failed to initialize map", err);
       setError(`Failed to initialize map: ${err.message || "Unknown error"}`);
@@ -601,172 +583,37 @@ const EthyrialMapFull: React.FC<Props> = ({
       mapInstanceRef.current = null;
       moveEndHandlerRef.current = null;
       contextMenuHandlerRef.current = null;
-      heatmapInitializedRef.current = false;
       Logger.info("misc", "OpenLayers map disposed");
     };
-  }, [mapId, labelCategoryIds, onMapReady, onViewChange, onResourceSelect, selectedResourceId, currentZLayer, updateUrlWithResource, onHeatmapLayersReady, getMarkerStyle]);
+  }, [mapId, labelCategoryIds, onMapReady, onViewChange, onResourceSelect, selectedResourceId, currentZLayer, updateUrlWithResource, getMarkerStyle, heatmapData]);
 
-  // Marker update effect
+  // Update heatmap data effect - use LayerManager
   useEffect(() => {
-    if (!vectorSourceRef.current || !allMarkers || !mapInstanceRef.current) {
-      return;
+    if (!mapInstanceRef.current) return;
+    
+    if (heatmapData) {
+      Logger.debug("misc", `Updating heatmap via LayerManager with ${heatmapData.points.length} points`);
+      LayerManager.updateHeatmapLayer(mapInstanceRef.current, heatmapData);
+    } else {
+      Logger.debug("misc", "Clearing heatmap via LayerManager");
+      LayerManager.clearHeatmapLayer(mapInstanceRef.current);
     }
-    
-    const currentZoom = mapInstanceRef.current.getView().getZoom();
-    const roundedZoom = currentZoom !== undefined ? Math.round(currentZoom) : undefined;
-    
-    let markerLayer: VectorLayer<any> | null = null;
-    if (mapInstanceRef.current) {
-      const allLayers = mapInstanceRef.current.getLayers().getArray();
-      for (const layer of allLayers) {
-        if (layer instanceof VectorLayer && 
-            ((layer.get('layerType') === 'marker') || 
-             (layer.getSource() === vectorSourceRef.current))) {
-          markerLayer = layer;
-          break;
-        }
-      }
-    }
-    
-    const wasVisible = markerLayer ? markerLayer.getVisible() : true;
-    
-    vectorSourceRef.current.clear();
-    const features = allMarkers
-      .filter((marker) => visibleCategoryIds[marker.categoryId] !== false)
-      .map((marker) => {
-        if (!marker.coordinate) {
-          return null;
-        }
-        try {
-          const feature = new Feature({
-            geometry: new Point([marker.coordinate.x, marker.coordinate.y]),
-            id: marker.id,
-            title: marker.title,
-            description: marker.description,
-            categoryId: marker.categoryId,
-            iconId: marker.iconId,
-            _mapZoom: roundedZoom,
-          });
-          feature.setId(marker.id);
-          return feature;
-        } catch (error) {
-          Logger.error(`Error creating feature for marker ${marker.id}`, error);
-          return null;
-        }
-      })
-      .filter(Boolean) as Feature[];
+  }, [heatmapData]);
 
-    vectorSourceRef.current.addFeatures(features);
-    
-    if (markerLayer) {
-      if (wasVisible) {
-        markerLayer.setVisible(true);
-      }
-      markerLayer.setZIndex(10);
-    }
-  }, [allMarkers, visibleCategoryIds, mapInstanceRef, labelCategoryIds]);
-
-  // Heatmap layer visibility effect
-  useEffect(() => {
-    if (!mapInstanceRef.current || !vectorSourceRef.current) {
-      return;
-    }
-    
-    Logger.debug("misc", `[HEATMAP_FLOW] Layer visibility effect triggered - heatmap data changed, has data: ${!!heatmapData}`);
-    
-    const map = mapInstanceRef.current;
-    let markerLayer = null;
-    let heatmapLayer = null;
-    
-    const allLayers = map.getLayers().getArray();
-    
-    for (const layer of allLayers) {
-      if (layer instanceof VectorLayer && 
-          typeof layer.getSource === 'function' && 
-          layer.getSource() === vectorSourceRef.current) {
-        markerLayer = layer;
-      }
-      
-      if (layer instanceof HeatmapLayer && 
-          typeof layer.getSource === 'function' && 
-          layer.getSource() === heatmapSourceRef.current) {
-        heatmapLayer = layer;
-      }
-      
-      if (markerLayer && heatmapLayer) break;
-    }
-    
-    if (markerLayer) {
-      markerLayer.setZIndex(10);
-      markerLayer.setVisible(true);
-    }
-    
-    if (heatmapLayer) {
-      heatmapLayer.setZIndex(5);
-      const newVisible = !!heatmapData;
-      heatmapLayer.setVisible(newVisible);
-    }
-  }, [heatmapData, mapInstanceRef, vectorSourceRef, heatmapSourceRef]);
-
-  // Heatmap layer initialization
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      const map = mapInstanceRef.current;
-      
-      if (!heatmapSourceRef.current) {
-        heatmapSourceRef.current = new VectorSource({
-          wrapX: false,
-        });
-      }
-      
-      if (heatmapLayerRef.current) {
-        map.removeLayer(heatmapLayerRef.current);
-        heatmapLayerRef.current = null;
-      }
-      
-      const hasWebGL = (typeof document !== 'undefined' && 
-        !!document.createElement('canvas').getContext('webgl2'));
-      
-      if (hasWebGL) {
-        heatmapLayerRef.current = new HeatmapLayer({
-          source: heatmapSourceRef.current,
-          opacity: 0.8,
-          blur: 15,
-          radius: 10,
-          weight: function(feature) {
-            return feature.get('weight') || 1;
-          },
-          gradient: ['rgba(0, 0, 255, 0)', 'rgba(0, 0, 255, 1)', 'rgba(0, 255, 0, 1)', 'rgba(255, 255, 0, 1)', 'rgba(255, 0, 0, 1)'],
-        });
-      } else {
-        heatmapLayerRef.current = new HeatmapLayer({
-          source: heatmapSourceRef.current,
-          opacity: 0.8,
-          blur: 15,
-          radius: 10,
-          weight: function(feature) {
-            return feature.get('weight') || 1;
-          },
-          gradient: ['rgba(0, 0, 255, 0)', 'rgba(0, 0, 255, 1)', 'rgba(0, 255, 0, 1)', 'rgba(255, 255, 0, 1)', 'rgba(255, 0, 0, 1)'],
-        });
-      }
-      
-      heatmapLayerRef.current.set('id', 'heatmap');
-      heatmapLayerRef.current.set('layerType', 'heatmap');
-      heatmapLayerRef.current.setVisible(false);
-      heatmapLayerRef.current.setZIndex(5);
-      map.addLayer(heatmapLayerRef.current);
-      
-      Logger.debug("misc", `[HeatmapInit] Created ${hasWebGL ? 'WebGL' : 'standard'} heatmap layer`);
-    }
-  }, []);
+  // Marker update effect - using LayerManager now happens in Map/index.tsx
 
   if (error) {
     return <MapContainer>Error: {error}</MapContainer>;
   }
 
   return (
-    <MapContainer ref={mapRef}>
+    <MapContainer ref={mapRef} className="font-asul">
+      {/* Use our custom MapFeatureTooltip for OpenLayers integration */}
+      {mapInstanceRef.current && (
+        <MapFeatureTooltip map={mapInstanceRef.current} />
+      )}
+      
+      {/* Popup container remains for backward compatibility */}
       <div
         ref={popupRef}
         className="absolute hidden z-20 border border-[#1A1A1A] rounded-sm p-1.5 bg-[#38322c] min-w-[150px] max-w-[300px]"
@@ -781,6 +628,7 @@ const EthyrialMapFull: React.FC<Props> = ({
           <div ref={popupContentRef} className="pt-1 pr-4" />
         </div>
       </div>
+      
       {isContextMenuOpen && (
         <IngameContextMenu
           coordX={contextMenuCoords.x}

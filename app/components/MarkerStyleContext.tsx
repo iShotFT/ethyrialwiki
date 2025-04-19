@@ -6,8 +6,6 @@ import { useMarkerStyles } from '../hooks/useMarkerStyles';
 // Define the context type
 interface MarkerStyleContextType {
   getMarkerStyle: (feature: FeatureLike, labelCategoryIds: Set<string>) => Style;
-  iconStyleCache: Record<string, Style>;
-  labelStyleBase: Style;
 }
 
 // Create the context with a default value

@@ -6,8 +6,7 @@ import HeatmapLayer from "ol/layer/Heatmap";
 import { client } from "~/utils/ApiClient";
 import Logger from "~/utils/Logger";
 import MapStore from '~/stores/MapStore';
-import { updateHeatmap } from "~/utils/heatmapUtils";
-import type { AggregatedPoint } from "@server/utils/PointAggregator";
+import LayerManager from '~/components/Map/Layers/LayerManager';
 
 // Performance tracking
 const PERF_LOG_PREFIX = "[HEATMAP_PERF]";
@@ -46,13 +45,11 @@ export interface FetchHeatmapOptions {
 
 /**
  * Custom hook for fetching and managing heatmap data
- * Modified to update OpenLayers directly to minimize React re-rendering
+ * Modified to use the centralized LayerManager
  */
 export function useHeatmapData() {
   // Create refs to hold OpenLayers objects
   const mapRef = useRef<OLMap | null>(null);
-  const heatmapSourceRef = useRef<VectorSource | null>(null);
-  const heatmapLayerRef = useRef<HeatmapLayer | null>(null);
   const requestTimeoutRef = useRef<number | null>(null);
   
   // Add request tracking to verify if API calls are made
@@ -68,36 +65,20 @@ export function useHeatmapData() {
     Logger.info("misc", `[HEATMAP_FLOW] fetchHeatmapData CALLED #${requestId} (total started: ${requestsStartedRef.current}) - itemId: ${options.itemId}, mapId: ${options.mapId}`);
     logPerformance('info', `${PERF_LOG_PREFIX} #${requestId} FETCH_CALLED - timestamp: ${startTime.toFixed(2)}ms`);
     
-    const { mapId, itemId, viewState, map, heatmapSource, heatmapLayer, updateStore = true } = options;
+    const { mapId, itemId, viewState, map, updateStore = true } = options;
     
-    // Store map references if provided - add logging
+    // Store map reference if provided
     if (map) {
       mapRef.current = map;
       Logger.debug("misc", `[HEATMAP_FLOW] Map reference provided and stored (valid: ${!!map})`);
     }
-    if (heatmapSource) {
-      heatmapSourceRef.current = heatmapSource;
-      Logger.debug("misc", `[HEATMAP_FLOW] Source reference provided and stored (valid: ${!!heatmapSource})`);
-    }
-    if (heatmapLayer) {
-      heatmapLayerRef.current = heatmapLayer;
-      Logger.debug("misc", `[HEATMAP_FLOW] Layer reference provided and stored (valid: ${!!heatmapLayer})`);
-    }
     
-    if (!mapId || !viewState) {
+    if (!mapId || !viewState || !mapRef.current) {
       Logger.warn(
         "misc",
-        new Error(`[HEATMAP_FLOW] Missing required data! mapId: ${!!mapId}, viewState: ${!!viewState}`)
+        new Error(`[HEATMAP_FLOW] Missing required data! mapId: ${!!mapId}, viewState: ${!!viewState}, map: ${!!mapRef.current}`)
       );
       return;
-    }
-    
-    // Add validation check to ensure source and layer are ready
-    if (!heatmapSourceRef.current || !heatmapLayerRef.current) {
-      Logger.warn(
-        "misc",
-        new Error(`[HEATMAP_FLOW] Heatmap source or layer refs not ready! source: ${!!heatmapSourceRef.current}, layer: ${!!heatmapLayerRef.current}`)
-      );
     }
     
     // Cancel any pending request timeouts
@@ -159,20 +140,20 @@ export function useHeatmapData() {
         // Track update time
         const updateStartTime = performance.now();
         
-        // CRITICAL: Update OpenLayers directly if possible to avoid React re-renders
+        // CRITICAL: Update layer using LayerManager
         let updateSuccess = false;
-        if (heatmapSourceRef.current && heatmapLayerRef.current) {
+        if (mapRef.current) {
           // Log before update
           logPerformance('info', `${PERF_LOG_PREFIX} #${requestId} UPDATE_HEATMAP_START at ${(performance.now() - startTime).toFixed(2)}ms`);
-          Logger.debug("misc", `[HEATMAP_FLOW] Updating heatmap with ${points.length} points directly`);
+          Logger.debug("misc", `[HEATMAP_FLOW] Updating heatmap with ${points.length} points via LayerManager`);
           
-          // Update the heatmap directly in OpenLayers
-          updateSuccess = updateHeatmap({ points }, heatmapSourceRef.current, heatmapLayerRef.current, mapRef.current);
+          // Update the heatmap using LayerManager
+          updateSuccess = LayerManager.updateHeatmapLayer(mapRef.current, { points });
           
           const updateEndTime = performance.now();
           logPerformance('info', `${PERF_LOG_PREFIX} #${requestId} UPDATE_HEATMAP_END - took ${(updateEndTime - updateStartTime).toFixed(2)}ms`);
         } else {
-          Logger.warn("misc", new Error(`[HEATMAP_FLOW] Missing heatmap refs! source: ${!!heatmapSourceRef.current}, layer: ${!!heatmapLayerRef.current}`));
+          Logger.warn("misc", new Error(`[HEATMAP_FLOW] Missing map reference`));
         }
         
         // Update store with minimal changes only if requested and update was successful
@@ -185,7 +166,7 @@ export function useHeatmapData() {
             Logger.debug("misc", `[HEATMAP_FLOW] Updating MapStore with ${points.length} points for itemId: ${itemId}`);
             
             // Convert points to the format expected by MapStore
-            const storePoints: Array<[number, number, number]> = points.map((point: AggregatedPoint) => [
+            const storePoints: Array<[number, number, number]> = points.map((point: any) => [
               point.x, 
               point.y, 
               point.weight || 1
@@ -229,20 +210,12 @@ export function useHeatmapData() {
   const clearHeatmap = useCallback(() => {
     Logger.info("misc", `[HEATMAP_FLOW] clearHeatmap called`);
     
-    // Clear the heatmap source first to avoid redraw when hiding
-    if (heatmapSourceRef.current) {
-      heatmapSourceRef.current.clear();
-      Logger.debug("misc", `[HEATMAP_FLOW] Heatmap source cleared`);
+    // Clear the heatmap using LayerManager
+    if (mapRef.current) {
+      LayerManager.clearHeatmapLayer(mapRef.current);
+      Logger.debug("misc", `[HEATMAP_FLOW] Heatmap cleared via LayerManager`);
     } else {
-      Logger.warn("misc", new Error(`[HEATMAP_FLOW] Cannot clear heatmap - source ref is null`));
-    }
-    
-    // Then explicitly hide the layer after source is cleared
-    if (heatmapLayerRef.current) {
-      heatmapLayerRef.current.setVisible(false);
-      Logger.debug("misc", `[HEATMAP_FLOW] Heatmap layer visibility set to false`);
-    } else {
-      Logger.warn("misc", new Error(`[HEATMAP_FLOW] Cannot clear heatmap - layer ref is null`));
+      Logger.warn("misc", new Error(`[HEATMAP_FLOW] Cannot clear heatmap - map ref is null`));
     }
     
     // Also update store
@@ -263,9 +236,7 @@ export function useHeatmapData() {
     clearHeatmap,
     
     // Expose refs for direct access
-    mapRef,
-    heatmapSourceRef,
-    heatmapLayerRef
+    mapRef
   };
 }
 
