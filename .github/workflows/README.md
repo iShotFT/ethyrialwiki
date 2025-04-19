@@ -54,6 +54,7 @@ kubectl create secret generic outline-auth -n ethyrial-production \
   --from-literal=DISCORD_CLIENT_ID="client_id" \
   --from-literal=DISCORD_CLIENT_SECRET="client_secret" \
   --from-literal=DISCORD_SERVER_ID="server_id"
+  --from-literal=STEAM_API_KEY="steam_api_key"
 
 # Create secret for encryption keys
 kubectl create secret generic outline-keys -n ethyrial-production \
@@ -83,6 +84,7 @@ kubectl create secret generic outline-auth -n ethyrial-staging \
   --from-literal=DISCORD_CLIENT_ID="xxx" \
   --from-literal=DISCORD_CLIENT_SECRET="xxx" \
   --from-literal=DISCORD_SERVER_ID="xxx" \
+  --from-literal=STEAM_API_KEY="steam_api_key" \
   --save-config --dry-run=client -o yaml | kubectl apply -f -
 
 # Overwrite existing secret for encryption keys

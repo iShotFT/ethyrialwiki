@@ -21,3 +21,4 @@ data/*
 *.tgz
 deploy/helm/outline/Chart.lock
 deploy/helm/outline/charts/
+*.db

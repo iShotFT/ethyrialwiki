@@ -4,4 +4,7 @@
   "typescript.validate.enable": true,
   "typescript.format.enable": true,
   "editor.formatOnSave": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.jsxAttributeCompletionStyle": "auto"
 }

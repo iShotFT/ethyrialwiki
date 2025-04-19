@@ -30,6 +30,16 @@ on:
         required: false
         default: false
         type: boolean
+      skip_cs_extractor:
+        description: "Skip C# marker extractor (use pre-generated markers file)"
+        required: false
+        default: true
+        type: boolean
+      use_s3_files:
+        description: "Download input files from S3"
+        required: false
+        default: true
+        type: boolean
       batch_size:
         description: "Database operation batch size"
         required: false
@@ -115,6 +125,65 @@ jobs:
           build-args: |
             NODE_ENV=production
 
+      - name: Download markers file if needed
+        if: ${{ github.event.inputs.skip_cs_extractor == 'true' }}
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          ENV_FILE=${{ steps.env_vars.outputs.env_file }}
+          
+          echo "Downloading markers file from S3..."
+          
+          # Create a temporary ConfigMap from our extracted environment variables
+          kubectl create configmap seeder-env --from-env-file=$ENV_FILE -n $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Create a temporary download job
+          cat <<EOF > marker-download-job.yaml
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: markers-download-job
+            namespace: $NAMESPACE
+          spec:
+            ttlSecondsAfterFinished: 300
+            template:
+              spec:
+                containers:
+                - name: download-markers
+                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}-seeder:latest
+                  command: ["yarn", "s3:download-markers"]
+                  envFrom:
+                  - configMapRef:
+                      name: seeder-env
+                  resources:
+                    limits:
+                      cpu: "1"
+                      memory: "1Gi"
+                    requests:
+                      cpu: "200m"
+                      memory: "512Mi"
+                restartPolicy: Never
+            backoffLimit: 1
+          EOF
+          
+          # Apply the job
+          kubectl apply -f marker-download-job.yaml
+          
+          # Wait for the job to complete
+          echo "Waiting for markers download job to complete..."
+          kubectl wait --for=condition=complete job/markers-download-job -n $NAMESPACE --timeout=120s
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Markers download job completed successfully!"
+          else
+            echo "❌ Markers download job failed or timed out!"
+            kubectl logs -l job-name=markers-download-job -n $NAMESPACE || true
+            kubectl delete job markers-download-job -n $NAMESPACE --ignore-not-found
+            exit 1
+          fi
+          
+          # Clean up
+          kubectl delete job markers-download-job -n $NAMESPACE --ignore-not-found
+
       - name: Run seeder in Kubernetes
         run: |
           NAMESPACE=${{ steps.namespace.outputs.namespace }}
@@ -133,6 +202,14 @@ jobs:
           
           if [[ "${{ github.event.inputs.upload_icons }}" == "true" ]]; then
             SEED_OPTIONS="$SEED_OPTIONS --upload-icons"
+          fi
+          
+          if [[ "${{ github.event.inputs.skip_cs_extractor }}" == "true" ]]; then
+            SEED_OPTIONS="$SEED_OPTIONS --skip-cs-extractor"
+          fi
+          
+          if [[ "${{ github.event.inputs.use_s3_files }}" == "true" ]]; then
+            SEED_OPTIONS="$SEED_OPTIONS --use-s3-files"
           fi
           
           SEED_OPTIONS="$SEED_OPTIONS --batch-size ${{ github.event.inputs.batch_size }}"
