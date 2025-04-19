@@ -6,14 +6,14 @@ metadata:
   labels:
     {{- include "outline.labels" . | nindent 4 }}
     app.kubernetes.io/component: opensearch-dashboards
-  {{- with .Values.opensearch.dashboards.ingress.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
     # Add basic auth annotation
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: {{ include "outline.fullname" . }}-opensearch-dashboards-auth
     nginx.ingress.kubernetes.io/auth-realm: "OpenSearch Dashboards Authentication Required"
-  {{- end }}
+    {{- with .Values.opensearch.dashboards.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   {{- if .Values.opensearch.dashboards.ingress.className }}
   ingressClassName: {{ .Values.opensearch.dashboards.ingress.className }}
@@ -28,11 +28,11 @@ spec:
     - host: {{ .Values.opensearch.dashboards.ingress.host | quote }}
       http:
         paths:
-          - path: {{ .Values.opensearch.dashboards.ingress.path }}
-            pathType: Prefix
+          - path: {{ .Values.opensearch.dashboards.ingress.path | default "/" }}
+            pathType: {{ .Values.opensearch.dashboards.ingress.pathType | default "Prefix" }}
             backend:
               service:
                 name: {{ include "outline.fullname" . }}-opensearch-dashboards
                 port:
                   number: 5601
-{{- end }} 
+{{- end }}
